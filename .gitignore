@@ -2,3 +2,5 @@
 *.pyc
 .coverage
 gitlint/man.py
+build/
+dist/

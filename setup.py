@@ -23,7 +23,7 @@ setup(name='git-lint',
       url='http://github.com/sk-/git-lint',
       packages=find_packages(),
       scripts=['scripts/git-lint'],
-      package_data={'gitlint': '*.yaml'},
+      package_data={'gitlint': ['*.yaml']},
       install_requires=['nose', 'mock', 'pyyaml', 'termcolor'],
       classifiers=[
         'Development Status :: 3 - Alpha',
