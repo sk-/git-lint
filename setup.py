@@ -16,14 +16,14 @@
 from setuptools import setup, find_packages
 
 setup(name='git-lint',
-      version='0.0.2',
+      version='0.0.2.3',
       description='Git Lint',
       author='Sebastian Kreft',
-      author_email='skreft@',
       url='http://github.com/sk-/git-lint',
       packages=find_packages(),
-      scripts=['scripts/git-lint'],
+      package_dir={'gitlint': 'gitlint'},
       package_data={'gitlint': ['*.yaml']},
+      scripts=['scripts/git-lint'],
       install_requires=['nose', 'mock', 'pyyaml', 'termcolor', 'docopt'],
       classifiers=[
         'Development Status :: 3 - Alpha',
