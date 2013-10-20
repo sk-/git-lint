@@ -1,0 +1,122 @@
+# Copyright 2013 Sebastian Kreft
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Regular expression matchers like \d, \w, must be escaped as in \\d, \\w.
+
+# CSS
+csslint:
+  extensions:
+  - .css
+  command: csslint
+  arguments:
+  - "--ignore=ids,box-model,adjoining-classes,qualified-headings,unique-headings,zero-units"
+  - "--format=compact"
+  filter: "^%(filename)s: line (%(lines)s), col"
+  installation: ""
+
+# Javascript
+gjslint:
+  extensions:
+  - .js
+  command: gjslint
+  filter: "^Line\\s+(%(lines)s),"
+  installation: ""
+
+jshint:
+  extensions:
+  - .js
+  command: jshint
+  filter: "^%(filename)s: line (%(lines)s), col "
+  installation: ""
+
+# PHP
+phpcs:
+  extensions:
+  - .php
+  command: phpcs
+  filter: "^\\s*(%(lines)s)\\s\\|"
+  installation: ""
+
+# Python
+pylint:
+  extensions:
+  - .py
+  command: pylint
+  arguments:
+  - "--output-format=parseable"
+  - "--reports=n"
+  filter: "^%(filename)s:(%(lines)s): \\["
+  installation: ""
+
+#pep8:
+#  extensions:
+#  - .py
+#  command: pep8
+#  arguments:
+#  - "--max-line-length=80"
+#  filter: "^%(filename)s:%(lines)s:\\d+: "
+#  installation: ""
+
+# JSON
+json:
+  extensions:
+  - .json
+  command: python
+  arguments:
+  - "-m"
+  - "json.tool"
+  filter: "^.*: line (%s) column |No JSON object could be decoded"
+  installation: ""
+
+# RST
+rst:
+  extensions:
+  - .rst
+  command: rst2html.py
+  filter: "^%(filename)s):(%(lines)s): "
+  installation: ""
+
+# PNG
+pngcrush:
+  extensions:
+  - .png
+  command: pngcrush
+  arguments:
+  - "-d"
+  - "/tmp/git-lint"
+  - "-rem"
+  - "alla"
+  - "-reduce"
+  - "-brute"
+  filter: "^\\s*\\(.* filesize reduction\\)"
+  installation: ""
+
+# JPEG
+jpegtran:
+  extensions:
+  - .jpg
+  - .jpeg
+  command: bash
+  arguments:
+  - "-c"
+  - >
+    origsize=`stat -c%s $1`;
+    newsize=`jpegtran -copy none -optimize -perfect $1 | wc -c`;
+    if [ $newsize -gt 0 ] && [ $newsize -lt $origsize ]; then
+    reduction=`bc <<< "scale = 2; (100*($origsize - $newsize) / $origsize)"`;
+    echo "The file size can be losslessly reduced from $origsize to $newsize bytes. ($reduction % filesize reduction)";
+    echo -n "Use: jpegtran -copy none -optimize -perfect -outfile <outfile> $1"; fi
+  - "jpeglint"
+  filter: "^.+"
+  installation: ""
