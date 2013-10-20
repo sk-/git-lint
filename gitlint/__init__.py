@@ -41,7 +41,7 @@ import gitlint.git as git
 import gitlint.linters as linters
 
 
-__VERSION__ = '0.0.1'
+__VERSION__ = '0.0.2'
 
 
 def find_invalid_filenames(filenames, repository_root):

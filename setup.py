@@ -16,7 +16,7 @@
 from setuptools import setup, find_packages
 
 setup(name='git-lint',
-      version='0.0.1',
+      version='0.0.2',
       description='Git Lint',
       author='Sebastian Kreft',
       author_email='skreft@',
@@ -24,7 +24,7 @@ setup(name='git-lint',
       packages=find_packages(),
       scripts=['scripts/git-lint'],
       package_data={'gitlint': ['*.yaml']},
-      install_requires=['nose', 'mock', 'pyyaml', 'termcolor'],
+      install_requires=['nose', 'mock', 'pyyaml', 'termcolor', 'docopt'],
       classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

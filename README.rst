@@ -123,6 +123,11 @@ TODOS and Possible Features
 
 Changelog
 =========
+v0.0.2 (2013-10-20)
+------------------
+
+* Fixes to the installer
+
 v0.0.1 (2013-10-20)
 -------------------
 

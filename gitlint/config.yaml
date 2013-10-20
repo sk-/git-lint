@@ -59,14 +59,14 @@ pylint:
   filter: "^%(filename)s:(%(lines)s): \\["
   installation: ""
 
-#pep8:
-#  extensions:
-#  - .py
-#  command: pep8
-#  arguments:
-#  - "--max-line-length=80"
-#  filter: "^%(filename)s:%(lines)s:\\d+: "
-#  installation: ""
+pep8:
+  extensions:
+  - .py
+  command: pep8
+  arguments:
+  - "--max-line-length=80"
+  filter: "^%(filename)s:%(lines)s:\\d+: "
+  installation: ""
 
 # JSON
 json:
@@ -84,7 +84,7 @@ rst:
   extensions:
   - .rst
   command: rst2html.py
-  filter: "^%(filename)s):(%(lines)s): "
+  filter: "^%(filename)s:%(lines)s: "
   installation: ""
 
 # PNG
