@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Functions for invoking a lint command."""
+
 import collections
 import functools
 import os.path
@@ -19,21 +21,6 @@ import subprocess
 import yaml
 
 import gitlint.utils as utils
-
-
-def filter_output(output, pattern):
-    """Filters out the lines not matching the pattern.
-
-    A line is defined to be anything surrounded by the start of file, end of
-    file or os.linesep.
-
-    Args:
-      output: string: string containing the lines to filter.
-      pattern: string: regular expression to filter out lines.
-
-    Returns: string: the list of filtered lines.
-    """
-    return os.linesep.join(utils.filter_lines(output.split(os.linesep), pattern))
 
 
 def lint_command(program, arguments, filter_regex, filename, lines):
@@ -63,26 +50,28 @@ def lint_command(program, arguments, filter_regex, filename, lines):
         return ('ERROR: could not execute "%s".\nMake sure all required ' +
                 'programs are installed') % ' '.join(call_arguments)
 
+    output_lines = output.split(os.linesep)
+
     if lines is None:
         lines_regex = r'\d+'
     else:
         lines_regex = '|'.join(map(str, lines))
-    filtered_output = filter_output(output,
-                                    filter_regex % {'lines': lines_regex,
-                                                    'filename': filename})
 
-    return filtered_output
+    filtered_lines = utils.filter_lines(output_lines,
+                                        filter_regex % {'lines': lines_regex,
+                                                        'filename': filename})
+
+    return os.linesep.join(filtered_lines)
 
 
 def get_config():
+    """Returns a dictionary that maps from an extension to a list of linters."""
     with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
         yaml_config = yaml.load(f)
     config = collections.defaultdict(list)
 
     for data in yaml_config.itervalues():
         for extension in data['extensions']:
-            if extension not in ['.js', '.py', '.css', '.php']: #, '.jpg']:
-                continue
             config[extension].append(
                 functools.partial(lint_command,
                                   data['command'],

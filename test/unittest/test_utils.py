@@ -15,6 +15,8 @@ import unittest
 
 import gitlint.utils as utils
 
+# pylint: disable=too-many-public-methods
+
 
 class UtilsTest(unittest.TestCase):
     def test_filter_lines_no_groups(self):
@@ -27,13 +29,30 @@ class UtilsTest(unittest.TestCase):
 
     def test_filter_lines_one_group(self):
         lines = ['1: foo', '12: bar', '', 'Debug: info']
-        self.assertEqual(['1', '12'], list(utils.filter_lines(lines, r'(?P<line>\d+): .*', groups=('line',))))
+        self.assertEqual(
+            ['1', '12'],
+            list(utils.filter_lines(lines,
+                                    r'(?P<line>\d+): .*',
+                                    groups=('line',))))
 
     def test_filter_lines_many_groups(self):
         lines = ['1: foo', '12: bar', '', 'Debug: info']
-        self.assertEqual([('1', 'foo'), ('12', 'bar')], list(utils.filter_lines(lines, r'(?P<line>\d+): (?P<info>.*)', groups=('line', 'info'))))
-        self.assertEqual([('1', 'foo', ':'), ('12', 'bar', ':')], list(utils.filter_lines(lines, r'(?P<line>\d+)(?P<separator>:) (?P<info>.*)', groups=('line', 'info', 'separator'))))
+        self.assertEqual(
+            [('1', 'foo'), ('12', 'bar')],
+            list(utils.filter_lines(lines,
+                                    r'(?P<line>\d+): (?P<info>.*)',
+                                    groups=('line', 'info'))))
+        self.assertEqual(
+            [('1', 'foo', ':'), ('12', 'bar', ':')],
+            list(utils.filter_lines(
+                lines,
+                r'(?P<line>\d+)(?P<separator>:) (?P<info>.*)',
+                groups=('line', 'info', 'separator'))))
 
     def test_filter_lines_group_not_always_defined(self):
         lines = ['1: foo', '12: bar', '', 'Debug: info']
-        self.assertEqual([('1', None), ('12', None), (None, 'info')], list(utils.filter_lines(lines, r'(?P<line>\d+): .*|Debug: (?P<debug>.*)', groups=('line', 'debug'))))
+        self.assertEqual(
+            [('1', None), ('12', None), (None, 'info')],
+            list(utils.filter_lines(lines,
+                                    r'(?P<line>\d+): .*|Debug: (?P<debug>.*)',
+                                    groups=('line', 'debug'))))

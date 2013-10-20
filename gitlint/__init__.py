@@ -45,6 +45,14 @@ __VERSION__ = '0.0.1'
 
 
 def find_invalid_filenames(filenames, repository_root):
+    """Find files that does not exist, are not in the repo or are directories.
+
+    Args:
+      filenames: list of filenames to check
+      repository_root: the absolute path of the repository's root.
+
+    Returns: A list of errors.
+    """
     errors = []
     for filename in filenames:
         if not os.path.abspath(filename).startswith(repository_root):
@@ -61,6 +69,7 @@ def find_invalid_filenames(filenames, repository_root):
 
 
 def main(argv):
+    """Main gitlint routine. To be called from scripts."""
     arguments = docopt.docopt(__doc__,
                               argv=argv[1:],
                               version='git-lint v%s' % __VERSION__)
@@ -70,7 +79,6 @@ def main(argv):
         sys.stderr.write('fatal: Not a git repository' + os.linesep)
         return 128
 
-    files_with_problems = 0
     if arguments['FILENAME']:
         invalid_filenames = find_invalid_filenames(arguments['FILENAME'],
                                                    repository_root)
@@ -89,6 +97,8 @@ def main(argv):
     else:
         modified_files = git.modified_files(repository_root)
 
+    linter_not_found = False
+    files_with_problems = 0
     for filename in modified_files:
         print 'Linting file: %s' % termcolor.colored(filename, attrs=('bold',))
         if arguments['--force']:
@@ -96,11 +106,10 @@ def main(argv):
         else:
             modified_lines = git.modified_lines(filename,
                                                 modified_files[filename])
+
         result = linters.lint(
             filename, modified_lines, linters._EXTENSION_TO_LINTER)
 
-        if result != 'OK' and not result.startswith('SKIPPED'):
-            files_with_problems += 1
         if result == 'OK':
             result = termcolor.colored(result, 'green', attrs=('bold',))
         elif result.startswith('SKIPPED:'):
@@ -111,9 +120,15 @@ def main(argv):
             result = result.replace(
                 'ERROR',
                 termcolor.colored('ERROR', 'red', attrs=('bold',)))
+            linter_not_found = True
+        else:
+            files_with_problems += 1
+
         print result
         print
 
     if files_with_problems > 0:
         return 1
+    if linter_not_found:
+        return 4
     return 0
