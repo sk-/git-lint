@@ -52,7 +52,8 @@ Current linters:
 Example use
 -----------
 
-::
+Below is the simplest call, for a detailed list, see the help::
+
   $ git lint
   Linting file: src/html/main.js
   Line 13, E:0110: Line too long (328 characters).
