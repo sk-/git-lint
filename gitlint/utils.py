@@ -91,7 +91,6 @@ def get_output_from_cache(name, filename):
     if (os.path.exists(cache_filename) and
             os.path.getmtime(filename) < os.path.getmtime(cache_filename)):
         with open(cache_filename) as f:
-            print f
             return f.read()
 
     return None
