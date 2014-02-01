@@ -24,10 +24,10 @@ def lint(filename):
         config.read(filename)
         return 0
     except ConfigParser.Error as error:
-        print 'Error:', error
+        print('Error: %s' % error)
         return 1
     except:
-        print 'Unexpected Error'
+        print('Unexpected Error')
         return 2
 
 

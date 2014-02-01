@@ -101,8 +101,8 @@ def main(argv):
     files_with_problems = 0
     for filename in sorted(modified_files.keys()):
         rel_filename = os.path.relpath(filename)
-        print 'Linting file: %s' % termcolor.colored(rel_filename,
-                                                     attrs=('bold',))
+        print('Linting file: %s' % termcolor.colored(rel_filename,
+                                                     attrs=('bold',)))
         if arguments['--force']:
             modified_lines = None
         else:
@@ -126,8 +126,8 @@ def main(argv):
         else:
             files_with_problems += 1
 
-        print result
-        print
+        print(result)
+        print('')
 
     if files_with_problems > 0:
         return 1

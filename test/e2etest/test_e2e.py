@@ -36,7 +36,7 @@ class E2ETest(unittest.TestCase):
         os.chdir(cls.original_cwd)
 
     def test_linters(self):
-        for extension, linter_list in linters._EXTENSION_TO_LINTER.iteritems():
+        for extension, linter_list in linters._EXTENSION_TO_LINTER.items():
             for linter in linter_list:
                 self.assert_linter_works(linter.args[0], extension)
 

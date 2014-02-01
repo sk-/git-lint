@@ -25,10 +25,10 @@ def lint(filename):
             yaml.load(f)
             return 0
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as error:
-            print 'Error:', error
+            print('Error: %s' % error)
             return 1
         except:
-            print 'Unexpected Error'
+            print('Unexpected Error')
             return 2
 
 

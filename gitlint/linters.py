@@ -87,7 +87,7 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
 def _parse_yaml_config(yaml_config):
     config = collections.defaultdict(list)
 
-    for name, data in yaml_config.iteritems():
+    for name, data in yaml_config.items():
         if utils.program_in_path(data['command']):
             command = functools.partial(lint_command,
                                         name,
