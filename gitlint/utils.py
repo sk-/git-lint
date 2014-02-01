@@ -65,7 +65,6 @@ def _open_for_write(filename):
     return open(filename, 'w')
 
 
-# TODO(skreft): add test
 def _get_cache_filename(name, filename):
     """Returns the cache location for filename and linter name."""
     filename = os.path.abspath(filename)[1:]

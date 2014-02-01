@@ -82,3 +82,25 @@ class UtilsTest(unittest.TestCase):
 
             mock_makedirs.assert_called_once_with(os.path.dirname(filename))
             mock_open.assert_called_once_with(filename, 'w')
+
+    def test_get_cache_filename(self):
+        def mock_abspath(filename):
+            if os.path.isabs(filename):
+                return filename
+            return '/foo/%s' % filename
+
+        with mock.patch('os.path.abspath',
+                        side_effect=mock_abspath), \
+             mock.patch('os.path.expanduser',
+                        side_effect=lambda a: '/home/user'):
+            self.assertEquals(
+                '/home/user/.git-lint/cache/linter1/foo/bar/file.txt',
+                utils._get_cache_filename('linter1', 'bar/file.txt'))
+
+            self.assertEquals(
+                '/home/user/.git-lint/cache/linter2/foo/file.txt',
+                utils._get_cache_filename('linter2', 'file.txt'))
+
+            self.assertEquals(
+                '/home/user/.git-lint/cache/linter3/bar/file.txt',
+                utils._get_cache_filename('linter3', '/bar/file.txt'))
