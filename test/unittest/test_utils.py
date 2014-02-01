@@ -104,3 +104,15 @@ class UtilsTest(unittest.TestCase):
             self.assertEquals(
                 '/home/user/.git-lint/cache/linter3/bar/file.txt',
                 utils._get_cache_filename('linter3', '/bar/file.txt'))
+
+    def test_save_output_in_cache(self):
+        output = 'Some content'
+        cache_filename = '/cache/filename.txt'
+        mock_file = mock.MagicMock()
+        with mock.patch('gitlint.utils._get_cache_filename',
+                        return_value=cache_filename), \
+             mock.patch('gitlint.utils._open_for_write',
+                        mock.mock_open(mock_file)) as mock_open:
+            utils.save_output_in_cache('linter', 'filename', output)
+            mock_open.assert_called_once_with(cache_filename)
+            mock_file().write.assert_called_once_with(output)

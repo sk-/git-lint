@@ -97,7 +97,6 @@ def get_output_from_cache(name, filename):
     return None
 
 
-# TODO(skreft): add test
 def save_output_in_cache(name, filename, output):
     """Saves output in the cache location.
 
