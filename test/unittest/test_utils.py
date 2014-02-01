@@ -116,3 +116,34 @@ class UtilsTest(unittest.TestCase):
             utils.save_output_in_cache('linter', 'filename', output)
             mock_open.assert_called_once_with(cache_filename)
             mock_file().write.assert_called_once_with(output)
+
+    def test_get_output_from_cache_no_cache(self):
+        cache_filename = '/cache/filename.txt'
+        with mock.patch('gitlint.utils._get_cache_filename',
+                        return_value=cache_filename), \
+             mock.patch('os.path.exists', return_value=False):
+            self.assertIsNone(
+                utils.get_output_from_cache('linter', 'filename'))
+
+    def test_get_output_from_cache_cache_is_expired(self):
+        cache_filename = '/cache/filename.txt'
+        with mock.patch('gitlint.utils._get_cache_filename',
+                        return_value=cache_filename), \
+             mock.patch('os.path.exists', return_value=True), \
+             mock.patch('os.path.getmtime', side_effect=[2, 1]):
+            self.assertIsNone(
+                utils.get_output_from_cache('linter', 'filename'))
+
+    def test_get_output_from_cache_cache_is_valid(self):
+        cache_filename = '/cache/filename.txt'
+        content = 'some_content'
+        with mock.patch('gitlint.utils._get_cache_filename',
+                        return_value=cache_filename), \
+             mock.patch('os.path.exists', return_value=True), \
+             mock.patch('os.path.getmtime', side_effect=[1, 2]), \
+             mock.patch('gitlint.utils.open',
+                        mock.mock_open(read_data=content),
+                        create=True) as mock_open:
+            self.assertEquals(
+                content, utils.get_output_from_cache('linter', 'filename'))
+            mock_open.assert_called_once_with(cache_filename)

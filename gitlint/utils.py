@@ -74,7 +74,6 @@ def _get_cache_filename(name, filename):
     return os.path.join(base_cache_dir, name, filename)
 
 
-# TODO(skreft): add test
 def get_output_from_cache(name, filename):
     """Returns the output from the cache if still valid.
 
@@ -92,6 +91,7 @@ def get_output_from_cache(name, filename):
     if (os.path.exists(cache_filename) and
             os.path.getmtime(filename) < os.path.getmtime(cache_filename)):
         with open(cache_filename) as f:
+            print f
             return f.read()
 
     return None
