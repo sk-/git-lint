@@ -4,3 +4,4 @@
 gitlint/man.py
 build/
 dist/
+experimental/

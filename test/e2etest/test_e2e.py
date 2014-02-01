@@ -38,7 +38,6 @@ class E2ETest(unittest.TestCase):
     def test_linters(self):
         for extension, linter_list in linters._EXTENSION_TO_LINTER.iteritems():
             for linter in linter_list:
-                print extension, linter
                 self.assert_linter_works(linter.args[0], [extension])
 
     def test_extension_not_defined(self):
@@ -48,8 +47,11 @@ class E2ETest(unittest.TestCase):
             f.write('Foo')
         subprocess.check_output(['git', 'add', filename],
                                 stderr=subprocess.STDOUT)
-        output = subprocess.check_output(['git', 'lint'],
-                                         stderr=subprocess.STDOUT)
+        try:
+            output = subprocess.check_output(['git', 'lint'],
+                                             stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as error:
+            self.fail(error.output)
 
         self.assertIn(os.path.relpath(filename), output)
         self.assertIn('SKIPPED', output)
@@ -65,9 +67,9 @@ class E2ETest(unittest.TestCase):
         """Checks that the given linter works well for all the extensions.
 
         It requires that 3 files are defined:
-        - <linter>_original.<extension>: A file with errors
-        - <linter>_error.<extension>: New errors are introduced.
-        - <linter>_nonewerror.<extension>: A line was modified/added from the
+        - <linter>/original.<extension>: A file with errors
+        - <linter>/error.<extension>: New errors are introduced.
+        - <linter>/nonewerror.<extension>: A line was modified/added from the
           last file, but no new errors are introduced.
         """
         for extension in extensions:
@@ -76,11 +78,11 @@ class E2ETest(unittest.TestCase):
             filename_repo = os.path.join(
                 self.temp_directory, '%s%s' % (linter_name, extension))
             filename_original = os.path.join(
-                data_dirname, '%s_original%s' % (linter_name, extension))
+                data_dirname, '%s/original%s' % (linter_name, extension))
             filename_error = os.path.join(
-                data_dirname, '%s_error%s' % (linter_name, extension))
+                data_dirname, '%s/error%s' % (linter_name, extension))
             filename_nonewerror = os.path.join(
-                data_dirname, '%s_nonewerror%s' % (linter_name, extension))
+                data_dirname, '%s/nonewerror%s' % (linter_name, extension))
 
             self.assertTrue(
                 os.path.exists(filename_original),

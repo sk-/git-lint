@@ -23,7 +23,13 @@ import yaml
 import gitlint.utils as utils
 
 
-def lint_command(program, arguments, filter_regex, filename, lines):
+def missing_requirement_command(program, installation_string, unused_filename,
+                                unused_lines):
+    """Pseudo-command to be used when requirements are missing."""
+    return 'SKIPPED: %s is not installed. %s' % (program, installation_string)
+
+
+def lint_command(name, program, arguments, filter_regex, filename, lines):
     """Executes a lint program and filter the output.
 
     Executes the lint tool 'program' with arguments 'arguments' over the file
@@ -31,6 +37,7 @@ def lint_command(program, arguments, filter_regex, filename, lines):
     'filter_regex'.
 
     Args:
+      name: string: the name of the linter.
       program: string: lint program.
       arguments: list[string]: extra arguments for the program.
       filter_regex: string: regular expression to filter lines.
@@ -40,15 +47,20 @@ def lint_command(program, arguments, filter_regex, filename, lines):
 
     Returns: string: a string with the filtered output of the program.
     """
-    call_arguments = [program] + arguments + [filename]
-    try:
-        output = subprocess.check_output(call_arguments,
-                                         stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as error:
-        output = error.output
-    except OSError:
-        return ('ERROR: could not execute "%s".\nMake sure all required ' +
-                'programs are installed') % ' '.join(call_arguments)
+    output = utils.get_output_from_cache(name, filename)
+
+    if output is None:
+        call_arguments = [program] + arguments + [filename]
+        try:
+            output = subprocess.check_output(call_arguments,
+                                             stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as error:
+            output = error.output
+        except OSError:
+            return ('ERROR: could not execute "%s".\nMake sure all required ' +
+                    'programs are installed') % ' '.join(call_arguments)
+
+        utils.save_output_in_cache(name, filename, output)
 
     output_lines = output.split(os.linesep)
 
@@ -56,29 +68,47 @@ def lint_command(program, arguments, filter_regex, filename, lines):
         lines_regex = r'\d+'
     else:
         lines_regex = '|'.join(map(str, lines))
+    lines_regex = '(%s)' % lines_regex
 
     filtered_lines = utils.filter_lines(output_lines,
                                         filter_regex % {'lines': lines_regex,
                                                         'filename': filename})
 
-    return os.linesep.join(filtered_lines)
+    rel_filename = os.path.relpath(filename)
+
+    result = os.linesep.join(filtered_lines)
+    result = result.replace(filename, rel_filename)
+
+    return result
+
+
+def _parse_yaml_config(yaml_config):
+    config = collections.defaultdict(list)
+
+    for name, data in yaml_config.iteritems():
+        if utils.program_in_path(data['command']):
+            command = functools.partial(lint_command,
+                                        name,
+                                        data['command'],
+                                        data.get('arguments', []),
+                                        data['filter'])
+        else:
+            command = functools.partial(missing_requirement_command,
+                                        data['command'],
+                                        data['installation'])
+        for extension in data['extensions']:
+            config[extension].append(command)
+
+    return config
 
 
 def get_config():
     """Returns a dictionary that maps from an extension to a list of linters."""
     with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
         yaml_config = yaml.load(f)
-    config = collections.defaultdict(list)
 
-    for data in yaml_config.itervalues():
-        for extension in data['extensions']:
-            config[extension].append(
-                functools.partial(lint_command,
-                                  data['command'],
-                                  data.get('arguments', []),
-                                  data['filter']))
+    return _parse_yaml_config(yaml_config)
 
-    return config
 
 _EXTENSION_TO_LINTER = get_config()
 

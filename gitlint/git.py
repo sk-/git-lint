@@ -33,22 +33,25 @@ def modified_files(root):
     """Returns a list of files that has been modified since the last commit.
 
     Args:
-      root: the root of the repository.
+      root: the root of the repository, it has to be an absolute path.
 
     Returns: a dictionary with the modified files as keys, and additional
       information as value. In this case it adds the status returned by
       git status.
     """
+    # TODO(skreft): add test for relative paths
+    assert os.path.isabs(root), "Root has to be absolute, got: %s" % root
+
     # TODO(skreft): add '--untracked-files=no'?
     status_lines = subprocess.check_output(
         ['git', 'status', '--porcelain',
          '--untracked-files=all']).split(os.linesep)
     modified_file_status = utils.filter_lines(
         status_lines,
-        r'(?P<mode>M | M|A |\?\?) (?P<filename>.+)',
+        r'(?P<mode>M | M|A |\?\?|AM) (?P<filename>.+)',
         groups=('filename', 'mode'))
 
-    return dict((os.path.relpath(os.path.join(root, filename)), mode)
+    return dict((os.path.join(root, filename), mode)
                 for filename, mode in modified_file_status)
 
 

@@ -24,7 +24,8 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(lines, list(utils.filter_lines(lines, '.')))
         self.assertEqual(['a', 'ad'], list(utils.filter_lines(lines, 'a')))
         self.assertEqual(['ad'], list(utils.filter_lines(lines, '.d')))
-        self.assertEqual([], list(utils.filter_lines(lines, 'd')))
+        self.assertEqual(['ad'], list(utils.filter_lines(lines, 'd')))
+        self.assertEqual([], list(utils.filter_lines(lines, '^d')))
         self.assertEqual([], list(utils.filter_lines(lines, 'foo')))
 
     def test_filter_lines_one_group(self):

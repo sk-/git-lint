@@ -37,27 +37,21 @@ class GitTest(unittest.TestCase):
         output = os.linesep.join(['A  docs/file1.txt',
                                   'M  data/file2.json',
                                   'D  file3.py',
-                                  '?? file4.js'])
-        original_relpath = os.path.relpath
+                                  '?? file4.js',
+                                  'AM file5.txt'])
         with mock.patch('subprocess.check_output',
-                        return_value=output), \
-             mock.patch('os.path.relpath',
-                        side_effect=lambda fname: original_relpath(
-                            fname, '/home/user/repo/data')):
+                        return_value=output):
             self.assertEqual(
-                {'../docs/file1.txt': 'A ',
-                 'file2.json': 'M ',
-                 '../file4.js': '??'},
+                {'/home/user/repo/docs/file1.txt': 'A ',
+                 '/home/user/repo/data/file2.json': 'M ',
+                 '/home/user/repo/file4.js': '??',
+                 '/home/user/repo/file5.txt': 'AM'},
                 git.modified_files('/home/user/repo'))
 
     def test_modified_files_nothing_changed(self):
         output = ''
-        original_relpath = os.path.relpath
         with mock.patch('subprocess.check_output',
-                        return_value=output), \
-             mock.patch('os.path.relpath',
-                        side_effect=lambda fname: original_relpath(
-                            fname, '/home/user/repo/data')):
+                        return_value=output):
             self.assertEqual({}, git.modified_files('/home/user/repo'))
 
     def test_modified_lines(self):

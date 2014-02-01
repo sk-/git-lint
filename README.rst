@@ -41,13 +41,20 @@ Current linters:
     * Custom via `Jpegtran <http://manpages.ubuntu.com/manpages/raring/man1/jpegtran.1.html>`_
 
 - PNG
-    * `Pngcrush <http://manpages.ubuntu.com/manpages/raring/man1/pngcrush.1.html>`_
+    * Custom via `Pngcrush <http://manpages.ubuntu.com/manpages/raring/man1/pngcrush.1.html>`_
+    * Custom via `Optipng <http://manpages.ubuntu.com/manpages/raring/man1/optipng.1.html>`_
 
 - RST
     * Via `rst2html.py (docutils) <http://docs.python.org/2/library/json.html>`_
 
 - JSON
     * Via python `json.tool module <http://docs.python.org/2/library/json.html>`_
+
+- YAML
+    * Custom via `PyYAML <http://pyyaml.org/>`_
+
+- INI
+    * Custom via `ConfigParser module <http://docs.python.org/2/library/configparser.html>`_
 
 Example use
 -----------
@@ -68,14 +75,19 @@ Below is the simplest call, for a detailed list, see the help::
   api.py:6: [R0913(too-many-arguments), callMethod] Too many arguments (6/5)
   api.py:6: [C0103(invalid-name), callMethod] Invalid function name "callMethod"
 
+
+By default git lint only reports problems with the modified lines
+(with the exception of some linters that check that the whole file is sound).
+To force displaying all the output from the linters use the -f option.
+
 Installation
 ------------
 
-You can install, upgrade, uninstall pep8.py with these commands::
+You can install, upgrade or uninstall git-lint with these commands::
 
-  $ pip install gitlint
-  $ pip install --upgrade gitlint
-  $ pip uninstall gitlint
+  $ pip install git-lint
+  $ pip install --upgrade git-lint
+  $ pip uninstall git-lint
 
 Development
 -----------
@@ -99,7 +111,9 @@ explanatory. (Note to myself: don't be so lazy and write a proper doc for this.)
 TODOS and Possible Features
 ---------------------------
 
-* Normalize output. That is try to show a more uniform output, by removing the
+* Linter that uses libmagic to validate that the extension is correct. Many
+  times I've seen that an image, or a compressed file has the wrong extension.
+* Normalize output. That is, try to uniform the output, by removing the
   filename and strings like 'line' or 'col'.
 * When multiple linters are available sort the output of the linters by line
 * Support directories as arguments
@@ -107,16 +121,13 @@ TODOS and Possible Features
 * Provide a man page so 'git help lint' and 'git lint --help' work
 * Allow to run a command or function when setting up the linter? These can be
   achieved now by running a bash script wrapping the linter. The rationale for
-  this is that some linters, like jshint, only allow iptions to be in a
-  configuration file.
+  this is that some linters, like jshint, only allow options to be in a
+  configuration file. This is done at the moment via scripts present in the
+  folder linters.
 * Decide what linter to use based on the whole filename or even in the filetype,
   as returned by the command file.
-* Save the last output (raw) for a file and if the modification time is lower
-  then do not run the linters and just output what we saved before.
 * Provide better options for colorizing the output, and maybe a way to disable
   it. Also detect if colors are supported or if it tty.
-* Add a message explaining how to install the executable in case it was not
-  found.
 * Add support for other version control systems like mercurial. This should be
   easy, it's just a matter of implementing the functions defined in
   gitlint/git.py.
@@ -124,8 +135,19 @@ TODOS and Possible Features
 
 Changelog
 =========
+v0.0.3 (2014-02-02)
+-------------------
+
+* Fixes to the filter syntax
+* Fixes to the git parser
+* Added linters (YAML, Ini, PHP) and improved linter for PNG and JPEG.
+* Improved pylint configuration.
+* Improved phpcs configuration.
+* Check if program is available and if not display info to install it.
+* Cache the output of linters, so subsequent calls are much faster.
+
 v0.0.2 (2013-10-20)
-------------------
+-------------------
 
 * Fixes to the installer
 
