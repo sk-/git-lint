@@ -39,7 +39,6 @@ def modified_files(root):
       information as value. In this case it adds the status returned by
       git status.
     """
-    # TODO(skreft): add test for relative paths
     assert os.path.isabs(root), "Root has to be absolute, got: %s" % root
 
     # TODO(skreft): add '--untracked-files=no'?

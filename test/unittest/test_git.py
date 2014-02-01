@@ -54,6 +54,10 @@ class GitTest(unittest.TestCase):
                         return_value=output):
             self.assertEqual({}, git.modified_files('/home/user/repo'))
 
+    def test_modified_files_non_absolute_root(self):
+         with self.assertRaises(AssertionError):
+            git.modified_files('foo/bar')
+
     def test_modified_lines(self):
         output = os.linesep.join([
             'baz',
