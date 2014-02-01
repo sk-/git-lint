@@ -82,6 +82,7 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
     return result
 
 
+# TODO(skreft): validate data['filter'], ie check that only has valid fields.
 def _parse_yaml_config(yaml_config):
     config = collections.defaultdict(list)
 
