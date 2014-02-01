@@ -66,7 +66,7 @@ class GitLintTest(unittest.TestCase):
         root = '/home/user/repo'
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch('gitlint.git.modified_files',
-                        return_value=[]) as get_modified_files:
+                        return_value={}) as get_modified_files:
             self.assertEqual(0, gitlint.main([]))
             get_modified_files.assert_called_once_with(root)
 
