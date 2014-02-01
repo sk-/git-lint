@@ -69,10 +69,10 @@ class GitTest(unittest.TestCase):
                         return_value=output) as check_output:
             self.assertEqual(
                 [2, 5],
-                git.modified_lines('/home/user/repo/foo/bar.txt', ' M'))
+                list(git.modified_lines('/home/user/repo/foo/bar.txt', ' M')))
             self.assertEqual(
                 [2, 5],
-                git.modified_lines('/home/user/repo/foo/bar.txt', 'M '))
+                list(git.modified_lines('/home/user/repo/foo/bar.txt', 'M ')))
             expected_calls = [mock.call(
                 ['git', 'blame', '--porcelain',
                  '/home/user/repo/foo/bar.txt'])] * 2
@@ -91,4 +91,4 @@ class GitTest(unittest.TestCase):
     def test_modified_lines_no_info(self):
         self.assertEqual(
             [],
-            git.modified_lines('/home/user/repo/foo/bar.txt', None))
+            list(git.modified_lines('/home/user/repo/foo/bar.txt', None)))

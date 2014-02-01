@@ -40,6 +40,7 @@ setup(name='git-lint',
           'License :: OSI Approved :: Apache Software License',
           'Operating System :: Unix',
           'Programming Language :: Python :: 2',
+          'Programming Language :: Python :: 3',
           'Topic :: Software Development :: Version Control',
       ],
      )

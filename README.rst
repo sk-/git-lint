@@ -102,6 +102,12 @@ You can install, upgrade or uninstall git-lint with these commands::
   $ pip install --upgrade git-lint
   $ pip uninstall git-lint
 
+Python Versions
+---------------
+
+Python 2.7 is supported, and it should also work for Python 3.2 and 3.3. Python
+2.6 is not supported because of the lack of subprocess.check_output.
+
 Development
 -----------
 

@@ -137,6 +137,7 @@ bash:
 yaml:
   extensions:
   - .yaml
+  - .yml
   command: yaml_linter.py
   filter: ".*"
   installation: "Run pip install PyYAML."
