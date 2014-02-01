@@ -4,6 +4,9 @@ Git-Lint
 .. image:: https://badge.fury.io/py/git-lint.png
     :target: http://badge.fury.io/py/git-lint
 
+.. image:: https://travis-ci.org/sk-/git-lint.png?branch=master
+    :target: https://travis-ci.org/sk-/git-lint
+
 Git-lint is a tool for improving source code one step at a time.
 
 Motivation
