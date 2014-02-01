@@ -29,6 +29,7 @@ def missing_requirement_command(program, installation_string, unused_filename,
     return 'SKIPPED: %s is not installed. %s' % (program, installation_string)
 
 
+# TODO(skreft): add test case for result already in cache.
 def lint_command(name, program, arguments, filter_regex, filename, lines):
     """Executes a lint program and filter the output.
 
