@@ -6,5 +6,8 @@ python:
 # command to install dependencies
 install:
   - "pip install ."
+  - "pip install coveralls"
 # command to run tests
 script: nosetests test/unittest
+after_success:
+  coveralls
