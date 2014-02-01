@@ -38,7 +38,7 @@ class E2ETest(unittest.TestCase):
     def test_linters(self):
         for extension, linter_list in linters._EXTENSION_TO_LINTER.iteritems():
             for linter in linter_list:
-                self.assert_linter_works(linter.args[0], [extension])
+                self.assert_linter_works(linter.args[0], extension)
 
     def test_extension_not_defined(self):
         extension = max(linters._EXTENSION_TO_LINTER.keys()) + 'fake'
@@ -63,7 +63,7 @@ class E2ETest(unittest.TestCase):
     # coverage and also avoid messing with installed versions.
     # TODO(skreft): check that the first file has more than 1 error, check that
     # the second file has 1 new error, check also the lines that changed.
-    def assert_linter_works(self, linter_name, extensions):
+    def assert_linter_works(self, linter_name, extension):
         """Checks that the given linter works well for all the extensions.
 
         It requires that 3 files are defined:
@@ -72,58 +72,57 @@ class E2ETest(unittest.TestCase):
         - <linter>/nonewerror.<extension>: A line was modified/added from the
           last file, but no new errors are introduced.
         """
-        for extension in extensions:
-            data_dirname = os.path.join(
-                os.path.dirname(os.path.realpath(__file__)), 'data')
-            filename_repo = os.path.join(
-                self.temp_directory, '%s%s' % (linter_name, extension))
-            filename_original = os.path.join(
-                data_dirname, '%s/original%s' % (linter_name, extension))
-            filename_error = os.path.join(
-                data_dirname, '%s/error%s' % (linter_name, extension))
-            filename_nonewerror = os.path.join(
-                data_dirname, '%s/nonewerror%s' % (linter_name, extension))
+        data_dirname = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), 'data')
+        filename_repo = os.path.join(
+            self.temp_directory, '%s%s' % (linter_name, extension))
+        filename_original = os.path.join(
+            data_dirname, '%s/original%s' % (linter_name, extension))
+        filename_error = os.path.join(
+            data_dirname, '%s/error%s' % (linter_name, extension))
+        filename_nonewerror = os.path.join(
+            data_dirname, '%s/nonewerror%s' % (linter_name, extension))
 
-            self.assertTrue(
-                os.path.exists(filename_original),
-                'You must define file "%s"' % filename_original)
-            self.assertTrue(
-                os.path.exists(filename_error),
-                'You must define file "%s"' % filename_error)
-            self.assertTrue(os.path.exists(
-                filename_nonewerror),
-                'You must define file "%s"' % filename_nonewerror)
+        self.assertTrue(
+            os.path.exists(filename_original),
+            'You must define file "%s"' % filename_original)
+        self.assertTrue(
+            os.path.exists(filename_error),
+            'You must define file "%s"' % filename_error)
+        self.assertTrue(os.path.exists(
+            filename_nonewerror),
+            'You must define file "%s"' % filename_nonewerror)
 
-            # Add file 1 (original) to repo
-            shutil.copy(filename_original, filename_repo)
-            subprocess.check_output(['git', 'add', filename_repo],
-                                    stderr=subprocess.STDOUT)
-            subprocess.check_output(['git', 'commit', '-m', 'Commit 1'],
-                                    stderr=subprocess.STDOUT)
+        # Add file 1 (original) to repo
+        shutil.copy(filename_original, filename_repo)
+        subprocess.check_output(['git', 'add', filename_repo],
+                                stderr=subprocess.STDOUT)
+        subprocess.check_output(['git', 'commit', '-m', 'Commit 1'],
+                                stderr=subprocess.STDOUT)
 
-            # Add file 2 (error) to repo
-            shutil.copy(filename_error, filename_repo)
-            try:
-                output = subprocess.check_output(['git', 'lint'],
-                                                 stderr=subprocess.STDOUT)
-                self.fail(('Git lint for file %s should have failed. \n ' +
-                          'Output:\n%s') % (filename_error, output))
-            except subprocess.CalledProcessError as error:
-                pass
-            subprocess.check_output(['git', 'add', filename_repo],
-                                    stderr=subprocess.STDOUT)
-            subprocess.check_output(['git', 'commit', '-m', 'Commit 2'],
-                                    stderr=subprocess.STDOUT)
+        # Add file 2 (error) to repo
+        shutil.copy(filename_error, filename_repo)
+        try:
+            output = subprocess.check_output(['git', 'lint'],
+                                             stderr=subprocess.STDOUT)
+            self.fail(('Git lint for file %s should have failed. \n ' +
+                      'Output:\n%s') % (filename_error, output))
+        except subprocess.CalledProcessError as error:
+            pass
+        subprocess.check_output(['git', 'add', filename_repo],
+                                stderr=subprocess.STDOUT)
+        subprocess.check_output(['git', 'commit', '-m', 'Commit 2'],
+                                stderr=subprocess.STDOUT)
 
-            # Add file 3 (nonewerror) to repo
-            shutil.copy(filename_nonewerror, filename_repo)
-            try:
-                subprocess.check_output(['git', 'lint'],
-                                        stderr=subprocess.STDOUT)
-            except subprocess.CalledProcessError as error:
-                self.fail(('Git lint for file %s should have not failed. \n' +
-                          'Output:\n%s') % (filename_nonewerror, error.output))
-            subprocess.check_output(['git', 'add', filename_repo],
+        # Add file 3 (nonewerror) to repo
+        shutil.copy(filename_nonewerror, filename_repo)
+        try:
+            subprocess.check_output(['git', 'lint'],
                                     stderr=subprocess.STDOUT)
-            subprocess.check_output(['git', 'commit', '-m', 'Commit 3'],
-                                    stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as error:
+            self.fail(('Git lint for file %s should have not failed. \n' +
+                      'Output:\n%s') % (filename_nonewerror, error.output))
+        subprocess.check_output(['git', 'add', filename_repo],
+                                stderr=subprocess.STDOUT)
+        subprocess.check_output(['git', 'commit', '-m', 'Commit 3'],
+                                stderr=subprocess.STDOUT)
