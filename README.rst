@@ -1,6 +1,9 @@
 Git-Lint
 ========
 
+.. image:: https://badge.fury.io/py/git-lint.png
+    :target: http://badge.fury.io/py/git-lint
+
 Git-lint is a tool for improving source code one step at a time.
 
 Motivation
@@ -111,6 +114,9 @@ explanatory. (Note to myself: don't be so lazy and write a proper doc for this.)
 TODOS and Possible Features
 ---------------------------
 
+* Add travis-ci configuration.
+* Add coveralls configuration.
+* Replace mock calls in test with pyfakefs.
 * Linter that uses libmagic to validate that the extension is correct. Many
   times I've seen that an image, or a compressed file has the wrong extension.
 * Normalize output. That is, try to uniform the output, by removing the
@@ -118,7 +124,9 @@ TODOS and Possible Features
 * When multiple linters are available sort the output of the linters by line
 * Support directories as arguments
 * Provide a way to install as a precommit hook
-* Provide a man page so 'git help lint' and 'git lint --help' work
+* Provide a man page so 'git help lint' and 'git lint --help' work. I already
+  have a script for converting the Usage to a man page, but I still need to
+  figure out how to install it on the system.
 * Allow to run a command or function when setting up the linter? These can be
   achieved now by running a bash script wrapping the linter. The rationale for
   this is that some linters, like jshint, only allow options to be in a
@@ -127,7 +135,7 @@ TODOS and Possible Features
 * Decide what linter to use based on the whole filename or even in the filetype,
   as returned by the command file.
 * Provide better options for colorizing the output, and maybe a way to disable
-  it. Also detect if colors are supported or if it tty.
+  it. Also detect if colors are supported or if it is a tty.
 * Add support for other version control systems like mercurial. This should be
   easy, it's just a matter of implementing the functions defined in
   gitlint/git.py.
