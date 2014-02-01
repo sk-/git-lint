@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os.path
 import unittest
+
+import mock
 
 import gitlint.utils as utils
 
@@ -57,3 +60,25 @@ class UtilsTest(unittest.TestCase):
             list(utils.filter_lines(lines,
                                     r'(?P<line>\d+): .*|Debug: (?P<debug>.*)',
                                     groups=('line', 'debug'))))
+
+    def test_open_for_write_file_exists(self):
+        filename = 'foo/bar/new_file'
+        with mock.patch('gitlint.utils.open',
+                        mock.mock_open(),
+                        create=True) as mock_open, \
+             mock.patch('os.path.exists', return_value=True):
+            utils._open_for_write(filename)
+
+            mock_open.assert_called_once_with(filename, 'w')
+
+    def test_open_for_write_file_does_not_exist(self):
+        filename = 'foo/bar/new_file'
+        with mock.patch('gitlint.utils.open',
+                        mock.mock_open(),
+                        create=True) as mock_open, \
+             mock.patch('os.path.exists', return_value=False), \
+             mock.patch('os.makedirs') as mock_makedirs:
+            utils._open_for_write(filename)
+
+            mock_makedirs.assert_called_once_with(os.path.dirname(filename))
+            mock_open.assert_called_once_with(filename, 'w')

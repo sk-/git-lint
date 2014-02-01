@@ -38,6 +38,7 @@ def filter_lines(lines, filter_regex, groups=None):
                 yield tuple(match.group(group) for group in groups)
 
 
+# TODO(skreft): add test
 def which(program):
     """Returns a list of paths where the program is found."""
     locations = os.environ.get("PATH").split(os.pathsep)
@@ -49,6 +50,7 @@ def which(program):
     return candidates
 
 
+# TODO(skreft): add test
 def program_in_path(program):
     """Returns whether program is found on the PATH."""
     return bool(which(program))
@@ -63,6 +65,7 @@ def _open_for_write(filename):
     return open(filename, 'w')
 
 
+# TODO(skreft): add test
 def _get_cache_filename(name, filename):
     """Returns the cache location for filename and linter name."""
     filename = os.path.abspath(filename)[1:]
@@ -72,6 +75,7 @@ def _get_cache_filename(name, filename):
     return os.path.join(base_cache_dir, name, filename)
 
 
+# TODO(skreft): add test
 def get_output_from_cache(name, filename):
     """Returns the output from the cache if still valid.
 
@@ -94,6 +98,7 @@ def get_output_from_cache(name, filename):
     return None
 
 
+# TODO(skreft): add test
 def save_output_in_cache(name, filename, output):
     """Saves output in the cache location.
 
