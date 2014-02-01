@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright 2013 Sebastian Kreft
+# Copyright 2013-2014 Sebastian Kreft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 from setuptools import setup, find_packages
 
 setup(name='git-lint',
-      version='0.0.2.3',
+      version='0.0.3',
       description='Git Lint',
       long_description=open('README.rst').read(),
       author='Sebastian Kreft',
