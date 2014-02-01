@@ -27,37 +27,47 @@ that were added or modified.
 Current linters:
 
 - CSS
-    * `Csslint <https://github.com/stubbornella/csslint>`_
+
+  * `Csslint <https://github.com/stubbornella/csslint>`_
 
 - Python
-    * `Pylint <http://www.pylint.org/>`_
-    * `PEP8 <https://pypi.python.org/pypi/pep8/1.4.6>`_
+
+  * `Pylint <http://www.pylint.org/>`_
+  * `PEP8 <https://pypi.python.org/pypi/pep8/1.4.6>`_
 
 - PHP
-    * `Php Code Sniffer <http://pear.php.net/package/PHP_CodeSniffer/>`_
+
+  * `Php Code Sniffer <http://pear.php.net/package/PHP_CodeSniffer/>`_
 
 - Javascript
-    * `Jshint <http://www.jshint.com/>`_
-    * `Gjslint <https://developers.google.com/closure/utilities/>`_
+
+  * `Jshint <http://www.jshint.com/>`_
+  * `Gjslint <https://developers.google.com/closure/utilities/>`_
 
 - JPEG
-    * Custom via `Jpegtran <http://manpages.ubuntu.com/manpages/raring/man1/jpegtran.1.html>`_
+
+  * Custom via `Jpegtran <http://manpages.ubuntu.com/manpages/raring/man1/jpegtran.1.html>`_
 
 - PNG
-    * Custom via `Pngcrush <http://manpages.ubuntu.com/manpages/raring/man1/pngcrush.1.html>`_
-    * Custom via `Optipng <http://manpages.ubuntu.com/manpages/raring/man1/optipng.1.html>`_
+
+  * Custom via `Pngcrush <http://manpages.ubuntu.com/manpages/raring/man1/pngcrush.1.html>`_
+  * Custom via `Optipng <http://manpages.ubuntu.com/manpages/raring/man1/optipng.1.html>`_
 
 - RST
-    * Via `rst2html.py (docutils) <http://docs.python.org/2/library/json.html>`_
+
+  * Via `rst2html.py (docutils) <http://docs.python.org/2/library/json.html>`_
 
 - JSON
-    * Via python `json.tool module <http://docs.python.org/2/library/json.html>`_
+
+  * Via python `json.tool module <http://docs.python.org/2/library/json.html>`_
 
 - YAML
-    * Custom via `PyYAML <http://pyyaml.org/>`_
+
+  * Custom via `PyYAML <http://pyyaml.org/>`_
 
 - INI
-    * Custom via `ConfigParser module <http://docs.python.org/2/library/configparser.html>`_
+
+  * Custom via `ConfigParser module <http://docs.python.org/2/library/configparser.html>`_
 
 Example use
 -----------
