@@ -1,1 +1,3 @@
 include gitlint/*.yaml
+include LICENSE
+include README.rst

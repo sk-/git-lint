@@ -16,14 +16,14 @@
 from setuptools import setup, find_packages
 
 setup(name='git-lint',
-      version='0.0.3.1',
+      version='0.0.3.2',
       description='Git Lint',
       long_description=open('README.rst').read(),
       author='Sebastian Kreft',
       url='http://github.com/sk-/git-lint',
       packages=find_packages(exclude=['test']),
       package_dir={'gitlint': 'gitlint'},
-      package_data={'gitlint': ['*.yaml']},
+      package_data={'gitlint': ['*.yaml'], '': ['README.rst', 'LICENSE']},
       scripts=[
           'scripts/git-lint',
           'scripts/custom_linters/ini_linter.py',
