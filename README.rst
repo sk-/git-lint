@@ -7,6 +7,9 @@ Git-Lint
 .. image:: https://travis-ci.org/sk-/git-lint.png?branch=master
     :target: https://travis-ci.org/sk-/git-lint
 
+.. image:: https://coveralls.io/repos/sk-/git-lint/badge.png?branch=master
+    :target: https://coveralls.io/r/sk-/git-lint?branch=master
+
 Git-lint is a tool for improving source code one step at a time.
 
 Motivation
@@ -133,8 +136,7 @@ explanatory. (Note to myself: don't be so lazy and write a proper doc for this.)
 TODOS and Possible Features
 ---------------------------
 
-* Add travis-ci configuration.
-* Add coveralls configuration.
+* Add travis-ci configuration for e2e tests.
 * Replace mock calls in test with pyfakefs.
 * Linter that uses libmagic to validate that the extension is correct. Many
   times I've seen that an image, or a compressed file has the wrong extension.
