@@ -190,3 +190,20 @@ html_lint:
   - "optional_tag"
   installation: "pip install html-linter."
   filter: "^%(lines)s:\\d+: "
+
+#Ruby
+ruby:
+  command: ruby-lint
+  extensions:
+  - '.rb'
+  # The first component is the basename, but it's not supported yet.
+  filter: ".*: .*: line %(lines)s, column \\d+: "
+  installation: "sudo gem install ruby-lint (requires ruby 1.9) or visit https://github.com/yorickpeterse/ruby-lint"
+
+rubocop:
+  command: rubocop
+  extensions:
+  - '.rb'
+  # The first component is the relpath, but it's not supported yet.
+  filter: ".*:%(lines)s:\\d: "
+  installation: "sudo gem install rubocop or visit https://github.com/bbatsov/rubocop"

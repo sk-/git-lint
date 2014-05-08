@@ -84,6 +84,11 @@ Current linters:
   * `HTML-Linter <https://github.com/deezer/html-linter>`_
   * `Tidy <https://w3c.github.io/tidy-html5/>`_ with preprocessing from `template-remover <https://github.com/deezer/html-linter>`_
 
+- Ruby
+
+ * `ruby-lint <https://github.com/yorickpeterse/ruby-lint>`_
+ * `rubocop <https://github.com/bbatsov/rubocop>`_
+
 Example use
 -----------
 
