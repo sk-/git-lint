@@ -173,6 +173,13 @@ TODOS and Possible Features
 
 Changelog
 =========
+v0.0.4 (2014-05-08)
+-------------------
+
+* Added linters: html, tidy, scss
+* Added way to override default configuration
+* Improvements for Python3
+
 v0.0.3 (2014-02-02)
 -------------------
 

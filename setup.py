@@ -18,7 +18,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='git-lint',
-    version='0.0.3.4',
+    version='0.0.4',
     description='Git Lint',
     long_description=open('README.rst').read(),
     author='Sebastian Kreft',
