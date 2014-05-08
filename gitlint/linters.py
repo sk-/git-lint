@@ -40,11 +40,6 @@ def missing_requirements_command(missing_programs, installation_string,
                                                  verb,
                                                  installation_string)
 
-def missing_requirement_command(program, installation_string, unused_filename,
-                                unused_lines):
-    """Pseudo-command to be used when requirements are missing."""
-    return 'SKIPPED: %s is not installed. %s' % (program, installation_string)
-
 
 # TODO(skreft): add test case for result already in cache.
 def lint_command(name, program, arguments, filter_regex, filename, lines):
