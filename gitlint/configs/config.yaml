@@ -56,6 +56,7 @@ phpcs:
   command: phpcs
   arguments:
   - "--report-width=1000"
+  - "--standard=PSR2"
   filter: "^\\s*%(lines)s\\s\\|"
   installation: "Visit https://github.com/squizlabs/PHP_CodeSniffer for installation instructions"
 

@@ -11,4 +11,3 @@
  * @link     foo.to
  */
 FOO;
-
