@@ -117,6 +117,18 @@ You can install, upgrade or uninstall git-lint with these commands::
   $ pip install --upgrade git-lint
   $ pip uninstall git-lint
 
+Configuration
+-------------
+
+Git-lint comes with a default configuration that includes all the linters listed
+above. If you don't like that list you can write your own configuration and put
+it in a file called `.gitlint.yaml` in the root of your repository. You can copy
+the file https://github.com/sk-/git-lint/blob/master/gitlint/configs/config.yaml
+to your repo and modify it.
+
+If you add a new linter or add a new flag to any of the commands, please
+share that with us, so we can integrate those changes.
+
 Python Versions
 ---------------
 
