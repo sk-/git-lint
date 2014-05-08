@@ -52,10 +52,11 @@ class E2ETest(unittest.TestCase):
                                              stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as error:
             self.fail(error.output)
-
-        self.assertIn(os.path.relpath(filename), output)
-        self.assertIn('SKIPPED', output)
-        self.assertIn(extension, output)
+        # Python3 does not like mixing bytes and strings. So we need to convert
+        # the first element to unicode first.
+        self.assertIn(os.path.relpath(filename).encode('utf-8'), output)
+        self.assertIn('SKIPPED'.encode('utf-8'), output)
+        self.assertIn(extension.encode('utf-8'), output)
 
     # TODO(skreft): improves assert so the message is clear in case there's an
     # error. Include output and file that is being processed.

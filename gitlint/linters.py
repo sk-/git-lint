@@ -23,6 +23,16 @@ import yaml
 import gitlint.utils as utils
 
 
+def missing_requirements_command(missing_programs, installation_string,
+                                 unused_filename, unused_lines):
+    """Pseudo-command to be used when requirements are missing."""
+    verb = 'is'
+    if len(missing_programs) > 1:
+        verb = 'are'
+    return 'SKIPPED: %s %s not installed. %s' % (', '.join(missing_programs),
+                                                 verb,
+                                                 installation_string)
+
 def missing_requirement_command(program, installation_string, unused_filename,
                                 unused_lines):
     """Pseudo-command to be used when requirements are missing."""
@@ -88,16 +98,18 @@ def _parse_yaml_config(yaml_config):
     config = collections.defaultdict(list)
 
     for name, data in yaml_config.items():
-        if utils.program_in_path(data['command']):
+        not_found_programs = utils.programs_not_in_path(
+            [data['command']] + data.get('requirements', []))
+        if not_found_programs:
+            command = functools.partial(missing_requirements_command,
+                                        not_found_programs,
+                                        data['installation'])
+        else:
             command = functools.partial(lint_command,
                                         name,
                                         data['command'],
                                         data.get('arguments', []),
                                         data['filter'])
-        else:
-            command = functools.partial(missing_requirement_command,
-                                        data['command'],
-                                        data['installation'])
         for extension in data['extensions']:
             config[extension].append(command)
 

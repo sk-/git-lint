@@ -104,6 +104,8 @@ pngcrush:
   extensions:
   - .png
   command: pngcrush-linter.sh
+  requirements:
+  - pngcrush
   filter: ".*"
   installation: "Run apt-get install pngcrush."
 
@@ -111,6 +113,8 @@ optipng:
   extensions:
   - .png
   command: optipng-linter.sh
+  requirements:
+  - optipng
   filter: ".*"
   installation: "Run apt-get install optipng."
 
@@ -120,6 +124,8 @@ jpegtran:
   - .jpg
   - .jpeg
   command: jpegtran-linter.sh
+  requirements:
+  - jpegtran
   filter: ".*"
   installation: "Run apt-get install jpegtran."
 

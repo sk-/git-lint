@@ -50,10 +50,9 @@ def which(program):
     return candidates
 
 
-# TODO(skreft): add test
-def program_in_path(program):
-    """Returns whether program is found on the PATH."""
-    return bool(which(program))
+def programs_not_in_path(programs):
+    """Returns all the programs that are not found in the PATH."""
+    return [program for program in programs if not which(program)]
 
 
 def _open_for_write(filename):

@@ -208,3 +208,25 @@ class LintersTest(unittest.TestCase):
             'SKIPPED: some_unexistent_program_name is not installed. Go to ' +
             'some_unexistent_program_name.com to install it.',
             config['.foo'][0]('filename', []))
+
+    def test_parse_yaml_config_requirements_not_in_path(self):
+        yaml_config = {
+            'linter': {
+                'arguments': [],
+                'command': 'ls',
+                'requirements': [
+                    'some_unexistent_command_one',
+                    'ls',
+                    'some_unexistent_command_two',
+                ],
+                'extensions': ['.foo'],
+                'filter': '.*',
+                'installation': 'Run apt-get install command_one command_two',
+            }
+        }
+        config = linters._parse_yaml_config(yaml_config)
+        self.assertEqual(
+            'SKIPPED: some_unexistent_command_one, ' +
+            'some_unexistent_command_two are not installed. Run apt-get ' +
+            'install command_one command_two',
+            config['.foo'][0]('filename', []))
