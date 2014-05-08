@@ -8,6 +8,6 @@ install:
   - "pip install ."
   - "pip install coveralls"
 # command to run tests
-script: python -R setup.py nosetests -m test/unittest
+script: python -R setup.py nosetests --exclude e2e
 after_success:
   coveralls
