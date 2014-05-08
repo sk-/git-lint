@@ -36,6 +36,10 @@ Current linters:
 
   * `Csslint <https://github.com/stubbornella/csslint>`_
 
+- SCSS
+
+  * `scss-lint <https://github.com/causes/scss-lint>`_
+
 - Python
 
   * `Pylint <http://www.pylint.org/>`_
@@ -74,6 +78,11 @@ Current linters:
 - INI
 
   * Custom via `ConfigParser module <http://docs.python.org/2/library/configparser.html>`_
+
+- HTML
+
+  * `HTML-Linter <https://github.com/deezer/html-linter>`_
+  * `Tidy <https://w3c.github.io/tidy-html5/>`_ with preprocessing from `template-remover <https://github.com/deezer/html-linter>`_
 
 Example use
 -----------

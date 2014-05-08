@@ -25,6 +25,14 @@ csslint:
   filter: "^%(filename)s: line %(lines)s, col"
   installation: "Go to https://github.com/stubbornella/csslint/wiki/Command-line-interface for installation instructions."
 
+# SCSS
+scss:
+  extensions:
+  - .scss
+  command: scss-lint
+  filter: "^%(filename)s:%(lines)s "
+  installation: "gem install scss-lint or go to https://github.com/causes/scss-lint"
+
 # Javascript
 gjslint:
   extensions:
