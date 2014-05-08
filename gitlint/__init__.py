@@ -115,7 +115,7 @@ def main(argv):
         changed_files = git.modified_files(repository_root)
         modified_files = {}
         for filename in arguments['FILENAME']:
-            normalized_filename = os.path.relpath(filename)
+            normalized_filename = os.path.abspath(filename)
             modified_files[normalized_filename] = changed_files.get(
                 normalized_filename)
     else:
