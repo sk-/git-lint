@@ -27,6 +27,7 @@ class GitLintTest(unittest.TestCase):
     def setUpClass(cls):
         cls._stderr = sys.stderr
         sys.stderr = sys.stdout
+        cls.gitlint_config = linters._EXTENSION_TO_LINTER
 
     @classmethod
     def tearDownClass(cls):
@@ -83,7 +84,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], linters._EXTENSION_TO_LINTER)
+                'changed.py', [3, 14], self.gitlint_config)
 
     def test_main_file_changed_but_skipped(self):
         root = '/home/user/repo'
@@ -100,7 +101,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], linters._EXTENSION_TO_LINTER)
+                'changed.py', [3, 14], self.gitlint_config)
 
     def test_main_file_linter_not_found(self):
         root = '/home/user/repo'
@@ -117,7 +118,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], linters._EXTENSION_TO_LINTER)
+                'changed.py', [3, 14], self.gitlint_config)
 
     def test_main_file_changed_and_now_invalid(self):
         root = '/home/user/repo'
@@ -134,7 +135,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], linters._EXTENSION_TO_LINTER)
+                'changed.py', [3, 14], self.gitlint_config)
 
     def test_main_force_all_lines(self):
         root = '/home/user/repo'
@@ -149,7 +150,7 @@ class GitLintTest(unittest.TestCase):
             expected_calls = [mock.call(root), mock.call(root)]
             self.assertEqual(expected_calls, get_modified_files.call_args_list)
             expected_calls = [mock.call(
-                'changed.py', None, linters._EXTENSION_TO_LINTER)] * 2
+                'changed.py', None, self.gitlint_config)] * 2
             self.assertEqual(expected_calls, lint.call_args_list)
 
     def test_main_with_invalid_files(self):
@@ -177,8 +178,8 @@ class GitLintTest(unittest.TestCase):
                 mock.call('changed.py', ' M'), mock.call('foo.txt', None)]
             self.assertEqual(expected_calls, get_modified_lines.call_args_list)
             expected_calls = [
-                mock.call('changed.py', [3, 14], linters._EXTENSION_TO_LINTER),
-                mock.call('foo.txt', [3, 14], linters._EXTENSION_TO_LINTER)]
+                mock.call('changed.py', [3, 14], self.gitlint_config),
+                mock.call('foo.txt', [3, 14], self.gitlint_config)]
             self.assertEqual(expected_calls, lint.call_args_list)
 
     def test_main_with_valid_files_relative(self):
@@ -199,6 +200,6 @@ class GitLintTest(unittest.TestCase):
                               mock.call('foo.txt', None)]
             self.assertEqual(expected_calls, get_modified_lines.call_args_list)
             expected_calls = [
-                mock.call('changed.py', [3, 14], linters._EXTENSION_TO_LINTER),
-                mock.call('foo.txt', [3, 14], linters._EXTENSION_TO_LINTER)]
+                mock.call('changed.py', [3, 14], self.gitlint_config),
+                mock.call('foo.txt', [3, 14], self.gitlint_config)]
             self.assertEqual(expected_calls, lint.call_args_list)
