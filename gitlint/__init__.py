@@ -36,6 +36,7 @@ import sys
 
 import docopt
 import termcolor
+import yaml
 
 import gitlint.git as git
 import gitlint.linters as linters
@@ -66,6 +67,29 @@ def find_invalid_filenames(filenames, repository_root):
                           ' not yet supported' % (filename, )))
 
     return errors
+
+
+def get_config():
+    """Gets the configuration file either from the repository or the default."""
+    config = os.path.join(os.path.dirname(__file__), 'configs', 'config.yaml')
+    repo_root = git.repository_root()
+
+    if repo_root:
+        repo_config = os.path.join(repo_root, '.gitlint.yaml')
+        if os.path.exists(repo_config):
+            config = repo_config
+
+    with open(config) as f:
+        # We have to read the content first as yaml hangs up when reading from
+        # MockOpen
+        content = f.read()
+        # Yaml.load will return None when the input is empty.
+        if not content:
+            yaml_config = {}
+        else:
+            yaml_config = yaml.load(content)
+
+    return linters.parse_yaml_config(yaml_config)
 
 
 def main(argv):
@@ -99,6 +123,8 @@ def main(argv):
 
     linter_not_found = False
     files_with_problems = 0
+    gitlint_config = get_config()
+
     for filename in sorted(modified_files.keys()):
         rel_filename = os.path.relpath(filename)
         print('Linting file: %s' % termcolor.colored(rel_filename,
@@ -110,7 +136,7 @@ def main(argv):
                                                 modified_files[filename])
 
         result = linters.lint(
-            filename, modified_lines, linters._EXTENSION_TO_LINTER)
+            filename, modified_lines, gitlint_config)
 
         if result == 'OK':
             result = termcolor.colored(result, 'green', attrs=('bold',))

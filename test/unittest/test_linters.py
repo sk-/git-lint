@@ -203,7 +203,7 @@ class LintersTest(unittest.TestCase):
                                  'install it.'),
             }
         }
-        config = linters._parse_yaml_config(yaml_config)
+        config = linters.parse_yaml_config(yaml_config)
         self.assertEqual(
             'SKIPPED: some_unexistent_program_name is not installed. Go to ' +
             'some_unexistent_program_name.com to install it.',
@@ -224,7 +224,7 @@ class LintersTest(unittest.TestCase):
                 'installation': 'Run apt-get install command_one command_two',
             }
         }
-        config = linters._parse_yaml_config(yaml_config)
+        config = linters.parse_yaml_config(yaml_config)
         self.assertEqual(
             'SKIPPED: some_unexistent_command_one, ' +
             'some_unexistent_command_two are not installed. Run apt-get ' +

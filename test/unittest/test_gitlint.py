@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import os
 import sys
 import unittest
 
@@ -27,7 +29,6 @@ class GitLintTest(unittest.TestCase):
     def setUpClass(cls):
         cls._stderr = sys.stderr
         sys.stderr = sys.stdout
-        cls.gitlint_config = linters._EXTENSION_TO_LINTER
 
     @classmethod
     def tearDownClass(cls):
@@ -84,7 +85,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], self.gitlint_config)
+                'changed.py', [3, 14], gitlint.get_config())
 
     def test_main_file_changed_but_skipped(self):
         root = '/home/user/repo'
@@ -101,7 +102,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], self.gitlint_config)
+                'changed.py', [3, 14], gitlint.get_config())
 
     def test_main_file_linter_not_found(self):
         root = '/home/user/repo'
@@ -118,7 +119,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], self.gitlint_config)
+                'changed.py', [3, 14], gitlint.get_config())
 
     def test_main_file_changed_and_now_invalid(self):
         root = '/home/user/repo'
@@ -135,7 +136,7 @@ class GitLintTest(unittest.TestCase):
             get_modified_files.assert_called_once_with(root)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], self.gitlint_config)
+                'changed.py', [3, 14], gitlint.get_config())
 
     def test_main_force_all_lines(self):
         root = '/home/user/repo'
@@ -150,7 +151,7 @@ class GitLintTest(unittest.TestCase):
             expected_calls = [mock.call(root), mock.call(root)]
             self.assertEqual(expected_calls, get_modified_files.call_args_list)
             expected_calls = [mock.call(
-                'changed.py', None, self.gitlint_config)] * 2
+                'changed.py', None, gitlint.get_config())] * 2
             self.assertEqual(expected_calls, lint.call_args_list)
 
     def test_main_with_invalid_files(self):
@@ -178,8 +179,8 @@ class GitLintTest(unittest.TestCase):
                 mock.call('changed.py', ' M'), mock.call('foo.txt', None)]
             self.assertEqual(expected_calls, get_modified_lines.call_args_list)
             expected_calls = [
-                mock.call('changed.py', [3, 14], self.gitlint_config),
-                mock.call('foo.txt', [3, 14], self.gitlint_config)]
+                mock.call('changed.py', [3, 14], gitlint.get_config()),
+                mock.call('foo.txt', [3, 14], gitlint.get_config())]
             self.assertEqual(expected_calls, lint.call_args_list)
 
     def test_main_with_valid_files_relative(self):
@@ -200,6 +201,60 @@ class GitLintTest(unittest.TestCase):
                               mock.call('foo.txt', None)]
             self.assertEqual(expected_calls, get_modified_lines.call_args_list)
             expected_calls = [
-                mock.call('changed.py', [3, 14], self.gitlint_config),
-                mock.call('foo.txt', [3, 14], self.gitlint_config)]
+                mock.call('changed.py', [3, 14], gitlint.get_config()),
+                mock.call('foo.txt', [3, 14], gitlint.get_config())]
             self.assertEqual(expected_calls, lint.call_args_list)
+
+    def test_get_config(self):
+        root = '/home/user/repo'
+        git_config = os.path.join(root, '.gitlint.yaml')
+        base_config = os.path.join(os.path.join(
+            os.path.dirname(gitlint.__file__), 'configs', 'config.yaml'))
+        config = """python:
+  extensions:
+  - .py
+  command: python
+  arguments:
+  - "-R"
+  - "-v"
+  filter: ".*"
+  installation: "Really?"
+"""
+
+        with mock.patch('gitlint.git.repository_root', return_value=root), \
+            mock.patch('os.path.exists', return_value=True), \
+            mock.patch('gitlint.open',
+                       mock.mock_open(read_data=config),
+                       create=True) as mock_open:
+            parsed_config = gitlint.get_config()
+            mock_open.assert_called_once_with(git_config)
+            self.assertIn('.py', parsed_config)
+
+        with mock.patch('gitlint.git.repository_root', return_value=root), \
+            mock.patch('os.path.exists', return_value=False), \
+            mock.patch('gitlint.open',
+                       mock.mock_open(read_data=config),
+                       create=True) as mock_open:
+            parsed_config = gitlint.get_config()
+            mock_open.assert_called_once_with(base_config)
+            self.assertIn('.py', parsed_config)
+
+        # When not in a repo should return the default config.
+        with mock.patch('gitlint.git.repository_root', return_value=None), \
+            mock.patch('os.path.exists', return_value=False), \
+            mock.patch('gitlint.open',
+                       mock.mock_open(read_data=config),
+                       create=True) as mock_open:
+            parsed_config = gitlint.get_config()
+            mock_open.assert_called_once_with(base_config)
+            self.assertIn('.py', parsed_config)
+
+        # When config file is empty return an empty dictionary.
+        with mock.patch('gitlint.git.repository_root', return_value=root), \
+            mock.patch('os.path.exists', return_value=True), \
+            mock.patch('gitlint.open',
+                       mock.mock_open(read_data=''),
+                       create=True) as mock_open:
+            parsed_config = gitlint.get_config()
+            mock_open.assert_called_once_with(git_config)
+            self.assertEquals({}, parsed_config)

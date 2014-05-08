@@ -23,6 +23,13 @@ import yaml
 import gitlint.utils as utils
 
 
+class Partial(functools.partial):
+    """Wrapper around functools partial to support equality comparisons."""
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__) and self.args == other.args
+                and self.keywords == other.keywords)
+
+
 def missing_requirements_command(missing_programs, installation_string,
                                  unused_filename, unused_lines):
     """Pseudo-command to be used when requirements are missing."""
@@ -94,37 +101,27 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
 
 
 # TODO(skreft): validate data['filter'], ie check that only has valid fields.
-def _parse_yaml_config(yaml_config):
+def parse_yaml_config(yaml_config):
+    """Converts a dictionary (parsed Yaml) to the internal representation."""
     config = collections.defaultdict(list)
 
     for name, data in yaml_config.items():
         not_found_programs = utils.programs_not_in_path(
             [data['command']] + data.get('requirements', []))
         if not_found_programs:
-            command = functools.partial(missing_requirements_command,
-                                        not_found_programs,
-                                        data['installation'])
+            command = Partial(missing_requirements_command,
+                              not_found_programs,
+                              data['installation'])
         else:
-            command = functools.partial(lint_command,
-                                        name,
-                                        data['command'],
-                                        data.get('arguments', []),
-                                        data['filter'])
+            command = Partial(lint_command,
+                              name,
+                              data['command'],
+                              data.get('arguments', []),
+                              data['filter'])
         for extension in data['extensions']:
             config[extension].append(command)
 
     return config
-
-
-def get_config():
-    """Returns a dictionary that maps from an extension to a list of linters."""
-    with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
-        yaml_config = yaml.load(f)
-
-    return _parse_yaml_config(yaml_config)
-
-
-_EXTENSION_TO_LINTER = get_config()
 
 
 def lint(filename, lines, config):

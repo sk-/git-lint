@@ -17,6 +17,7 @@ import subprocess
 import tempfile
 import unittest
 
+import gitlint
 import gitlint.linters as linters
 
 # pylint: disable=too-many-public-methods
@@ -29,6 +30,7 @@ class E2ETest(unittest.TestCase):
         cls.temp_directory = tempfile.mkdtemp(prefix='gitlint')
         os.chdir(cls.temp_directory)
         subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
+        cls.gitlint_config = gitlint.get_config()
 
     @classmethod
     def tearDownClass(cls):
@@ -36,12 +38,12 @@ class E2ETest(unittest.TestCase):
         os.chdir(cls.original_cwd)
 
     def test_linters(self):
-        for extension, linter_list in linters._EXTENSION_TO_LINTER.items():
+        for extension, linter_list in self.gitlint_config.items():
             for linter in linter_list:
                 self.assert_linter_works(linter.args[0], extension)
 
     def test_extension_not_defined(self):
-        extension = max(linters._EXTENSION_TO_LINTER.keys()) + 'fake'
+        extension = max(self.gitlint_config.keys()) + 'fake'
         filename = os.path.join(self.temp_directory, 'filename' + extension)
         with open(filename, 'w') as f:
             f.write('Foo')

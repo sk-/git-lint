@@ -24,7 +24,8 @@ def repository_root():
     try:
         root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
                                        stderr=subprocess.STDOUT).strip()
-        return root
+        # The str is required to for Python3 to convert the bytes to a str.
+        return str(root)
     except subprocess.CalledProcessError:
         return None
 
