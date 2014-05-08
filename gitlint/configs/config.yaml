@@ -156,3 +156,29 @@ ini:
   command: ini_linter.py
   filter: ".*"
   installation: ""
+
+#HTML
+tidy:
+  extensions:
+  - .html
+  command: tidy-wrapper.sh
+  requirements:
+  - tidy
+  - remove_template.py
+  - grep
+  arguments:
+  - "-qe"
+  - "--drop-empty-elements"
+  - "false"
+  installation: "Visit https://w3c.github.io/tidy-html5/"
+  filter: "^line %(lines)s column \\d+ - "
+
+html_lint:
+  extensions:
+  - .html
+  command: html_lint.py
+  arguments:
+  - "--disable"
+  - "optional_tag"
+  installation: "pip install html-linter."
+  filter: "^%(lines)s:\\d+: "

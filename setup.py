@@ -18,7 +18,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='git-lint',
-    version='0.0.3.2',
+    version='0.0.3.4',
     description='Git Lint',
     long_description=open('README.rst').read(),
     author='Sebastian Kreft',
@@ -33,8 +33,18 @@ setup(
         'scripts/custom_linters/jpegtran-linter.sh',
         'scripts/custom_linters/optipng-linter.sh',
         'scripts/custom_linters/pngcrush-linter.sh',
+        'scripts/custom_linters/tidy-wrapper.sh',
     ],
-    install_requires=['pyyaml', 'termcolor', 'docopt'],
+    install_requires=[
+        'pyyaml',
+        'termcolor',
+        'docopt',
+        # Packages specific to linters. They are optional, but to ease the use
+        # we prefer to put them here.
+        'html-linter',
+        'template-remover',
+        'docutils',
+    ],
     tests_require=['nose>=1.3', 'mock'],
     classifiers=[
         'Development Status :: 3 - Alpha',
