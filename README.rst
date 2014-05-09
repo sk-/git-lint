@@ -148,8 +148,8 @@ arguments:
 Python Versions
 ---------------
 
-Python 2.7 is supported, and it should also work for Python 3.2 and 3.3. Python
-2.6 is not supported because of the lack of subprocess.check_output.
+Python 2.7 is supported, and it should also work for Python 3.2, 3.3 and 3.4.
+Python 2.6 is not supported because of the lack of subprocess.check_output.
 
 Development
 -----------
