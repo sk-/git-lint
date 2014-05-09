@@ -208,3 +208,16 @@ rubocop:
   # The first component is the relpath, but it's not supported yet.
   filter: ".*:%(lines)s:\\d: "
   installation: "sudo gem install rubocop or visit https://github.com/bbatsov/rubocop"
+
+#Java
+checkstyle:
+  command: checkstyle
+  extensions:
+  - .java
+  requirements:
+  - java
+  arguments:
+  - "-c"
+  - "%(DEFAULT_CONFIGS)s/checkstyle.xml"
+  filter: "%(filename)s:%(lines)s:(\\d+:)? "
+  installation: "sudo apt-get install checkstyle or go to http://checkstyle.sourceforge.net/cmdline.html"
