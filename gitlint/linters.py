@@ -18,8 +18,6 @@ import functools
 import os.path
 import subprocess
 
-import yaml
-
 import gitlint.utils as utils
 
 
