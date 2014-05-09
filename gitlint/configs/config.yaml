@@ -45,6 +45,9 @@ jshint:
   extensions:
   - .js
   command: jshint
+  arguments:
+  - "--config"
+  - "%(DEFAULT_CONFIGS)s/jshint.json"
   filter: "^%(filename)s: line %(lines)s, col "
   installation: "Visit http://www.jshint.com/install/ for installation instructions."
 
