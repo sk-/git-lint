@@ -89,6 +89,11 @@ Current linters:
  * `ruby-lint <https://github.com/yorickpeterse/ruby-lint>`_
  * `rubocop <https://github.com/bbatsov/rubocop>`_
 
+- Java
+
+ * `PMD <http://pmd.sourceforge.net/>`_ (it requires to put the script run.sh in your PATH)
+ * `Checkstyle <http://checkstyle.sourceforge.net/>`
+
 Example use
 -----------
 

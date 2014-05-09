@@ -221,3 +221,19 @@ checkstyle:
   - "%(DEFAULT_CONFIGS)s/checkstyle.xml"
   filter: "%(filename)s:%(lines)s:(\\d+:)? "
   installation: "sudo apt-get install checkstyle or go to http://checkstyle.sourceforge.net/cmdline.html"
+
+pmd:
+  command: run.sh
+  extensions:
+  - .java
+  requirements:
+  - java
+  arguments:
+  - "pmd"
+  - "-format"
+  - "text"
+  - "-rulesets"
+  - "rulesets/java/android.xml,rulesets/java/basic.xml,rulesets/java/braces.xml,rulesets/java/clone.xml,rulesets/java/codesize.xml,rulesets/java/coupling.xml,rulesets/java/design.xml,rulesets/java/empty.xml,rulesets/java/finalizers.xml,rulesets/java/imports.xml,rulesets/java/j2ee.xml,rulesets/java/javabeans.xml,rulesets/java/junit.xml,rulesets/java/logging-jakarta-commons.xml,rulesets/java/optimizations.xml,rulesets/java/strictexception.xml,rulesets/java/strings.xml,rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml"
+  - "-d"
+  filter: "%(filename)s:%(lines)s:\\s"
+  installation: "Go to http://pmd.sourceforge.net/pmd-5.1.1/installing.html"
