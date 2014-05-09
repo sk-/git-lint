@@ -41,8 +41,12 @@ def filter_lines(lines, filter_regex, groups=None):
 # TODO(skreft): add test
 def which(program):
     """Returns a list of paths where the program is found."""
-    locations = os.environ.get("PATH").split(os.pathsep)
+    if (os.path.isabs(program) and os.path.isfile(program) and
+            os.access(program, os.X_OK)):
+        return [program]
+
     candidates = []
+    locations = os.environ.get("PATH").split(os.pathsep)
     for location in locations:
         candidate = os.path.join(location, program)
         if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
