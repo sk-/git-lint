@@ -29,6 +29,11 @@ class Partial(functools.partial):
         return (isinstance(other, self.__class__) and self.args == other.args
                 and self.keywords == other.keywords)
 
+    def __repr__(self):
+        return 'Partial: func: %s, args: %s, kwargs: %s' % (self.func.__name__,
+                                                            self.args,
+                                                            self.keywords)
+
 
 def missing_requirements_command(missing_programs, installation_string,
                                  unused_filename, unused_lines):
@@ -96,25 +101,35 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
 
 
 # TODO(skreft): validate data['filter'], ie check that only has valid fields.
-def parse_yaml_config(yaml_config):
+def parse_yaml_config(yaml_config, repo_home):
     """Converts a dictionary (parsed Yaml) to the internal representation."""
     config = collections.defaultdict(list)
 
+    variables = {
+        'DEFAULT_CONFIGS': os.path.join(os.path.dirname(__file__),
+                                        'configs'),
+        'REPO_HOME': repo_home,
+    }
+
     for name, data in yaml_config.items():
+        command = data['command'] % variables
+        requirements = [req % variables for req in data.get('requirements', [])]
+        arguments = [arg % variables for arg in data.get('arguments', [])]
+
         not_found_programs = utils.programs_not_in_path(
-            [data['command']] + data.get('requirements', []))
+            [command] + requirements)
         if not_found_programs:
-            command = Partial(missing_requirements_command,
-                              not_found_programs,
-                              data['installation'])
+            linter_command = Partial(missing_requirements_command,
+                                     not_found_programs,
+                                     data['installation'])
         else:
-            command = Partial(lint_command,
-                              name,
-                              data['command'],
-                              data.get('arguments', []),
-                              data['filter'])
+            linter_command = Partial(lint_command,
+                                     name,
+                                     command,
+                                     arguments,
+                                     data['filter'])
         for extension in data['extensions']:
-            config[extension].append(command)
+            config[extension].append(linter_command)
 
     return config
 

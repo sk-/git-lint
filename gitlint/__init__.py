@@ -89,7 +89,7 @@ def get_config():
         else:
             yaml_config = yaml.load(content)
 
-    return linters.parse_yaml_config(yaml_config)
+    return linters.parse_yaml_config(yaml_config, repo_root)
 
 
 def main(argv):

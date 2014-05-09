@@ -18,6 +18,8 @@ import unittest
 
 import mock
 
+import gitlint
+import gitlint.utils
 import gitlint.linters as linters
 
 # pylint: disable=too-many-public-methods,protected-access
@@ -203,7 +205,7 @@ class LintersTest(unittest.TestCase):
                                  'install it.'),
             }
         }
-        config = linters.parse_yaml_config(yaml_config)
+        config = linters.parse_yaml_config(yaml_config, '')
         self.assertEqual(
             'SKIPPED: some_unexistent_program_name is not installed. Go to ' +
             'some_unexistent_program_name.com to install it.',
@@ -224,9 +226,54 @@ class LintersTest(unittest.TestCase):
                 'installation': 'Run apt-get install command_one command_two',
             }
         }
-        config = linters.parse_yaml_config(yaml_config)
+        config = linters.parse_yaml_config(yaml_config, '')
         self.assertEqual(
             'SKIPPED: some_unexistent_command_one, ' +
             'some_unexistent_command_two are not installed. Run apt-get ' +
             'install command_one command_two',
             config['.foo'][0]('filename', []))
+
+    def test_parse_yaml_config_with_variables(self):
+        yaml_config_with_vars = {
+            'linter': {
+                'arguments': [
+                    '--config',
+                    '%(DEFAULT_CONFIGS)s/foo.config'
+                ],
+                'command': '%(REPO_HOME)s/bin/linter',
+                'requirements': [
+                    '%(REPO_HOME)s/bin/dep1',
+                ],
+                'extensions': ['.foo'],
+                'filter': '.*',
+                'installation': 'install',
+            }
+        }
+        variables = {
+            'DEFAULT_CONFIGS': os.path.join(os.path.dirname(gitlint.__file__),
+                                            'configs'),
+            'REPO_HOME': '/usr/home/repo',
+        }
+        yaml_config_no_vars = {
+            'linter': {
+                'arguments': [
+                    '--config',
+                    '%(DEFAULT_CONFIGS)s/foo.config' % variables
+                ],
+                'command': '%(REPO_HOME)s/bin/linter' % variables,
+                'requirements': [
+                    '%(REPO_HOME)s/bin/dep1' % variables,
+                ],
+                'extensions': ['.foo'],
+                'filter': '.*',
+                'installation': 'install',
+            }
+        }
+
+        with mock.patch('gitlint.utils.which', return_value=['lint']):
+            config_with_vars = linters.parse_yaml_config(
+                yaml_config_with_vars, variables['REPO_HOME'])
+            config_no_vars = linters.parse_yaml_config(
+                yaml_config_no_vars, variables['REPO_HOME'])
+
+            self.assertEquals(config_with_vars, config_no_vars)
