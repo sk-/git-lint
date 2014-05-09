@@ -201,6 +201,14 @@ TODOS and Possible Features
 
 Changelog
 =========
+
+v0.0.5 (2014-05-09)
+-------------------
+
+* Added linters: ruby-lint, rubocop, checkstyle, pmd
+* Variables %(REPO_HOME)s and %(DEFAULT_CONFIGS)s can be specified in configuration
+* Added default pylintrc configuration
+
 v0.0.4 (2014-05-08)
 -------------------
 
