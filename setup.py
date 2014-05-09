@@ -25,7 +25,6 @@ setup(
     url='http://github.com/sk-/git-lint',
     packages=find_packages(exclude=['test']),
     package_dir={'gitlint': 'gitlint'},
-    package_data={'gitlint': ['*.yaml'], '': ['README.rst', 'LICENSE']},
     scripts=[
         'scripts/git-lint',
         'scripts/custom_linters/ini_linter.py',
