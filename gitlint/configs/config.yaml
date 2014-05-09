@@ -74,6 +74,7 @@ pylint:
   - .py
   command: pylint
   arguments:
+  - "--rcfile=%(DEFAULT_CONFIGS)s/pylintrc"
   - "--output-format=text"
   - "--msg-template='{abspath}:{line}:{column}: [{symbol}, {obj}] {msg}'"
   - "--reports=n"
