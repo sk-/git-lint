@@ -21,4 +21,5 @@ unset ARGV[$ARGC];
 
 remove_template.py $FILENAME |
 tidy ${ARGV[@]} 2>&1 |
-egrep -v "Warning: (.* proprietary attribute \"(itemtype|itemid|itemscope|itemprop)\"|missing <!DOCTYPE> declaration|inserting implicit <body>|inserting missing 'title' element)$"
+egrep -v "Warning: (.* proprietary attribute \"(itemtype|itemid|itemscope|itemprop)\"|missing <!DOCTYPE> declaration|inserting implicit <body>|inserting missing 'title' element)$" |
+uniq
