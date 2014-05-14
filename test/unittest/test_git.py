@@ -66,6 +66,18 @@ class GitTest(unittest.TestCase):
             git_call.assert_called_once_with(
                 ['git', 'status', '--porcelain', '--untracked-files=all'])
 
+    def test_modified_files_with_spaces(self):
+        output = os.linesep.join(['A  "docs/file 1.txt"',
+                                  'M  "data/file 2.json"'])
+        with mock.patch('subprocess.check_output',
+                        return_value=output) as git_call:
+            self.assertEqual(
+                {'/home/user/repo/docs/file 1.txt': 'A ',
+                 '/home/user/repo/data/file 2.json': 'M '},
+                git.modified_files('/home/user/repo'))
+            git_call.assert_called_once_with(
+                ['git', 'status', '--porcelain', '--untracked-files=all'])
+
     def test_modified_files_nothing_changed(self):
         output = ''
         with mock.patch('subprocess.check_output',

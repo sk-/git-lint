@@ -30,6 +30,14 @@ def repository_root():
         return None
 
 
+def _remove_filename_quotes(filename):
+    """Removes the quotes from a filename returned by git status."""
+    if filename.startswith('"') and filename.endswith('"'):
+        return filename[1:-1]
+
+    return filename
+
+
 def modified_files(root, tracked_only=False):
     """Returns a list of files that has been modified since the last commit.
 
@@ -42,7 +50,6 @@ def modified_files(root, tracked_only=False):
     """
     assert os.path.isabs(root), "Root has to be absolute, got: %s" % root
 
-    # TODO(skreft): add '--untracked-files=no'?
     status_lines = subprocess.check_output(
         ['git', 'status', '--porcelain',
          '--untracked-files=all']).split(os.linesep)
@@ -56,7 +63,7 @@ def modified_files(root, tracked_only=False):
         r'(?P<mode>%s) (?P<filename>.+)' % modes_str,
         groups=('filename', 'mode'))
 
-    return dict((os.path.join(root, filename), mode)
+    return dict((os.path.join(root, _remove_filename_quotes(filename)), mode)
                 for filename, mode in modified_file_status)
 
 
