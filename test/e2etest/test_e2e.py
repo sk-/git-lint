@@ -100,8 +100,11 @@ class E2ETest(unittest.TestCase):
         shutil.copy(filename_original, filename_repo)
         subprocess.check_output(['git', 'add', filename_repo],
                                 stderr=subprocess.STDOUT)
-        subprocess.check_output(['git', 'commit', '-m', 'Commit 1'],
-                                stderr=subprocess.STDOUT)
+
+        # --no-verify is required as a pre-commit hook could be installed.
+        subprocess.check_output(
+            ['git', 'commit', '-m', 'Commit 1', '--no-verify'],
+            stderr=subprocess.STDOUT)
 
         # Add file 2 (error) to repo
         shutil.copy(filename_error, filename_repo)
@@ -114,8 +117,10 @@ class E2ETest(unittest.TestCase):
             pass
         subprocess.check_output(['git', 'add', filename_repo],
                                 stderr=subprocess.STDOUT)
-        subprocess.check_output(['git', 'commit', '-m', 'Commit 2'],
-                                stderr=subprocess.STDOUT)
+        # --no-verify is required as a pre-commit hook could be installed.
+        subprocess.check_output(
+            ['git', 'commit', '-m', 'Commit 2', '--no-verify'],
+            stderr=subprocess.STDOUT)
 
         # Add file 3 (nonewerror) to repo
         shutil.copy(filename_nonewerror, filename_repo)
