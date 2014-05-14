@@ -17,18 +17,20 @@ git-lint: improving source code one step at a time
 Lints all the modified files in your git repository showing only the modified
 lines.
 
-It currently supports the following languages:
-PHP: via phpcs
-Python: via pylint
+It supports many filetypes, including:
+    PHP, Python, Javascript, Ruby, CSS, SCSS, PNG, JPEG, RST, YAML, INI, Java,
+    among others. See https://github.com/sk-/git-lint for the complete list.
 
 Usage:
     git-lint [-f | --force] [FILENAME ...]
+    git-lint [-t | --tracked] [-f | --force]
     git-lint -h | --version
 
 Options:
-    -h          Show the usage patterns.
-    --version   Prints the version number.
-    -f --force  Shows all the lines with problems.
+    -h            Show the usage patterns.
+    --version     Prints the version number.
+    -f --force    Shows all the lines with problems.
+    -t --tracked  Lints only tracked files.
 """
 
 import os.path
@@ -112,14 +114,16 @@ def main(argv):
                 os.linesep.join(invalid[1] for invalid in invalid_filenames))
             return 2
 
-        changed_files = git.modified_files(repository_root)
+        changed_files = git.modified_files(repository_root,
+                                           tracked_only=arguments['--tracked'])
         modified_files = {}
         for filename in arguments['FILENAME']:
             normalized_filename = os.path.abspath(filename)
             modified_files[normalized_filename] = changed_files.get(
                 normalized_filename)
     else:
-        modified_files = git.modified_files(repository_root)
+        modified_files = git.modified_files(repository_root,
+                                            tracked_only=arguments['--tracked'])
 
     linter_not_found = False
     files_with_problems = 0

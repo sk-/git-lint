@@ -40,19 +40,39 @@ class GitTest(unittest.TestCase):
                                   '?? file4.js',
                                   'AM file5.txt'])
         with mock.patch('subprocess.check_output',
-                        return_value=output):
+                        return_value=output) as git_call:
             self.assertEqual(
                 {'/home/user/repo/docs/file1.txt': 'A ',
                  '/home/user/repo/data/file2.json': 'M ',
                  '/home/user/repo/file4.js': '??',
                  '/home/user/repo/file5.txt': 'AM'},
                 git.modified_files('/home/user/repo'))
+            git_call.assert_called_once_with(
+                ['git', 'status', '--porcelain', '--untracked-files=all'])
+
+    def test_modified_files_tracked_only(self):
+        output = os.linesep.join(['A  docs/file1.txt',
+                                  'M  data/file2.json',
+                                  'D  file3.py',
+                                  '?? file4.js',
+                                  'AM file5.txt'])
+        with mock.patch('subprocess.check_output',
+                        return_value=output) as git_call:
+            self.assertEqual(
+                {'/home/user/repo/docs/file1.txt': 'A ',
+                 '/home/user/repo/data/file2.json': 'M ',
+                 '/home/user/repo/file5.txt': 'AM'},
+                git.modified_files('/home/user/repo', tracked_only=True))
+            git_call.assert_called_once_with(
+                ['git', 'status', '--porcelain', '--untracked-files=all'])
 
     def test_modified_files_nothing_changed(self):
         output = ''
         with mock.patch('subprocess.check_output',
-                        return_value=output):
+                        return_value=output) as git_call:
             self.assertEqual({}, git.modified_files('/home/user/repo'))
+            git_call.assert_called_once_with(
+                ['git', 'status', '--porcelain', '--untracked-files=all'])
 
     def test_modified_files_non_absolute_root(self):
          with self.assertRaises(AssertionError):

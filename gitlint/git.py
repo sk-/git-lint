@@ -30,7 +30,7 @@ def repository_root():
         return None
 
 
-def modified_files(root):
+def modified_files(root, tracked_only=False):
     """Returns a list of files that has been modified since the last commit.
 
     Args:
@@ -46,9 +46,14 @@ def modified_files(root):
     status_lines = subprocess.check_output(
         ['git', 'status', '--porcelain',
          '--untracked-files=all']).split(os.linesep)
+    modes = ['M ', ' M', 'A ', 'AM']
+    if not tracked_only:
+        modes.append(r'\?\?')
+    modes_str = '|'.join(modes)
+
     modified_file_status = utils.filter_lines(
         status_lines,
-        r'(?P<mode>M | M|A |\?\?|AM) (?P<filename>.+)',
+        r'(?P<mode>%s) (?P<filename>.+)' % modes_str,
         groups=('filename', 'mode'))
 
     return dict((os.path.join(root, filename), mode)
