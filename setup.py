@@ -18,7 +18,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='git-lint',
-    version='0.0.5.3',
+    version='0.0.5.4',
     description='Git Lint',
     long_description=open('README.rst').read(),
     author='Sebastian Kreft',
@@ -28,6 +28,7 @@ setup(
     package_data={'gitlint': ['configs/*'], '': ['README.rst', 'LICENSE']},
     scripts=[
         'scripts/git-lint',
+        'scripts/pre-commit.git-lint.sh',
         'scripts/custom_linters/ini_linter.py',
         'scripts/custom_linters/yaml_linter.py',
         'scripts/custom_linters/jpegtran-linter.sh',
