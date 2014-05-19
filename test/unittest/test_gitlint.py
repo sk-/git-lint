@@ -29,21 +29,65 @@ class GitLintTest(unittest.TestCase):
     def setUpClass(cls):
         cls._stderr = sys.stderr
         sys.stderr = sys.stdout
+        cls.git_lint_config = gitlint.get_config()
 
     @classmethod
     def tearDownClass(cls):
         sys.stderr = cls._stderr
 
+    def setUp(self):
+        self.root = '/home/user/repo'
+        self.filename = os.path.join(self.root, 'changed.py')
+        self.filename2 = os.path.join(self.root, 'foo.txt')
+
+        self.git_repository_root_patch = mock.patch(
+            'gitlint.git.repository_root', return_value=self.root)
+        self.git_repository_root = self.git_repository_root_patch.start()
+        self.addCleanup(self.git_repository_root_patch.stop)
+
+        self.git_modified_files_patch = mock.patch(
+            'gitlint.git.modified_files', return_value={self.filename: ' M'})
+        self.git_modified_files = self.git_modified_files_patch.start()
+        self.addCleanup(self.git_modified_files_patch.stop)
+
+        self.git_modified_lines_patch = mock.patch(
+            'gitlint.git.modified_lines', return_value=[3, 14])
+        self.git_modified_lines = self.git_modified_lines_patch.start()
+        self.addCleanup(self.git_modified_lines_patch.stop)
+
+        self.lint_patch = mock.patch(
+            'gitlint.linters.lint')
+        self.lint = self.lint_patch.start()
+        self.addCleanup(self.lint_patch.stop)
+
+    def reset_mock_calls(self):
+        """Resets the counter calls of the defined mocks."""
+        self.git_repository_root.reset_mock()
+        self.git_modified_files.reset_mock()
+        self.git_modified_lines.reset_mock()
+        self.lint.reset_mock()
+
+    def assert_mocked_calls(self, tracked_only=False):
+        """Checks if the mocks were called as expected.
+
+        This method exists to avoid duplication.
+        """
+        self.git_modified_files.assert_called_once_with(
+            self.root, tracked_only=tracked_only)
+        self.git_modified_lines.assert_called_once_with(self.filename, ' M')
+        self.lint.assert_called_once_with(
+            self.filename, [3, 14], self.git_lint_config)
+
     def test_find_invalid_filenames(self):
-        root = '/home/user/repo'
         filenames = ['/tmp/outside_repo',
-                     '%s/inexistent_file' % root,
-                     '%s/directory_in_repo/' % root,
-                     '%s/valid' % root]
+                     '%s/inexistent_file' % self.root,
+                     '%s/directory_in_repo/' % self.root,
+                     '%s/valid' % self.root]
         expected = {
             '/tmp/outside_repo': 'does not belong to repository',
-            '%s/inexistent_file' % root: 'does not exist',
-            '%s/directory_in_repo/' % root: 'Directories are not yet supported',
+            '%s/inexistent_file' % self.root: 'does not exist',
+            '%s/directory_in_repo/' % self.root: ('Directories are not yet ' +
+                                                  'supported'),
         }
 
         with mock.patch(
@@ -53,7 +97,7 @@ class GitLintTest(unittest.TestCase):
                 'os.path.isdir',
                 side_effect=lambda filename: 'directory' in filename):
             invalid_filenames = dict(
-                gitlint.find_invalid_filenames(filenames, root))
+                gitlint.find_invalid_filenames(filenames, self.root))
 
         self.assertEqual(expected.keys(), invalid_filenames.keys())
         for filename in invalid_filenames:
@@ -61,116 +105,67 @@ class GitLintTest(unittest.TestCase):
             self.assertIn(expected[filename], invalid_filenames[filename])
 
     def test_main_not_in_repo(self):
-        with mock.patch('gitlint.git.repository_root', return_value=None):
-            self.assertEqual(128, gitlint.main([]))
+        self.git_repository_root.return_value = None
+        self.assertEqual(128, gitlint.main([]))
 
     def test_main_nothing_changed(self):
-        root = '/home/user/repo'
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch('gitlint.git.modified_files',
-                        return_value={}) as get_modified_files:
-            self.assertEqual(0, gitlint.main([]))
-            get_modified_files.assert_called_once_with(root, tracked_only=False)
+        self.git_modified_files.return_value = {}
+        self.assertEqual(0, gitlint.main([]))
+        self.git_modified_files.assert_called_once_with(
+            self.root, tracked_only=False)
 
     def test_main_file_changed_and_still_valid(self):
-        root = '/home/user/repo'
-        filename = 'changed.py'
         lint_response = {
-            filename: {
+            self.filename: {
                 'comments': []
             }
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={filename: ' M'}) as get_modified_files, \
-             mock.patch('gitlint.git.modified_lines',
-                        return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint:
-            self.assertEqual(0, gitlint.main([]))
-            get_modified_files.assert_called_once_with(root, tracked_only=False)
-            get_modified_lines.assert_called_once_with('changed.py', ' M')
-            lint.assert_called_once_with(
-                filename, [3, 14], gitlint.get_config())
+        self.lint.return_value = lint_response
+
+        self.assertEqual(0, gitlint.main([]))
+        self.assert_mocked_calls()
 
     def test_main_file_changed_and_still_valid_tracked_only(self):
-        root = '/home/user/repo'
-        filename = 'changed.py'
         lint_response = {
-            filename: {
+            self.filename: {
                 'comments': []
             }
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={'changed.py': ' M'}) as get_modified_files, \
-             mock.patch('gitlint.git.modified_lines',
-                        return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint:
-            self.assertEqual(0, gitlint.main(['git-lint', '-t']))
-            self.assertEqual(0, gitlint.main(['git-lint', '--tracked']))
-            expected_calls = [mock.call(root, tracked_only=True)] * 2
-            self.assertEqual(expected_calls, get_modified_files.call_args_list)
-            expected_calls = [mock.call(
-                'changed.py', [3, 14], gitlint.get_config())] * 2
-            self.assertEqual(expected_calls, lint.call_args_list)
-            expected_calls = [mock.call('changed.py', ' M')] * 2
-            self.assertEqual(expected_calls, get_modified_lines.call_args_list)
+        self.lint.return_value = lint_response
+
+        self.assertEqual(0, gitlint.main(['git-lint', '-t']))
+        self.assert_mocked_calls(tracked_only=True)
+
+        self.reset_mock_calls()
+
+        self.assertEqual(0, gitlint.main(['git-lint', '--tracked']))
+        self.assert_mocked_calls(tracked_only=True)
 
     def test_main_file_changed_but_skipped(self):
-        root = '/home/user/repo'
-        filename = 'changed.py'
         lint_response = {
-            filename: {
+            self.filename: {
                 'skipped': ['foo']
             }
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={'changed.py': ' M'}) as get_modified_files, \
-             mock.patch(
-                'gitlint.git.modified_lines',
-                return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint:
-            self.assertEqual(0, gitlint.main([]))
-            get_modified_files.assert_called_once_with(root, tracked_only=False)
-            get_modified_lines.assert_called_once_with('changed.py', ' M')
-            lint.assert_called_once_with(
-                'changed.py', [3, 14], gitlint.get_config())
+        self.lint.return_value = lint_response
+
+        self.assertEqual(0, gitlint.main([]))
+        self.assert_mocked_calls()
 
     def test_main_file_linter_not_found(self):
-        root = '/home/user/repo'
-        filename = 'changed.py'
         lint_response = {
-            filename: {
+            self.filename: {
                 'error': ['foo']
             }
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={'changed.py': ' M'}) as get_modified_files, \
-             mock.patch(
-                'gitlint.git.modified_lines',
-                return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint:
-            self.assertEqual(4, gitlint.main([]))
-            get_modified_files.assert_called_once_with(root, tracked_only=False)
-            get_modified_lines.assert_called_once_with('changed.py', ' M')
-            lint.assert_called_once_with(
-                'changed.py', [3, 14], gitlint.get_config())
+        self.lint.return_value = lint_response
+
+        self.assertEqual(4, gitlint.main([]))
+        self.assert_mocked_calls()
 
     def test_main_file_changed_and_now_invalid(self):
-        root = '/home/user/repo'
-        filename = 'changed.py'
         lint_response = {
-            filename: {
+            self.filename: {
                 'comments': [
                     {
                         'line': 3,
@@ -179,26 +174,14 @@ class GitLintTest(unittest.TestCase):
                 ]
             }
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={'changed.py': ' M'}) as get_modified_files, \
-             mock.patch(
-                'gitlint.git.modified_lines',
-                return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint:
-            self.assertEqual(1, gitlint.main([]))
-            get_modified_files.assert_called_once_with(root, tracked_only=False)
-            get_modified_lines.assert_called_once_with('changed.py', ' M')
-            lint.assert_called_once_with(
-                'changed.py', [3, 14], gitlint.get_config())
+        self.lint.return_value = lint_response
+
+        self.assertEqual(1, gitlint.main([]))
+        self.assert_mocked_calls()
 
     def test_main_force_all_lines(self):
-        root = '/home/user/repo'
-        filename = 'changed.py'
         lint_response = {
-            filename: {
+            self.filename: {
                 'comments': [
                     {
                         'line': 3,
@@ -207,110 +190,92 @@ class GitLintTest(unittest.TestCase):
                 ]
             }
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={'changed.py': ' M'}) as get_modified_files, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint:
-            self.assertEqual(1, gitlint.main(['git-lint', '--force']))
-            self.assertEqual(1, gitlint.main(['git-lint', '-f']))
-            expected_calls = [mock.call(root, tracked_only=False)] * 2
-            self.assertEqual(expected_calls, get_modified_files.call_args_list)
-            expected_calls = [mock.call(
-                'changed.py', None, gitlint.get_config())] * 2
-            self.assertEqual(expected_calls, lint.call_args_list)
+        self.lint.return_value = lint_response
+
+        self.assertEqual(1, gitlint.main(['git-lint', '--force']))
+        self.git_modified_files.assert_called_once_with(
+            self.root, tracked_only=False)
+        self.lint.assert_called_once_with(
+            self.filename, None, self.git_lint_config)
+
+        self.reset_mock_calls()
+
+        self.assertEqual(1, gitlint.main(['git-lint', '-f']))
+
+        self.git_modified_files.assert_called_once_with(
+            self.root, tracked_only=False)
+        self.lint.assert_called_once_with(
+            self.filename, None, self.git_lint_config)
 
     def test_main_with_invalid_files(self):
-        root = '/home/user/repo'
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch('gitlint.find_invalid_filenames',
+        with mock.patch('gitlint.find_invalid_filenames',
                         return_value=[('foo.txt', 'does not exist')]):
             self.assertEqual(2, gitlint.main(['git-lint', 'foo.txt']))
 
     def test_main_with_valid_files(self):
-        root = '/home/user/repo'
         lint_response = {
-            '/home/user/repo/changed.py': {
+            self.filename: {
                 'comments': []
             },
-            '/home/user/repo/foo.txt': {
+            self.filename2: {
                 'comments': []
             },
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={
-                    '/home/user/repo/changed.py': ' M'
-                }) as get_modified_files, \
-             mock.patch(
-                'gitlint.git.modified_lines',
-                return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint, \
-             mock.patch('os.getcwd', return_value=root):
+        self.lint.return_value = lint_response
+
+        with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
+                mock.patch('os.getcwd', return_value=self.root):
             self.assertEqual(
-                0, gitlint.main(['git-lint', 'changed.py', 'foo.txt']))
-            get_modified_files.assert_called_once_with(root, tracked_only=False)
+                0, gitlint.main(['git-lint', self.filename, self.filename2]))
+            self.git_modified_files.assert_called_once_with(
+                self.root, tracked_only=False)
             expected_calls = [
-                mock.call('/home/user/repo/changed.py', ' M'),
-                mock.call('/home/user/repo/foo.txt', None),
+                mock.call(self.filename, ' M'),
+                mock.call(self.filename2, None),
             ]
-            self.assertEqual(expected_calls, get_modified_lines.call_args_list)
+            self.assertEqual(expected_calls,
+                             self.git_modified_lines.call_args_list)
             expected_calls = [
-                mock.call('/home/user/repo/changed.py',
+                mock.call(self.filename,
                           [3, 14],
-                          gitlint.get_config()),
-                mock.call('/home/user/repo/foo.txt',
+                          self.git_lint_config),
+                mock.call(self.filename2,
                           [3, 14],
-                          gitlint.get_config())]
-            self.assertEqual(expected_calls, lint.call_args_list)
+                          self.git_lint_config)]
+            self.assertEqual(expected_calls, self.lint.call_args_list)
 
     def test_main_with_valid_files_relative(self):
-        root = '/home/user/repo'
         lint_response = {
-            '/home/user/repo/changed.py': {
+            self.filename: {
                 'comments': []
             },
-            '/home/user/repo/foo.txt': {
+            self.filename2: {
                 'comments': []
             },
         }
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-             mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
-             mock.patch(
-                'gitlint.git.modified_files',
-                return_value={
-                    '/home/user/repo/changed.py': ' M'
-                }) as get_modified_files, \
-             mock.patch(
-                'gitlint.git.modified_lines',
-                return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint',
-                        return_value=lint_response) as lint, \
-             mock.patch('os.getcwd', return_value=root):
+        self.lint.return_value = lint_response
+
+        with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
+                mock.patch('os.getcwd', return_value=self.root):
             self.assertEqual(
                 0, gitlint.main(['git-lint', 'bar/../changed.py', './foo.txt']))
-            get_modified_files.assert_called_once_with(root, tracked_only=False)
-            expected_calls = [mock.call('/home/user/repo/changed.py', ' M'),
-                              mock.call('/home/user/repo/foo.txt', None)]
-            self.assertEqual(expected_calls, get_modified_lines.call_args_list)
+            self.git_modified_files.assert_called_once_with(
+                self.root, tracked_only=False)
+            expected_calls = [mock.call(self.filename, ' M'),
+                              mock.call(self.filename2, None)]
+            self.assertEqual(expected_calls,
+                             self.git_modified_lines.call_args_list)
             expected_calls = [
-                mock.call('/home/user/repo/changed.py',
+                mock.call(self.filename,
                           [3, 14],
-                          gitlint.get_config()),
-                mock.call('/home/user/repo/foo.txt',
+                          self.git_lint_config),
+                mock.call(self.filename2,
                           [3, 14],
-                          gitlint.get_config())]
-            self.assertEqual(expected_calls, lint.call_args_list)
+                          self.git_lint_config)]
+            self.assertEqual(expected_calls, self.lint.call_args_list)
 
     def test_get_config(self):
-        root = '/home/user/repo'
-        git_config = os.path.join(root, '.gitlint.yaml')
-        base_config = os.path.join(os.path.join(
-            os.path.dirname(gitlint.__file__), 'configs', 'config.yaml'))
+        git_config = os.path.join(self.root, '.gitlint.yaml')
         config = """python:
   extensions:
   - .py
@@ -321,43 +286,33 @@ class GitLintTest(unittest.TestCase):
   filter: ".*"
   installation: "Really?"
 """
-
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-            mock.patch('os.path.exists', return_value=True), \
+        with mock.patch('os.path.exists', return_value=True), \
             mock.patch('gitlint.open',
                        mock.mock_open(read_data=config),
                        create=True) as mock_open:
             parsed_config = gitlint.get_config()
             mock_open.assert_called_once_with(git_config)
-            self.assertIn('.py', parsed_config)
+            self.assertEqual(['.py'], list(parsed_config.keys()))
+            self.assertEqual(1, len(parsed_config['.py']))
 
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-            mock.patch('os.path.exists', return_value=False), \
-            mock.patch('gitlint.open',
-                       mock.mock_open(read_data=config),
-                       create=True) as mock_open:
+    def test_get_config_from_default(self):
+        with mock.patch('os.path.exists', return_value=False):
             parsed_config = gitlint.get_config()
-            mock_open.assert_called_once_with(base_config)
-            self.assertIn('.py', parsed_config)
+            self.assertEquals(self.git_lint_config, parsed_config)
 
+    def test_get_config_not_in_a_repo(self):
         # When not in a repo should return the default config.
-        with mock.patch('gitlint.git.repository_root', return_value=None), \
-            mock.patch('os.path.exists', return_value=False), \
-            mock.patch('gitlint.open',
-                       mock.mock_open(read_data=config),
-                       create=True) as mock_open:
-            parsed_config = gitlint.get_config()
-            mock_open.assert_called_once_with(base_config)
-            self.assertIn('.py', parsed_config)
+        self.git_repository_root.return_value = None
+        parsed_config = gitlint.get_config()
+        self.assertEquals(self.git_lint_config, parsed_config)
 
+    def test_get_config_empty(self):
         # When config file is empty return an empty dictionary.
-        with mock.patch('gitlint.git.repository_root', return_value=root), \
-            mock.patch('os.path.exists', return_value=True), \
+        with mock.patch('os.path.exists', return_value=True), \
             mock.patch('gitlint.open',
                        mock.mock_open(read_data=''),
                        create=True) as mock_open:
             parsed_config = gitlint.get_config()
-            mock_open.assert_called_once_with(git_config)
             self.assertEqual({}, parsed_config)
 
     def test_format_comment(self):
