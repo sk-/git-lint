@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# First part return the files being commited.
-git diff-index -z --cached HEAD --name-only | xargs --null git lint
+# First part return the files being commited, excluding deleted files.
+git diff-index -z --cached HEAD --name-only --diff-filter="(A|C|M|R|T|U|X|B)" |
+xargs --null git lint;
 
 if [ "$?" != "0" ]; then
   echo "There are some problems with the modified files.";
