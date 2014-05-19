@@ -358,7 +358,7 @@ class GitLintTest(unittest.TestCase):
                        create=True) as mock_open:
             parsed_config = gitlint.get_config()
             mock_open.assert_called_once_with(git_config)
-            self.assertEquals({}, parsed_config)
+            self.assertEqual({}, parsed_config)
 
     def test_format_comment(self):
         self.assertEqual('', gitlint.format_comment({}))

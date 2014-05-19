@@ -101,15 +101,15 @@ class UtilsTest(unittest.TestCase):
                         side_effect=mock_abspath), \
              mock.patch('os.path.expanduser',
                         side_effect=lambda a: '/home/user'):
-            self.assertEquals(
+            self.assertEqual(
                 '/home/user/.git-lint/cache/linter1/foo/bar/file.txt',
                 utils._get_cache_filename('linter1', 'bar/file.txt'))
 
-            self.assertEquals(
+            self.assertEqual(
                 '/home/user/.git-lint/cache/linter2/foo/file.txt',
                 utils._get_cache_filename('linter2', 'file.txt'))
 
-            self.assertEquals(
+            self.assertEqual(
                 '/home/user/.git-lint/cache/linter3/bar/file.txt',
                 utils._get_cache_filename('linter3', '/bar/file.txt'))
 
@@ -152,6 +152,6 @@ class UtilsTest(unittest.TestCase):
              mock.patch('gitlint.utils.open',
                         mock.mock_open(read_data=content),
                         create=True) as mock_open:
-            self.assertEquals(
+            self.assertEqual(
                 content, utils.get_output_from_cache('linter', 'filename'))
             mock_open.assert_called_once_with(cache_filename)

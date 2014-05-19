@@ -192,7 +192,7 @@ class LintersTest(unittest.TestCase):
                                         '^Line (%(lines)s):')
             filename = 'foo.txt'
             output = command(filename, lines=[3, 5, 7])
-            self.assertEquals(1, len(output[filename]['error']))
+            self.assertEqual(1, len(output[filename]['error']))
             output[filename]['error'] = []
             self.assertTrue(
                 {
@@ -317,9 +317,9 @@ class LintersTest(unittest.TestCase):
     def test_lint_extension_not_defined(self):
         config = {}
         output = linters.lint('foo.txt', lines=[4, 5], config=config)
-        self.assertEquals(1, len(output['foo.txt']['skipped']))
+        self.assertEqual(1, len(output['foo.txt']['skipped']))
         output['foo.txt']['skipped'] = []
-        self.assertEquals(
+        self.assertEqual(
             {
                 'foo.txt': {
                     'skipped': []
@@ -335,7 +335,7 @@ class LintersTest(unittest.TestCase):
             '.txt': [linter1]
         }
         output = linters.lint('foo.txt', lines=[4, 5], config=config)
-        self.assertEquals(1, len(output['foo.txt']['skipped']))
+        self.assertEqual(1, len(output['foo.txt']['skipped']))
         output['foo.txt']['skipped'] = []
         self.assertEqual(
             {
@@ -353,7 +353,7 @@ class LintersTest(unittest.TestCase):
             '.txt': [linter1, linter1]
         }
         output = linters.lint('foo.txt', lines=[4, 5], config=config)
-        self.assertEquals(2, len(output['foo.txt']['skipped']))
+        self.assertEqual(2, len(output['foo.txt']['skipped']))
         output['foo.txt']['skipped'] = []
         self.assertEqual(
             {
@@ -455,4 +455,4 @@ class LintersTest(unittest.TestCase):
             config_no_vars = linters.parse_yaml_config(
                 yaml_config_no_vars, variables['REPO_HOME'])
 
-            self.assertEquals(config_with_vars, config_no_vars)
+            self.assertEqual(config_with_vars, config_no_vars)
