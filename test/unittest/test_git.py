@@ -25,7 +25,7 @@ import gitlint.git as git
 class GitTest(unittest.TestCase):
     def test_repository_root_ok(self):
         with mock.patch('subprocess.check_output',
-                        return_value='/home/user/repo'):
+                        return_value=b'/home/user/repo'):
             self.assertEqual('/home/user/repo', git.repository_root())
 
     def test_repository_root_error(self):
@@ -38,7 +38,7 @@ class GitTest(unittest.TestCase):
                                   'M  data/file2.json',
                                   'D  file3.py',
                                   '?? file4.js',
-                                  'AM file5.txt'])
+                                  'AM file5.txt']).encode('utf-8')
         with mock.patch('subprocess.check_output',
                         return_value=output) as git_call:
             self.assertEqual(
@@ -55,7 +55,7 @@ class GitTest(unittest.TestCase):
                                   'M  data/file2.json',
                                   'D  file3.py',
                                   '?? file4.js',
-                                  'AM file5.txt'])
+                                  'AM file5.txt']).encode('utf-8')
         with mock.patch('subprocess.check_output',
                         return_value=output) as git_call:
             self.assertEqual(
@@ -68,7 +68,7 @@ class GitTest(unittest.TestCase):
 
     def test_modified_files_with_spaces(self):
         output = os.linesep.join(['A  "docs/file 1.txt"',
-                                  'M  "data/file 2.json"'])
+                                  'M  "data/file 2.json"']).encode('utf-8')
         with mock.patch('subprocess.check_output',
                         return_value=output) as git_call:
             self.assertEqual(
@@ -79,7 +79,7 @@ class GitTest(unittest.TestCase):
                 ['git', 'status', '--porcelain', '--untracked-files=all'])
 
     def test_modified_files_nothing_changed(self):
-        output = ''
+        output = b''
         with mock.patch('subprocess.check_output',
                         return_value=output) as git_call:
             self.assertEqual({}, git.modified_files('/home/user/repo'))
@@ -87,7 +87,7 @@ class GitTest(unittest.TestCase):
                 ['git', 'status', '--porcelain', '--untracked-files=all'])
 
     def test_modified_files_non_absolute_root(self):
-         with self.assertRaises(AssertionError):
+        with self.assertRaises(AssertionError):
             git.modified_files('foo/bar')
 
     def test_modified_lines(self):
@@ -96,7 +96,7 @@ class GitTest(unittest.TestCase):
             '0000000000000000000000000000000000000000 2 2 4',
             'foo',
             '0000000000000000000000000000000000000000 5 5',
-            'bar'])
+            'bar']).encode('utf-8')
         with mock.patch('subprocess.check_output',
                         return_value=output) as check_output:
             self.assertEqual(

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import io
 import os
 import shutil
 import subprocess
@@ -18,7 +19,6 @@ import tempfile
 import unittest
 
 import gitlint
-import gitlint.linters as linters
 
 # pylint: disable=too-many-public-methods
 
@@ -36,6 +36,9 @@ class E2ETest(unittest.TestCase):
     def tearDownClass(cls):
         shutil.rmtree(cls.temp_directory, True)
         os.chdir(cls.original_cwd)
+
+    def setUp(self):
+        self.out = io.StringIO()
 
     def test_linters(self):
         for extension, linter_list in self.gitlint_config.items():
@@ -62,8 +65,6 @@ class E2ETest(unittest.TestCase):
 
     # TODO(skreft): improves assert so the message is clear in case there's an
     # error. Include output and file that is being processed.
-    # TODO(skreft): maybe call the script directly so we can improve the
-    # coverage and also avoid messing with installed versions.
     # TODO(skreft): check that the first file has more than 1 error, check that
     # the second file has 1 new error, check also the lines that changed.
     def assert_linter_works(self, linter_name, extension):
@@ -80,11 +81,11 @@ class E2ETest(unittest.TestCase):
         filename_repo = os.path.join(
             self.temp_directory, '%s%s' % (linter_name, extension))
         filename_original = os.path.join(
-            data_dirname, '%s/original%s' % (linter_name, extension))
+            data_dirname, linter_name, 'original%s' % extension)
         filename_error = os.path.join(
-            data_dirname, '%s/error%s' % (linter_name, extension))
+            data_dirname, linter_name, 'error%s' % extension)
         filename_nonewerror = os.path.join(
-            data_dirname, '%s/nonewerror%s' % (linter_name, extension))
+            data_dirname, linter_name, 'nonewerror%s' % extension)
 
         self.assertTrue(
             os.path.exists(filename_original),
@@ -108,13 +109,13 @@ class E2ETest(unittest.TestCase):
 
         # Add file 2 (error) to repo
         shutil.copy(filename_error, filename_repo)
-        try:
-            output = subprocess.check_output(['git', 'lint'],
-                                             stderr=subprocess.STDOUT)
-            self.fail(('Git lint for file %s should have failed. \n ' +
-                      'Output:\n%s') % (filename_error, output))
-        except subprocess.CalledProcessError as error:
-            pass
+        out = io.StringIO()
+        response = gitlint.main([], stdout=out, stderr=out)
+        if response == 0:
+            self.fail(('Git lint for file %s should have failed.\n' +
+                       'Output:\n%s') % (filename_error,
+                                         out.getvalue()))
+
         subprocess.check_output(['git', 'add', filename_repo],
                                 stderr=subprocess.STDOUT)
         # --no-verify is required as a pre-commit hook could be installed.
@@ -124,12 +125,12 @@ class E2ETest(unittest.TestCase):
 
         # Add file 3 (nonewerror) to repo
         shutil.copy(filename_nonewerror, filename_repo)
-        try:
-            subprocess.check_output(['git', 'lint'],
-                                    stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as error:
+        out = io.StringIO()
+        response = gitlint.main([], stdout=out, stderr=out)
+        if response != 0:
             self.fail(('Git lint for file %s should have not failed. \n' +
-                      'Output:\n%s') % (filename_nonewerror, error.output))
+                       'Output:\n%s') % (filename_nonewerror,
+                                         out.getvalue()))
         subprocess.check_output(['git', 'add', filename_repo],
                                 stderr=subprocess.STDOUT)
         subprocess.check_output(['git', 'commit', '-m', 'Commit 3'],

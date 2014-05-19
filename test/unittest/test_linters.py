@@ -29,8 +29,11 @@ class LintersTest(unittest.TestCase):
     def test_lint_command_success(self):
         with mock.patch('subprocess.check_output') as check_output, \
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
-            check_output.return_value = os.linesep.join(
-                ['Line 1:1: 1', 'Line 5:2: 5', 'Line 7:3: 7', 'Line 9:4: 9'])
+            check_output.return_value = os.linesep.join([
+                'Line 1:1: 1',
+                'Line 5:2: 5',
+                'Line 7:3: 7',
+                'Line 9:4: 9']).encode('utf-8')
             command = functools.partial(
                 linters.lint_command,
                 'l',
@@ -95,7 +98,7 @@ class LintersTest(unittest.TestCase):
         with mock.patch('subprocess.check_output') as check_output, \
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
             check_output.return_value = os.linesep.join(
-                ['ERROR: line 1, col 1: (W32) missing foo'])
+                ['ERROR: line 1, col 1: (W32) missing foo']).encode('utf-8')
             command = functools.partial(
                 linters.lint_command,
                 'l',
@@ -121,8 +124,11 @@ class LintersTest(unittest.TestCase):
                 command(filename, lines=None))
 
     def test_lint_command_error(self):
-        output = os.linesep.join(
-            ['Line 1: 1', 'Line 5: 5', 'Line 7: 7', 'Line 9: 9'])
+        output = os.linesep.join([
+            'Line 1: 1',
+            'Line 5: 5',
+            'Line 7: 7',
+            'Line 9: 9']).encode('utf-8')
         with mock.patch('subprocess.check_output',
                         side_effect=subprocess.CalledProcessError(
                             1, 'linter', output)) as check_output, \
@@ -220,8 +226,8 @@ class LintersTest(unittest.TestCase):
         config = {
             '.txt': [linter1, linter2]
         }
-        outputs = [os.linesep.join(['Line 1: 1', 'Line 5: 5']),
-                   os.linesep.join([' line 4: 4'])]
+        outputs = [os.linesep.join(['Line 1: 1', 'Line 5: 5']).encode('utf-8'),
+                   os.linesep.join([' line 4: 4']).encode('utf-8')]
         with mock.patch('subprocess.check_output',
                         side_effect=outputs) as check_output, \
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
@@ -264,8 +270,8 @@ class LintersTest(unittest.TestCase):
         config = {
             '.txt': [linter1, linter2]
         }
-        outputs = ['',
-                   os.linesep.join([' line 4: 4'])]
+        outputs = [b'',
+                   os.linesep.join([' line 4: 4']).encode('utf-8')]
         with mock.patch('subprocess.check_output',
                         side_effect=outputs) as check_output, \
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
@@ -296,7 +302,7 @@ class LintersTest(unittest.TestCase):
         config = {
             '.txt': [linter1, linter2]
         }
-        outputs = ['', '']
+        outputs = [b'', b'']
         with mock.patch('subprocess.check_output',
                         side_effect=outputs) as check_output, \
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):

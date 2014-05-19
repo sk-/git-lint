@@ -24,8 +24,8 @@ def repository_root():
     try:
         root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
                                        stderr=subprocess.STDOUT).strip()
-        # The str is required to for Python3 to convert the bytes to a str.
-        return str(root)
+        # Convert to unicode first
+        return root.decode('utf-8')
     except subprocess.CalledProcessError:
         return None
 
@@ -50,9 +50,10 @@ def modified_files(root, tracked_only=False):
     """
     assert os.path.isabs(root), "Root has to be absolute, got: %s" % root
 
+    # Convert to unicode and split
     status_lines = subprocess.check_output(
         ['git', 'status', '--porcelain',
-         '--untracked-files=all']).split(os.linesep)
+         '--untracked-files=all']).decode('utf-8').split(os.linesep)
 
     modes = ['M ', ' M', 'A ', 'AM']
     if not tracked_only:
@@ -83,11 +84,14 @@ def modified_lines(filename, extra_data):
         return []
     if extra_data not in ('M ', ' M'):
         return None
+
+    # Split as bytes, as the output may have some non unicode characters.
     blame_lines = subprocess.check_output(
-        ['git', 'blame', '--porcelain', filename]).split(os.linesep)
+        ['git', 'blame', '--porcelain', filename]).split(
+            os.linesep.encode('utf-8'))
     modified_line_numbers = utils.filter_lines(
         blame_lines,
-        r'0000000000000000000000000000000000000000 (?P<line>\d+) (\d+)',
+        br'0000000000000000000000000000000000000000 (?P<line>\d+) (\d+)',
         groups=('line',))
 
-    return map(int, modified_line_numbers)
+    return list(map(int, modified_line_numbers))
