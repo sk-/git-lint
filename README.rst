@@ -86,13 +86,13 @@ Current linters:
 
 - Ruby
 
- * `ruby-lint <https://github.com/yorickpeterse/ruby-lint>`_
- * `rubocop <https://github.com/bbatsov/rubocop>`_
+  * `ruby-lint <https://github.com/yorickpeterse/ruby-lint>`_
+  * `rubocop <https://github.com/bbatsov/rubocop>`_
 
 - Java
 
- * `PMD <http://pmd.sourceforge.net/>`_ (it requires to put the script run.sh in your PATH)
- * `Checkstyle <http://checkstyle.sourceforge.net/>`
+  * `PMD <http://pmd.sourceforge.net/>`_ (it requires to put the script run.sh in your PATH)
+  * `Checkstyle <http://checkstyle.sourceforge.net/>`
 
 Example use
 -----------
@@ -174,14 +174,7 @@ TODOS and Possible Features
 ---------------------------
 
 * Add travis-ci configuration for e2e tests.
-* Replace mock calls in test with pyfakefs.
-* Linter that uses libmagic to validate that the extension is correct. Many
-  times I've seen that an image, or a compressed file has the wrong extension.
-* Normalize output. That is, try to uniform the output, by removing the
-  filename and strings like 'line' or 'col'.
-* When multiple linters are available sort the output of the linters by line
 * Support directories as arguments
-* Provide a way to install as a precommit hook
 * Provide a man page so 'git help lint' and 'git lint --help' work. I already
   have a script for converting the Usage to a man page, but I still need to
   figure out how to install it on the system.

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import io
+import json
 import os
 import sys
 import unittest
@@ -229,6 +230,38 @@ class GitLintTest(unittest.TestCase):
         self.assertIn('error1', self.stdout.getvalue())
         self.assertIn('error2', self.stdout.getvalue())
         self.assert_mocked_calls()
+
+    def test_main_file_json(self):
+        self.git_modified_files.return_value = {
+            self.filename: ' M',
+            self.filename2: 'M ',
+        }
+        lint_response = {
+            self.filename: {
+                'skipped': ['skipped1', 'skipped2'],
+                'error': ['error1', 'error2'],
+                'comments': [
+                    {
+                        'line': 3,
+                        'message': 'message1'
+                    },
+                    {
+                        'line': 4,
+                        'message': 'message2'
+                    }
+                ]
+            },
+            self.filename2: {
+                'comments': []
+            },
+        }
+        self.lint.return_value = lint_response
+
+        self.assertEqual(
+            1,
+            gitlint.main(['git-lint', '--json'],
+                         stdout=self.stdout, stderr=None))
+        self.assertEqual(lint_response, json.loads(self.stdout.getvalue()))
 
     def test_main_file_with_skipped_and_error(self):
         lint_response = {

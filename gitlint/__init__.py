@@ -22,8 +22,8 @@ It supports many filetypes, including:
     among others. See https://github.com/sk-/git-lint for the complete list.
 
 Usage:
-    git-lint [-f | --force] [FILENAME ...]
-    git-lint [-t | --tracked] [-f | --force]
+    git-lint [-f | --force] [--json] [FILENAME ...]
+    git-lint [-t | --tracked] [-f | --force] [--json]
     git-lint -h | --version
 
 Options:
@@ -31,11 +31,14 @@ Options:
     --version     Prints the version number.
     -f --force    Shows all the lines with problems.
     -t --tracked  Lints only tracked files.
+    --json        Prints the result as a json string. Useful to use it in
+                  conjunction with other tools.
 """
 
 from __future__ import unicode_literals
 
 import codecs
+import json
 import os
 import os.path
 import sys
@@ -154,6 +157,8 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
                               argv=argv[1:],
                               version='git-lint v%s' % __VERSION__)
 
+    json_output = arguments['--json']
+
     repository_root = git.repository_root()
     if repository_root is None:
         stderr.write('fatal: Not a git repository' + os.linesep)
@@ -182,15 +187,17 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
     linter_not_found = False
     files_with_problems = 0
     gitlint_config = get_config()
+    json_result = {}
 
     error = termcolor.colored('ERROR', 'red', attrs=('bold',))
     skipped = termcolor.colored('SKIPPED', 'yellow', attrs=('bold',))
 
     for filename in sorted(modified_files.keys()):
         rel_filename = os.path.relpath(filename)
-        stdout.write('Linting file: %s%s' %
-                     (termcolor.colored(rel_filename, attrs=('bold',)),
-                      linesep))
+        if not json_output:
+            stdout.write('Linting file: %s%s' %
+                         (termcolor.colored(rel_filename, attrs=('bold',)),
+                          linesep))
         if arguments['--force']:
             modified_lines = None
         else:
@@ -219,8 +226,18 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
             output += os.linesep.join(format_comment(data)
                                       for data in result['comments'])
 
-        stdout.write(output)
-        stdout.write(linesep + linesep)
+        if json_output:
+            json_result[filename] = result
+        else:
+            stdout.write(output)
+            stdout.write(linesep + linesep)
+
+    if json_output:
+        # Hack to convert to unicode, Python3 returns unicode, wheres Python2
+        # returns str.
+        stdout.write(
+            json.dumps(json_result,
+                       ensure_ascii=False).encode('utf-8').decode('utf-8'))
 
     if files_with_problems > 0:
         return 1
