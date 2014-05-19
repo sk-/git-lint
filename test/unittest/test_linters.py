@@ -30,18 +30,59 @@ class LintersTest(unittest.TestCase):
         with mock.patch('subprocess.check_output') as check_output, \
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
             check_output.return_value = os.linesep.join(
-                ['Line 1: 1', 'Line 5: 5', 'Line 7: 7', 'Line 9: 9'])
-            command = functools.partial(linters.lint_command,
-                                        'l',
-                                        'linter',
-                                        ['-f', '--compact'],
-                                        '^Line (%(lines)s):')
+                ['Line 1:1: 1', 'Line 5:2: 5', 'Line 7:3: 7', 'Line 9:4: 9'])
+            command = functools.partial(
+                linters.lint_command,
+                'l',
+                'linter',
+                ['-f', '--compact'],
+                r'^Line (?P<line>%(lines)s):(?P<column>\d+): (?P<message>.*)$')
             filename = 'foo.txt'
-            self.assertEqual(os.linesep.join(['Line 5: 5', 'Line 7: 7']),
-                             command(filename, lines=[3, 5, 7]))
             self.assertEqual(
-                os.linesep.join(
-                    ['Line 1: 1', 'Line 5: 5', 'Line 7: 7', 'Line 9: 9']),
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'line': 5,
+                                'column': 2,
+                                'message': '5'
+                            },
+                            {
+                                'line': 7,
+                                'column': 3,
+                                'message': '7'
+                            },
+                        ],
+                    },
+                },
+                command(filename, lines=[3, 5, 7]))
+            self.assertEqual(
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'line': 1,
+                                'column': 1,
+                                'message': '1'
+                            },
+                            {
+                                'line': 5,
+                                'column': 2,
+                                'message': '5'
+                            },
+                            {
+                                'line': 7,
+                                'column': 3,
+                                'message': '7'
+                            },
+                            {
+                                'line': 9,
+                                'column': 4,
+                                'message': '9'
+                            },
+                        ],
+                    },
+                },
                 command(filename, lines=None))
             expected_calls = [
                 mock.call(['linter', '-f', '--compact', 'foo.txt'],
@@ -50,6 +91,35 @@ class LintersTest(unittest.TestCase):
                           stderr=subprocess.STDOUT)]
             self.assertEqual(expected_calls, check_output.call_args_list)
 
+    def test_lint_command_all_fields(self):
+        with mock.patch('subprocess.check_output') as check_output, \
+                mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
+            check_output.return_value = os.linesep.join(
+                ['ERROR: line 1, col 1: (W32) missing foo'])
+            command = functools.partial(
+                linters.lint_command,
+                'l',
+                'linter',
+                ['-f', '--compact'],
+                r'^(?P<severity>.*): line (?P<line>%(lines)s)(, col ' +
+                r'(?P<column>\d+)): \((?P<message_id>.*)\) (?P<message>.*)$')
+            filename = 'foo.txt'
+            self.assertEqual(
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'line': 1,
+                                'column': 1,
+                                'message': 'missing foo',
+                                'message_id': 'W32',
+                                'severity': 'Error',
+                            },
+                        ],
+                    },
+                },
+                command(filename, lines=None))
+
     def test_lint_command_error(self):
         output = os.linesep.join(
             ['Line 1: 1', 'Line 5: 5', 'Line 7: 7', 'Line 9: 9'])
@@ -57,17 +127,52 @@ class LintersTest(unittest.TestCase):
                         side_effect=subprocess.CalledProcessError(
                             1, 'linter', output)) as check_output, \
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
-            command = functools.partial(linters.lint_command,
-                                        'l',
-                                        'linter',
-                                        ['-f', '--compact'],
-                                        '^Line (%(lines)s):')
+            command = functools.partial(
+                linters.lint_command,
+                'l',
+                'linter',
+                ['-f', '--compact'],
+                '^Line (?P<line>%(lines)s): (?P<message>.*)$')
             filename = 'foo.txt'
-            self.assertEqual(os.linesep.join(['Line 5: 5', ('Line 7: 7')]),
-                             command(filename, lines=[3, 5, 7]))
             self.assertEqual(
-                os.linesep.join(
-                    ['Line 1: 1', 'Line 5: 5', 'Line 7: 7', 'Line 9: 9']),
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'line': 5,
+                                'message': '5'
+                            },
+                            {
+                                'line': 7,
+                                'message': '7'
+                            },
+                        ],
+                    },
+                },
+                command(filename, lines=[3, 5, 7]))
+            self.assertEqual(
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'line': 1,
+                                'message': '1'
+                            },
+                            {
+                                'line': 5,
+                                'message': '5'
+                            },
+                            {
+                                'line': 7,
+                                'message': '7'
+                            },
+                            {
+                                'line': 9,
+                                'message': '9'
+                            },
+                        ],
+                    },
+                },
                 command(filename, lines=None))
             expected_calls = [
                 mock.call(['linter', '-f', '--compact', 'foo.txt'],
@@ -86,46 +191,32 @@ class LintersTest(unittest.TestCase):
                                         ['-f', '--compact'],
                                         '^Line (%(lines)s):')
             filename = 'foo.txt'
+            output = command(filename, lines=[3, 5, 7])
+            self.assertEquals(1, len(output[filename]['error']))
+            output[filename]['error'] = []
             self.assertTrue(
-                command(filename, lines=[3, 5, 7]).startswith('ERROR:'))
+                {
+                    filename: {
+                        'error': ''
+                    }
+                },
+                output)
             expected_calls = [
-                mock.call(['linter', '-f', '--compact', 'foo.txt'],
-                          stderr=subprocess.STDOUT)]
-            self.assertEqual(expected_calls, check_output.call_args_list)
-
-    def test_lint_command_pattern_no_parentheses(self):
-        with mock.patch('subprocess.check_output') as check_output, \
-                mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
-            check_output.return_value = os.linesep.join(
-                ['Line 1: col 14: undefined', 'Line 5: 5', 'Line 7: 7'])
-            command = functools.partial(linters.lint_command,
-                                        'l',
-                                        'linter',
-                                        ['-f', '--compact'],
-                                        '^Line %(lines)s:')
-            filename = 'foo.txt'
-            self.assertEqual(os.linesep.join(['Line 7: 7']),
-                             command(filename, lines=[3, 7, 14]))
-            self.assertEqual(
-                os.linesep.join(
-                    ['Line 1: col 14: undefined', 'Line 5: 5', 'Line 7: 7']),
-                command(filename, lines=None))
-            expected_calls = [
-                mock.call(['linter', '-f', '--compact', 'foo.txt'],
-                          stderr=subprocess.STDOUT),
                 mock.call(['linter', '-f', '--compact', 'foo.txt'],
                           stderr=subprocess.STDOUT)]
             self.assertEqual(expected_calls, check_output.call_args_list)
 
     def test_lint(self):
-        linter1 = functools.partial(linters.lint_command,
-                                    'l1',
-                                    'linter1', ['-f'],
-                                    '^Line (%(lines)s):')
-        linter2 = functools.partial(linters.lint_command,
-                                    'l2',
-                                    'linter2', [],
-                                    '^ line (%(lines)s):')
+        linter1 = functools.partial(
+            linters.lint_command,
+            'l1',
+            'linter1', ['-f'],
+            '^Line (?P<line>%(lines)s): (?P<message>.*)$')
+        linter2 = functools.partial(
+            linters.lint_command,
+            'l2',
+            'linter2', [],
+            '^ line (?P<line>%(lines)s): (?P<message>.*)$')
         config = {
             '.txt': [linter1, linter2]
         }
@@ -136,7 +227,20 @@ class LintersTest(unittest.TestCase):
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
             filename = 'foo.txt'
             self.assertEqual(
-                os.linesep.join(['Line 5: 5', ' line 4: 4']),
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'line': 5,
+                                'message': '5'
+                            },
+                            {
+                                'line': 4,
+                                'message': '4'
+                            },
+                        ],
+                    },
+                },
                 linters.lint(filename, lines=[4, 5], config=config))
             expected_calls = [
                 mock.call(['linter1', '-f', 'foo.txt'],
@@ -146,9 +250,17 @@ class LintersTest(unittest.TestCase):
 
     def test_lint_one_empty_lint(self):
         linter1 = functools.partial(
-            linters.lint_command, 'l1', 'linter1', ['-f'], '^Line (%(lines)s):')
+            linters.lint_command,
+            'l1',
+            'linter1',
+            ['-f'],
+            '^Line (?P<line>%(lines)s): (?P<message>.*)$')
         linter2 = functools.partial(
-            linters.lint_command, 'l2', 'linter2', [], '^ line (%(lines)s):')
+            linters.lint_command,
+            'l2',
+            'linter2',
+            [],
+            '^ line (?P<line>%(lines)s): (?P<message>.*)$')
         config = {
             '.txt': [linter1, linter2]
         }
@@ -159,7 +271,16 @@ class LintersTest(unittest.TestCase):
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
             filename = 'foo.txt'
             self.assertEqual(
-                ' line 4: 4',
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'line': 4,
+                                'message': '4'
+                            },
+                        ],
+                    },
+                },
                 linters.lint(filename, lines=[4, 5], config=config))
             expected_calls = [
                 mock.call(['linter1', '-f', 'foo.txt'],
@@ -181,7 +302,12 @@ class LintersTest(unittest.TestCase):
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
             filename = 'foo.txt'
             self.assertEqual(
-                'OK', linters.lint(filename, lines=[4, 5], config=config))
+                {
+                    filename: {
+                        'comments': []
+                    }
+                },
+                linters.lint(filename, lines=[4, 5], config=config))
             expected_calls = [
                 mock.call(['linter1', '-f', 'foo.txt'],
                           stderr=subprocess.STDOUT),
@@ -191,8 +317,51 @@ class LintersTest(unittest.TestCase):
     def test_lint_extension_not_defined(self):
         config = {}
         output = linters.lint('foo.txt', lines=[4, 5], config=config)
-        self.assertIn('.txt', output)
-        self.assertTrue(output.startswith('SKIPPED'))
+        self.assertEquals(1, len(output['foo.txt']['skipped']))
+        output['foo.txt']['skipped'] = []
+        self.assertEquals(
+            {
+                'foo.txt': {
+                    'skipped': []
+                }
+            },
+            output)
+
+    def test_lint_missing_programs(self):
+        linter1 = functools.partial(
+            linters.missing_requirements_command,
+            'l1', ['p1', 'p2'], 'Install p1 and p2')
+        config = {
+            '.txt': [linter1]
+        }
+        output = linters.lint('foo.txt', lines=[4, 5], config=config)
+        self.assertEquals(1, len(output['foo.txt']['skipped']))
+        output['foo.txt']['skipped'] = []
+        self.assertEqual(
+            {
+                'foo.txt': {
+                    'skipped': []
+                }
+            },
+            output)
+
+    def test_lint_two_missing_programs(self):
+        linter1 = functools.partial(
+            linters.missing_requirements_command,
+            'l1', ['p1', 'p2'], 'Install p1 and p2')
+        config = {
+            '.txt': [linter1, linter1]
+        }
+        output = linters.lint('foo.txt', lines=[4, 5], config=config)
+        self.assertEquals(2, len(output['foo.txt']['skipped']))
+        output['foo.txt']['skipped'] = []
+        self.assertEqual(
+            {
+                'foo.txt': {
+                    'skipped': []
+                }
+            },
+            output)
 
     def test_parse_yaml_config_command_not_in_path(self):
         yaml_config = {
@@ -207,8 +376,13 @@ class LintersTest(unittest.TestCase):
         }
         config = linters.parse_yaml_config(yaml_config, '')
         self.assertEqual(
-            'SKIPPED: some_unexistent_program_name is not installed. Go to ' +
-            'some_unexistent_program_name.com to install it.',
+            {
+                'filename': {
+                    'skipped': ['some_unexistent_program_name is not ' +
+                                'installed. Go to some_unexistent_program_' +
+                                'name.com to install it.']
+                }
+            },
             config['.foo'][0]('filename', []))
 
     def test_parse_yaml_config_requirements_not_in_path(self):
@@ -228,9 +402,14 @@ class LintersTest(unittest.TestCase):
         }
         config = linters.parse_yaml_config(yaml_config, '')
         self.assertEqual(
-            'SKIPPED: some_unexistent_command_one, ' +
-            'some_unexistent_command_two are not installed. Run apt-get ' +
-            'install command_one command_two',
+            {
+                'filename': {
+                    'skipped': ['some_unexistent_command_one, ' +
+                                'some_unexistent_command_two are not '
+                                'installed. Run apt-get install command_one ' +
+                                'command_two']
+                }
+            },
             config['.foo'][0]('filename', []))
 
     def test_parse_yaml_config_with_variables(self):

@@ -53,6 +53,7 @@ def modified_files(root, tracked_only=False):
     status_lines = subprocess.check_output(
         ['git', 'status', '--porcelain',
          '--untracked-files=all']).split(os.linesep)
+
     modes = ['M ', ' M', 'A ', 'AM']
     if not tracked_only:
         modes.append(r'\?\?')

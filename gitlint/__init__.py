@@ -94,6 +94,47 @@ def get_config():
     return linters.parse_yaml_config(yaml_config, repo_root)
 
 
+def format_comment(comment_data):
+    """Formats the data returned by the linters.
+
+    Given a dictionary with the fields: line, column, severity, message_id,
+    message, will generate a message like:
+
+    'line {line}, col {column}: {severity}: [{message_id}]: {message}'
+
+    Any of the fields may nbe absent.
+
+    Args:
+      comment_data: dictionary with the linter data.
+
+    Returns:
+      a string with the formatted message.
+    """
+    format_pieces = []
+    # Line and column information
+    if 'line' in comment_data:
+        format_pieces.append('line {line}')
+    if 'column' in comment_data:
+        if format_pieces:
+            format_pieces.append(', ')
+        format_pieces.append('col {column}')
+    if format_pieces:
+        format_pieces.append(': ')
+
+    # Severity and Id information
+    if 'severity' in comment_data:
+        format_pieces.append('{severity}: ')
+
+    if 'message_id' in comment_data:
+        format_pieces.append('[{message_id}]: ')
+
+    # The message
+    if 'message' in comment_data:
+        format_pieces.append('{message}')
+
+    return ''.join(format_pieces).format(**comment_data)
+
+
 def main(argv):
     """Main gitlint routine. To be called from scripts."""
     arguments = docopt.docopt(__doc__,
@@ -129,6 +170,9 @@ def main(argv):
     files_with_problems = 0
     gitlint_config = get_config()
 
+    error = termcolor.colored('ERROR', 'red', attrs=('bold',))
+    skipped = termcolor.colored('SKIPPED', 'yellow', attrs=('bold',))
+
     for filename in sorted(modified_files.keys()):
         rel_filename = os.path.relpath(filename)
         print('Linting file: %s' % termcolor.colored(rel_filename,
@@ -141,22 +185,28 @@ def main(argv):
 
         result = linters.lint(
             filename, modified_lines, gitlint_config)
+        result = result[filename]
 
-        if result == 'OK':
-            result = termcolor.colored(result, 'green', attrs=('bold',))
-        elif result.startswith('SKIPPED:'):
-            result = result.replace(
-                'SKIPPED',
-                termcolor.colored('SKIPPED', 'yellow', attrs=('bold',)))
-        elif result.startswith('ERROR:'):
-            result = result.replace(
-                'ERROR',
-                termcolor.colored('ERROR', 'red', attrs=('bold',)))
+        # TODO(skreft): modify this so to support the presence of skipped and
+        # comments at the same time
+        output = None
+        if result.get('error'):
+            output = os.linesep.join(
+                '%s: %s' % (error, reason) for reason in result.get('error')
+            )
             linter_not_found = True
+        elif result.get('skipped'):
+            output = os.linesep.join(
+                '%s: %s' % (skipped, reason) for reason in result.get('skipped')
+            )
+        elif result.get('comments', []) == []:
+            output = termcolor.colored('OK', 'green', attrs=('bold',))
         else:
             files_with_problems += 1
+            output = os.linesep.join(format_comment(data)
+                                     for data in result['comments'])
 
-        print(result)
+        print(output)
         print('')
 
     if files_with_problems > 0:

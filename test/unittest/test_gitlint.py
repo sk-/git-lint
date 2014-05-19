@@ -74,28 +74,42 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_file_changed_and_still_valid(self):
         root = '/home/user/repo'
+        filename = 'changed.py'
+        lint_response = {
+            filename: {
+                'comments': []
+            }
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch(
                 'gitlint.git.modified_files',
-                return_value={'changed.py': ' M'}) as get_modified_files, \
+                return_value={filename: ' M'}) as get_modified_files, \
              mock.patch('gitlint.git.modified_lines',
                         return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint', return_value='OK') as lint:
+             mock.patch('gitlint.linters.lint',
+                        return_value=lint_response) as lint:
             self.assertEqual(0, gitlint.main([]))
             get_modified_files.assert_called_once_with(root, tracked_only=False)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
             lint.assert_called_once_with(
-                'changed.py', [3, 14], gitlint.get_config())
+                filename, [3, 14], gitlint.get_config())
 
     def test_main_file_changed_and_still_valid_tracked_only(self):
         root = '/home/user/repo'
+        filename = 'changed.py'
+        lint_response = {
+            filename: {
+                'comments': []
+            }
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch(
                 'gitlint.git.modified_files',
                 return_value={'changed.py': ' M'}) as get_modified_files, \
              mock.patch('gitlint.git.modified_lines',
                         return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint', return_value='OK') as lint:
+             mock.patch('gitlint.linters.lint',
+                        return_value=lint_response) as lint:
             self.assertEqual(0, gitlint.main(['git-lint', '-t']))
             self.assertEqual(0, gitlint.main(['git-lint', '--tracked']))
             expected_calls = [mock.call(root, tracked_only=True)] * 2
@@ -108,6 +122,12 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_file_changed_but_skipped(self):
         root = '/home/user/repo'
+        filename = 'changed.py'
+        lint_response = {
+            filename: {
+                'skipped': ['foo']
+            }
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch(
                 'gitlint.git.modified_files',
@@ -116,7 +136,7 @@ class GitLintTest(unittest.TestCase):
                 'gitlint.git.modified_lines',
                 return_value=[3, 14]) as get_modified_lines, \
              mock.patch('gitlint.linters.lint',
-                        return_value='SKIPPED: foo') as lint:
+                        return_value=lint_response) as lint:
             self.assertEqual(0, gitlint.main([]))
             get_modified_files.assert_called_once_with(root, tracked_only=False)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
@@ -125,6 +145,12 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_file_linter_not_found(self):
         root = '/home/user/repo'
+        filename = 'changed.py'
+        lint_response = {
+            filename: {
+                'error': ['foo']
+            }
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch(
                 'gitlint.git.modified_files',
@@ -133,7 +159,7 @@ class GitLintTest(unittest.TestCase):
                 'gitlint.git.modified_lines',
                 return_value=[3, 14]) as get_modified_lines, \
              mock.patch('gitlint.linters.lint',
-                        return_value='ERROR: foo') as lint:
+                        return_value=lint_response) as lint:
             self.assertEqual(4, gitlint.main([]))
             get_modified_files.assert_called_once_with(root, tracked_only=False)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
@@ -142,6 +168,17 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_file_changed_and_now_invalid(self):
         root = '/home/user/repo'
+        filename = 'changed.py'
+        lint_response = {
+            filename: {
+                'comments': [
+                    {
+                        'line': 3,
+                        'message': 'error'
+                    }
+                ]
+            }
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch(
                 'gitlint.git.modified_files',
@@ -150,7 +187,7 @@ class GitLintTest(unittest.TestCase):
                 'gitlint.git.modified_lines',
                 return_value=[3, 14]) as get_modified_lines, \
              mock.patch('gitlint.linters.lint',
-                        return_value='3: Error') as lint:
+                        return_value=lint_response) as lint:
             self.assertEqual(1, gitlint.main([]))
             get_modified_files.assert_called_once_with(root, tracked_only=False)
             get_modified_lines.assert_called_once_with('changed.py', ' M')
@@ -159,12 +196,23 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_force_all_lines(self):
         root = '/home/user/repo'
+        filename = 'changed.py'
+        lint_response = {
+            filename: {
+                'comments': [
+                    {
+                        'line': 3,
+                        'message': 'error'
+                    }
+                ]
+            }
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch(
                 'gitlint.git.modified_files',
                 return_value={'changed.py': ' M'}) as get_modified_files, \
              mock.patch('gitlint.linters.lint',
-                        return_value='3: Error') as lint:
+                        return_value=lint_response) as lint:
             self.assertEqual(1, gitlint.main(['git-lint', '--force']))
             self.assertEqual(1, gitlint.main(['git-lint', '-f']))
             expected_calls = [mock.call(root, tracked_only=False)] * 2
@@ -182,6 +230,14 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_with_valid_files(self):
         root = '/home/user/repo'
+        lint_response = {
+            '/home/user/repo/changed.py': {
+                'comments': []
+            },
+            '/home/user/repo/foo.txt': {
+                'comments': []
+            },
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
              mock.patch(
@@ -192,7 +248,8 @@ class GitLintTest(unittest.TestCase):
              mock.patch(
                 'gitlint.git.modified_lines',
                 return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint', return_value='OK') as lint, \
+             mock.patch('gitlint.linters.lint',
+                        return_value=lint_response) as lint, \
              mock.patch('os.getcwd', return_value=root):
             self.assertEqual(
                 0, gitlint.main(['git-lint', 'changed.py', 'foo.txt']))
@@ -213,6 +270,14 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_with_valid_files_relative(self):
         root = '/home/user/repo'
+        lint_response = {
+            '/home/user/repo/changed.py': {
+                'comments': []
+            },
+            '/home/user/repo/foo.txt': {
+                'comments': []
+            },
+        }
         with mock.patch('gitlint.git.repository_root', return_value=root), \
              mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
              mock.patch(
@@ -223,7 +288,8 @@ class GitLintTest(unittest.TestCase):
              mock.patch(
                 'gitlint.git.modified_lines',
                 return_value=[3, 14]) as get_modified_lines, \
-             mock.patch('gitlint.linters.lint', return_value='OK') as lint, \
+             mock.patch('gitlint.linters.lint',
+                        return_value=lint_response) as lint, \
              mock.patch('os.getcwd', return_value=root):
             self.assertEqual(
                 0, gitlint.main(['git-lint', 'bar/../changed.py', './foo.txt']))
@@ -293,3 +359,45 @@ class GitLintTest(unittest.TestCase):
             parsed_config = gitlint.get_config()
             mock_open.assert_called_once_with(git_config)
             self.assertEquals({}, parsed_config)
+
+    def test_format_comment(self):
+        self.assertEqual('', gitlint.format_comment({}))
+        self.assertEqual('line 1: message',
+                         gitlint.format_comment({
+                            'line': 1,
+                            'message': 'message',
+                         }))
+        self.assertEqual('line 1, col 2: message',
+                         gitlint.format_comment({
+                            'line': 1,
+                            'column': 2,
+                            'message': 'message',
+                         }))
+        self.assertEqual('line 1, col 2: Error: message',
+                         gitlint.format_comment({
+                            'line': 1,
+                            'column': 2,
+                            'severity': 'Error',
+                            'message': 'message',
+                         }))
+        self.assertEqual('line 1, col 2: Error: [not-used]: message',
+                         gitlint.format_comment({
+                            'line': 1,
+                            'column': 2,
+                            'severity': 'Error',
+                            'message_id': 'not-used',
+                            'message': 'message',
+                         }))
+        self.assertEqual('col 2: [not-used]: message',
+                         gitlint.format_comment({
+                            'column': 2,
+                            'message_id': 'not-used',
+                            'message': 'message',
+                         }))
+        self.assertEqual('line 1, col 2: Error: [not-used]: ',
+                         gitlint.format_comment({
+                            'line': 1,
+                            'column': 2,
+                            'severity': 'Error',
+                            'message_id': 'not-used',
+                         }))

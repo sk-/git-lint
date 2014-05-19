@@ -61,6 +61,14 @@ class UtilsTest(unittest.TestCase):
                                     r'(?P<line>\d+): .*|Debug: (?P<debug>.*)',
                                     groups=('line', 'debug'))))
 
+    def test_filter_lines_group_not_defined(self):
+        lines = ['1: foo', '12: bar', '', 'Debug: info']
+        self.assertEqual(
+            [('1', None), ('12', None)],
+            list(utils.filter_lines(lines,
+                                    r'(?P<line>\d+): .*',
+                                    groups=('line', 'debug'))))
+
     def test_open_for_write_file_exists(self):
         filename = 'foo/bar/new_file'
         with mock.patch('gitlint.utils.open',

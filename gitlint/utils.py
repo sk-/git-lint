@@ -35,7 +35,8 @@ def filter_lines(lines, filter_regex, groups=None):
             elif len(groups) == 1:
                 yield match.group(groups[0])
             else:
-                yield tuple(match.group(group) for group in groups)
+                matched_groups = match.groupdict()
+                yield tuple(matched_groups.get(group) for group in groups)
 
 
 # TODO(skreft): add test

@@ -15,6 +15,7 @@
 
 import collections
 import functools
+import os
 import os.path
 import subprocess
 
@@ -33,15 +34,21 @@ class Partial(functools.partial):
                                                             self.keywords)
 
 
-def missing_requirements_command(missing_programs, installation_string,
-                                 unused_filename, unused_lines):
+def missing_requirements_command(unused_name, missing_programs,
+                                 installation_string, filename, unused_lines):
     """Pseudo-command to be used when requirements are missing."""
     verb = 'is'
     if len(missing_programs) > 1:
         verb = 'are'
-    return 'SKIPPED: %s %s not installed. %s' % (', '.join(missing_programs),
-                                                 verb,
-                                                 installation_string)
+    return {
+        filename: {
+            'skipped': [
+                '%s %s not installed. %s' % (', '.join(missing_programs),
+                                             verb,
+                                             installation_string)
+            ]
+        }
+    }
 
 
 # TODO(skreft): add test case for result already in cache.
@@ -61,7 +68,7 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
       lines: list[int]|None: list of lines that we want to capture. If None,
         then all lines will be captured.
 
-    Returns: string: a string with the filtered output of the program.
+    Returns: dict: a dict with the extracted info from the message.
     """
     output = utils.get_output_from_cache(name, filename)
 
@@ -73,8 +80,13 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
         except subprocess.CalledProcessError as error:
             output = error.output
         except OSError:
-            return ('ERROR: could not execute "%s".\nMake sure all required ' +
-                    'programs are installed') % ' '.join(call_arguments)
+            return {
+                filename: {
+                    'error': [('Could not execute "%s".%sMake sure all ' +
+                               'required programs are installed') %
+                              (' '.join(call_arguments), os.linesep)]
+                }
+            }
 
         utils.save_output_in_cache(name, filename, output)
 
@@ -86,16 +98,28 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
         lines_regex = '|'.join(map(str, lines))
     lines_regex = '(%s)' % lines_regex
 
+    groups = ('line', 'column', 'message', 'severity', 'message_id')
     filtered_lines = utils.filter_lines(output_lines,
                                         filter_regex % {'lines': lines_regex,
-                                                        'filename': filename})
+                                                        'filename': filename},
+                                        groups=groups)
 
-    rel_filename = os.path.relpath(filename)
+    result = []
+    for data in filtered_lines:
+        comment = dict(p for p in zip(groups, data) if p[1] is not None)
+        if 'line' in comment:
+            comment['line'] = int(comment['line'])
+        if 'column' in comment:
+            comment['column'] = int(comment['column'])
+        if 'severity' in comment:
+            comment['severity'] = comment['severity'].title()
+        result.append(comment)
 
-    result = os.linesep.join(filtered_lines)
-    result = result.replace(filename, rel_filename)
-
-    return result
+    return {
+        filename: {
+            'comments': result
+        }
+    }
 
 
 # TODO(skreft): validate data['filter'], ie check that only has valid fields.
@@ -118,6 +142,7 @@ def parse_yaml_config(yaml_config, repo_home):
             [command] + requirements)
         if not_found_programs:
             linter_command = Partial(missing_requirements_command,
+                                     name,
                                      not_found_programs,
                                      data['installation'])
         else:
@@ -142,21 +167,26 @@ def lint(filename, lines, config):
         config: dict[string: linter]: mapping from extension to a linter
           function.
 
-    Returns: string: 'OK' when succesful, a string starting with 'SKIPPED' in
-    case there was no linter defined for the file, or the output of the linter
-    with the lines filtered.
+    Returns: dict: if there were errors running the command then the field
+      'error' will have the reasons in a list. if the lint process was skipped,
+      then a field 'skipped' will be set with the reasons. Otherwise, the field
+      'comments' will have the messages.
     """
     _, ext = os.path.splitext(filename)
     if ext in config:
-        linters_output = []
+        output = collections.defaultdict(list)
         for linter in config[ext]:
             linter_output = linter(filename, lines)
-            if linter_output:
-                linters_output.append(linter_output)
-        output = os.linesep.join(linters_output)
-        if not output:
-            return 'OK'
-        return output
+            for category, values in linter_output[filename].items():
+                output[category].extend(values)
+
+        return {
+            filename: dict(output)
+        }
     else:
-        return ('SKIPPED: no linter is defined or enabled for files with '
-                'extension "%s"' % ext)
+        return {
+            filename: {
+                'skipped': ['SKIPPED: no linter is defined or enabled for files'
+                            ' with extension "%s"' % ext]
+            }
+        }
