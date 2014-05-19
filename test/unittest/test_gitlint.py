@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import io
 import os
 import sys
 import unittest
@@ -39,6 +40,9 @@ class GitLintTest(unittest.TestCase):
         self.root = '/home/user/repo'
         self.filename = os.path.join(self.root, 'changed.py')
         self.filename2 = os.path.join(self.root, 'foo.txt')
+
+        self.stdout = io.StringIO()
+        self.stderr = io.StringIO()
 
         self.git_repository_root_patch = mock.patch(
             'gitlint.git.repository_root', return_value=self.root)
@@ -106,11 +110,14 @@ class GitLintTest(unittest.TestCase):
 
     def test_main_not_in_repo(self):
         self.git_repository_root.return_value = None
-        self.assertEqual(128, gitlint.main([]))
+        self.assertEqual(
+            128, gitlint.main([], stdout=None, stderr=self.stderr))
+        self.assertIn('Not a git repository', self.stderr.getvalue())
 
     def test_main_nothing_changed(self):
         self.git_modified_files.return_value = {}
-        self.assertEqual(0, gitlint.main([]))
+        self.assertEqual(
+            0, gitlint.main([], stdout=None, stderr=None))
         self.git_modified_files.assert_called_once_with(
             self.root, tracked_only=False)
 
@@ -122,7 +129,9 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        self.assertEqual(0, gitlint.main([]))
+        self.assertEqual(
+            0, gitlint.main([], stdout=self.stdout, stderr=None))
+        self.assertIn('OK', self.stdout.getvalue())
         self.assert_mocked_calls()
 
     def test_main_file_changed_and_still_valid_tracked_only(self):
@@ -133,12 +142,19 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        self.assertEqual(0, gitlint.main(['git-lint', '-t']))
+        self.assertEqual(
+            0,
+            gitlint.main(['git-lint', '-t'], stdout=self.stdout, stderr=None))
+        self.assertIn('OK', self.stdout.getvalue())
         self.assert_mocked_calls(tracked_only=True)
 
         self.reset_mock_calls()
+        self.stdout = io.StringIO()
+        self.stderr = io.StringIO()
 
-        self.assertEqual(0, gitlint.main(['git-lint', '--tracked']))
+        self.assertEqual(0, gitlint.main(['git-lint', '--tracked'],
+                                         stdout=self.stdout, stderr=None))
+        self.assertIn('OK', self.stdout.getvalue())
         self.assert_mocked_calls(tracked_only=True)
 
     def test_main_file_changed_but_skipped(self):
@@ -149,7 +165,9 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        self.assertEqual(0, gitlint.main([]))
+        self.assertEqual(0,
+                         gitlint.main([], stdout=self.stdout, stderr=None))
+        self.assertIn('SKIPPED', self.stdout.getvalue())
         self.assert_mocked_calls()
 
     def test_main_file_linter_not_found(self):
@@ -160,7 +178,9 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        self.assertEqual(4, gitlint.main([]))
+        self.assertEqual(4,
+                         gitlint.main([], stdout=self.stdout, stderr=None))
+        self.assertIn('ERROR', self.stdout.getvalue())
         self.assert_mocked_calls()
 
     def test_main_file_changed_and_now_invalid(self):
@@ -176,7 +196,55 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        self.assertEqual(1, gitlint.main([]))
+        self.assertEqual(1,
+                         gitlint.main([], stdout=self.stdout, stderr=None))
+        self.assertIn('line 3: error', self.stdout.getvalue())
+        self.assert_mocked_calls()
+
+    def test_main_file_with_skipped_error_and_comments(self):
+        lint_response = {
+            self.filename: {
+                'skipped': ['skipped1', 'skipped2'],
+                'error': ['error1', 'error2'],
+                'comments': [
+                    {
+                        'line': 3,
+                        'message': 'message1'
+                    },
+                    {
+                        'line': 4,
+                        'message': 'message2'
+                    }
+                ]
+            }
+        }
+        self.lint.return_value = lint_response
+
+        self.assertEqual(1,
+                         gitlint.main([], stdout=self.stdout, stderr=None))
+        self.assertIn('line 3: message1', self.stdout.getvalue())
+        self.assertIn('line 4: message2', self.stdout.getvalue())
+        self.assertIn('skipped1', self.stdout.getvalue())
+        self.assertIn('skipped2', self.stdout.getvalue())
+        self.assertIn('error1', self.stdout.getvalue())
+        self.assertIn('error2', self.stdout.getvalue())
+        self.assert_mocked_calls()
+
+    def test_main_file_with_skipped_and_error(self):
+        lint_response = {
+            self.filename: {
+                'skipped': ['skipped1'],
+                'error': ['error1'],
+                'comments': []
+            }
+        }
+        self.lint.return_value = lint_response
+
+        self.assertEqual(4,
+                         gitlint.main([], stdout=self.stdout, stderr=None))
+        self.assertNotIn('OK', self.stdout.getvalue())
+        self.assertIn('skipped1', self.stdout.getvalue())
+        self.assertIn('error1', self.stdout.getvalue())
         self.assert_mocked_calls()
 
     def test_main_force_all_lines(self):
@@ -191,16 +259,25 @@ class GitLintTest(unittest.TestCase):
             }
         }
         self.lint.return_value = lint_response
+        self.git_modified_lines.return_value = []
 
-        self.assertEqual(1, gitlint.main(['git-lint', '--force']))
+        self.assertEqual(1,
+                         gitlint.main(['git-lint', '--force'],
+                                      stdout=self.stdout, stderr=None))
+        self.assertIn('line 3: error', self.stdout.getvalue())
+
         self.git_modified_files.assert_called_once_with(
             self.root, tracked_only=False)
         self.lint.assert_called_once_with(
             self.filename, None, self.git_lint_config)
 
         self.reset_mock_calls()
+        self.stdout = io.StringIO()
 
-        self.assertEqual(1, gitlint.main(['git-lint', '-f']))
+        self.assertEqual(1,
+                         gitlint.main(['git-lint', '-f'],
+                                      stdout=self.stdout, stderr=None))
+        self.assertIn('line 3: error', self.stdout.getvalue())
 
         self.git_modified_files.assert_called_once_with(
             self.root, tracked_only=False)
@@ -210,7 +287,10 @@ class GitLintTest(unittest.TestCase):
     def test_main_with_invalid_files(self):
         with mock.patch('gitlint.find_invalid_filenames',
                         return_value=[('foo.txt', 'does not exist')]):
-            self.assertEqual(2, gitlint.main(['git-lint', 'foo.txt']))
+            self.assertEqual(2,
+                             gitlint.main(['git-lint', 'foo.txt'],
+                                          stdout=None, stderr=self.stderr))
+            self.assertIn('does not exist', self.stderr.getvalue())
 
     def test_main_with_valid_files(self):
         lint_response = {
@@ -226,7 +306,14 @@ class GitLintTest(unittest.TestCase):
         with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
                 mock.patch('os.getcwd', return_value=self.root):
             self.assertEqual(
-                0, gitlint.main(['git-lint', self.filename, self.filename2]))
+                0, gitlint.main(['git-lint', self.filename, self.filename2],
+                                stdout=self.stdout, stderr=None))
+            self.assertIn('OK', self.stdout.getvalue())
+            self.assertIn(os.path.basename(self.filename),
+                          self.stdout.getvalue())
+            self.assertIn(os.path.basename(self.filename2),
+                          self.stdout.getvalue())
+
             self.git_modified_files.assert_called_once_with(
                 self.root, tracked_only=False)
             expected_calls = [
@@ -258,7 +345,11 @@ class GitLintTest(unittest.TestCase):
         with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
                 mock.patch('os.getcwd', return_value=self.root):
             self.assertEqual(
-                0, gitlint.main(['git-lint', 'bar/../changed.py', './foo.txt']))
+                0, gitlint.main(['git-lint', 'bar/../changed.py', './foo.txt'],
+                                stdout=self.stdout, stderr=self.stderr))
+            self.assertIn('OK', self.stdout.getvalue())
+            self.assertEqual('', self.stderr.getvalue())
+
             self.git_modified_files.assert_called_once_with(
                 self.root, tracked_only=False)
             expected_calls = [mock.call(self.filename, ' M'),

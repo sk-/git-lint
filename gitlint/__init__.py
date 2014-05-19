@@ -33,6 +33,10 @@ Options:
     -t --tracked  Lints only tracked files.
 """
 
+from __future__ import unicode_literals
+
+import codecs
+import os
 import os.path
 import sys
 
@@ -135,15 +139,24 @@ def format_comment(comment_data):
     return ''.join(format_pieces).format(**comment_data)
 
 
-def main(argv):
+def main(argv, stdout=sys.stdout, stderr=sys.stderr):
     """Main gitlint routine. To be called from scripts."""
+    # Wrap sys stdout for python 2, so print can understand unicode.
+    linesep = os.linesep
+    if sys.version_info[0] < 3:
+        if stdout == sys.stdout:
+            stdout = codecs.getwriter("utf-8")(stdout)
+        if stderr == sys.stderr:
+            stderr = codecs.getwriter("utf-8")(stderr)
+        linesep = unicode(os.linesep)
+
     arguments = docopt.docopt(__doc__,
                               argv=argv[1:],
                               version='git-lint v%s' % __VERSION__)
 
     repository_root = git.repository_root()
     if repository_root is None:
-        sys.stderr.write('fatal: Not a git repository' + os.linesep)
+        stderr.write('fatal: Not a git repository' + os.linesep)
         return 128
 
     if arguments['FILENAME']:
@@ -151,7 +164,7 @@ def main(argv):
                                                    repository_root)
         if invalid_filenames:
             invalid_filenames.append(('', ''))
-            sys.stderr.write(
+            stderr.write(
                 os.linesep.join(invalid[1] for invalid in invalid_filenames))
             return 2
 
@@ -175,8 +188,9 @@ def main(argv):
 
     for filename in sorted(modified_files.keys()):
         rel_filename = os.path.relpath(filename)
-        print('Linting file: %s' % termcolor.colored(rel_filename,
-                                                     attrs=('bold',)))
+        stdout.write('Linting file: %s%s' %
+                     (termcolor.colored(rel_filename, attrs=('bold',)),
+                      linesep))
         if arguments['--force']:
             modified_lines = None
         else:
@@ -187,27 +201,26 @@ def main(argv):
             filename, modified_lines, gitlint_config)
         result = result[filename]
 
-        # TODO(skreft): modify this so to support the presence of skipped and
-        # comments at the same time
-        output = None
+        output = ''
         if result.get('error'):
-            output = os.linesep.join(
+            output += os.linesep.join(
                 '%s: %s' % (error, reason) for reason in result.get('error')
             )
             linter_not_found = True
-        elif result.get('skipped'):
-            output = os.linesep.join(
+        if result.get('skipped'):
+            output += os.linesep.join(
                 '%s: %s' % (skipped, reason) for reason in result.get('skipped')
             )
-        elif result.get('comments', []) == []:
-            output = termcolor.colored('OK', 'green', attrs=('bold',))
+        if result.get('comments', []) == []:
+            if not output:
+                output += termcolor.colored('OK', 'green', attrs=('bold',))
         else:
             files_with_problems += 1
-            output = os.linesep.join(format_comment(data)
-                                     for data in result['comments'])
+            output += os.linesep.join(format_comment(data)
+                                      for data in result['comments'])
 
-        print(output)
-        print('')
+        stdout.write(output)
+        stdout.write(linesep + linesep)
 
     if files_with_problems > 0:
         return 1
