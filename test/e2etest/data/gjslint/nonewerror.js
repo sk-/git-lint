@@ -1,2 +1,3 @@
 foo=1;
-bar = 3;
+var bar = 3;
+bar++;

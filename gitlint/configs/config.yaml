@@ -117,7 +117,7 @@ json:
   - "-m"
   - "json.tool"
   # enforce that here comes a colon
-  filter: "^(?P<message>[^:]+|No JSON object could be decoded)(: line (?P<line>\\d+) column (?P<column>\\d+).*)?$"
+  filter: "^(?P<message>[^:]+(?=: line \\d+ column \\d+)|No JSON object could be decoded)(: line (?P<line>\\d+) column (?P<column>\\d+).*)?$"
   installation: "Nothing else should be required."
 
 # RST
@@ -270,7 +270,7 @@ pmd:
   - "-format"
   - "text"
   - "-rulesets"
-  - "rulesets/java/android.xml,rulesets/java/basic.xml,rulesets/java/braces.xml,rulesets/java/clone.xml,rulesets/java/codesize.xml,rulesets/java/coupling.xml,rulesets/java/design.xml,rulesets/java/empty.xml,rulesets/java/finalizers.xml,rulesets/java/imports.xml,rulesets/java/j2ee.xml,rulesets/java/javabeans.xml,rulesets/java/junit.xml,rulesets/java/logging-jakarta-commons.xml,rulesets/java/optimizations.xml,rulesets/java/strictexception.xml,rulesets/java/strings.xml,rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml"
+  - "rulesets/java/android.xml,rulesets/java/basic.xml,rulesets/java/braces.xml,rulesets/java/clone.xml,rulesets/java/codesize.xml,rulesets/java/coupling.xml,rulesets/java/design.xml,rulesets/java/empty.xml,rulesets/java/finalizers.xml,rulesets/java/imports.xml,rulesets/java/j2ee.xml,rulesets/java/junit.xml,rulesets/java/logging-jakarta-commons.xml,rulesets/java/optimizations.xml,rulesets/java/strictexception.xml,rulesets/java/strings.xml,rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml"
   - "-d"
   filter: "%(filename)s:(?P<line>%(lines)s):\\s+(?P<message>.+)"
   installation: "Go to http://pmd.sourceforge.net/pmd-5.1.1/installing.html"

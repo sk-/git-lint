@@ -1,3 +1,21 @@
 {
-  "maxerr": 100000
+  "maxerr": 100000,
+  "browser": true,
+  "jquery": true,
+  "camelcase": true,
+  "curly": true,
+  "forin": true,
+  "freeze": true,
+  "immed": true,
+  "indent": 2,
+  "latedef": "nofunc",
+  "newcap": true,
+  "noarg": true,
+  "noempty": true,
+  "nonbsp": true,
+  "nonew": true,
+  "quotmark": "single",
+  "trailing": true,
+  "undef": true,
+  "unused": true
 }
