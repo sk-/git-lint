@@ -25,8 +25,10 @@ import gitlint.git as git
 class GitTest(unittest.TestCase):
     def test_repository_root_ok(self):
         with mock.patch('subprocess.check_output',
-                        return_value=b'/home/user/repo'):
+                        return_value=b'/home/user/repo\n') as git_call:
             self.assertEqual('/home/user/repo', git.repository_root())
+            git_call.asser_called_once_with(
+                ['git', 'rev-parse', '--show-toplevel'])
 
     def test_repository_root_error(self):
         with mock.patch('subprocess.check_output',
@@ -86,6 +88,26 @@ class GitTest(unittest.TestCase):
             git_call.assert_called_once_with(
                 ['git', 'status', '--porcelain', '--untracked-files=all'])
 
+    def test_modified_files_with_commit(self):
+        output = os.linesep.join([
+            'M\ttest/e2etest/data/bash/error.sh',
+            'D\ttest/e2etest/data/ruby/error.rb',
+            'A\ttest/e2etest/data/rubylint/error.rb',
+            '',
+        ]).encode('utf-8')
+        commit = '0a' * 20
+        with mock.patch('subprocess.check_output',
+                        return_value=output) as git_call:
+            self.assertEqual(
+                {
+                    '/home/user/repo/test/e2etest/data/bash/error.sh': 'M ',
+                    '/home/user/repo/test/e2etest/data/rubylint/error.rb': 'A ',
+                },
+                git.modified_files('/home/user/repo', commit=commit))
+            git_call.assert_called_once_with(
+                ['git', 'diff-tree', '-r', '--root', '--no-commit-id',
+                 '--name-status', commit])
+
     def test_modified_files_non_absolute_root(self):
         with self.assertRaises(AssertionError):
             git.modified_files('foo/bar')
@@ -110,6 +132,32 @@ class GitTest(unittest.TestCase):
                  '/home/user/repo/foo/bar.txt'])] * 2
             self.assertEqual(expected_calls, check_output.call_args_list)
 
+    def test_modified_lines_with_commit(self):
+        output = os.linesep.join([
+            'baz',
+            '0123456789abcdef31410123456789abcdef3141 2 2 4',
+            'foo',
+            '0123456789abcdef31410123456789abcdef3141 5 5',
+            'bar']).encode('utf-8')
+        with mock.patch('subprocess.check_output',
+                        return_value=output) as check_output:
+            self.assertEqual(
+                [2, 5],
+                list(git.modified_lines(
+                    '/home/user/repo/foo/bar.txt',
+                    ' M',
+                    commit='0123456789abcdef31410123456789abcdef3141')))
+            self.assertEqual(
+                [2, 5],
+                list(git.modified_lines(
+                    '/home/user/repo/foo/bar.txt',
+                    'M ',
+                    commit='0123456789abcdef31410123456789abcdef3141')))
+            expected_calls = [mock.call(
+                ['git', 'blame', '--porcelain',
+                 '/home/user/repo/foo/bar.txt'])] * 2
+            self.assertEqual(expected_calls, check_output.call_args_list)
+
     def test_modified_lines_new_addition(self):
         self.assertEqual(
             None,
@@ -124,3 +172,10 @@ class GitTest(unittest.TestCase):
         self.assertEqual(
             [],
             list(git.modified_lines('/home/user/repo/foo/bar.txt', None)))
+
+    def test_last_commit(self):
+        with mock.patch('subprocess.check_output',
+                        return_value=b'0a' * 20 + b'\n') as git_call:
+            self.assertEqual('0a' * 20, git.last_commit())
+            git_call.asser_called_once_with(
+                ['git', 'rev-parse', 'HEAD'])

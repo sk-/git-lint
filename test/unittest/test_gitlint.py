@@ -78,8 +78,9 @@ class GitLintTest(unittest.TestCase):
         This method exists to avoid duplication.
         """
         self.git_modified_files.assert_called_once_with(
-            self.root, tracked_only=tracked_only)
-        self.git_modified_lines.assert_called_once_with(self.filename, ' M')
+            self.root, tracked_only=tracked_only, commit=None)
+        self.git_modified_lines.assert_called_once_with(
+            self.filename, ' M', commit=None)
         self.lint.assert_called_once_with(
             self.filename, [3, 14], self.git_lint_config)
 
@@ -120,7 +121,7 @@ class GitLintTest(unittest.TestCase):
         self.assertEqual(
             0, gitlint.main([], stdout=None, stderr=None))
         self.git_modified_files.assert_called_once_with(
-            self.root, tracked_only=False)
+            self.root, tracked_only=False, commit=None)
 
     def test_main_file_changed_and_still_valid(self):
         lint_response = {
@@ -300,7 +301,7 @@ class GitLintTest(unittest.TestCase):
         self.assertIn('line 3: error', self.stdout.getvalue())
 
         self.git_modified_files.assert_called_once_with(
-            self.root, tracked_only=False)
+            self.root, tracked_only=False, commit=None)
         self.lint.assert_called_once_with(
             self.filename, None, self.git_lint_config)
 
@@ -313,7 +314,7 @@ class GitLintTest(unittest.TestCase):
         self.assertIn('line 3: error', self.stdout.getvalue())
 
         self.git_modified_files.assert_called_once_with(
-            self.root, tracked_only=False)
+            self.root, tracked_only=False, commit=None)
         self.lint.assert_called_once_with(
             self.filename, None, self.git_lint_config)
 
@@ -348,10 +349,10 @@ class GitLintTest(unittest.TestCase):
                           self.stdout.getvalue())
 
             self.git_modified_files.assert_called_once_with(
-                self.root, tracked_only=False)
+                self.root, tracked_only=False, commit=None)
             expected_calls = [
-                mock.call(self.filename, ' M'),
-                mock.call(self.filename2, None),
+                mock.call(self.filename, ' M', commit=None),
+                mock.call(self.filename2, None, commit=None),
             ]
             self.assertEqual(expected_calls,
                              self.git_modified_lines.call_args_list)
@@ -384,9 +385,9 @@ class GitLintTest(unittest.TestCase):
             self.assertEqual('', self.stderr.getvalue())
 
             self.git_modified_files.assert_called_once_with(
-                self.root, tracked_only=False)
-            expected_calls = [mock.call(self.filename, ' M'),
-                              mock.call(self.filename2, None)]
+                self.root, tracked_only=False, commit=None)
+            expected_calls = [mock.call(self.filename, ' M', commit=None),
+                              mock.call(self.filename2, None, commit=None)]
             self.assertEqual(expected_calls,
                              self.git_modified_lines.call_args_list)
             expected_calls = [

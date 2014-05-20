@@ -22,17 +22,19 @@ It supports many filetypes, including:
     among others. See https://github.com/sk-/git-lint for the complete list.
 
 Usage:
-    git-lint [-f | --force] [--json] [FILENAME ...]
-    git-lint [-t | --tracked] [-f | --force] [--json]
+    git-lint [-f | --force] [--json] [--last-commit] [FILENAME ...]
+    git-lint [-t | --tracked] [-f | --force] [--json] [--last-commit]
     git-lint -h | --version
 
 Options:
-    -h            Show the usage patterns.
-    --version     Prints the version number.
-    -f --force    Shows all the lines with problems.
-    -t --tracked  Lints only tracked files.
-    --json        Prints the result as a json string. Useful to use it in
-                  conjunction with other tools.
+    -h             Show the usage patterns.
+    --version      Prints the version number.
+    -f --force     Shows all the lines with problems.
+    -t --tracked   Lints only tracked files.
+    --json         Prints the result as a json string. Useful to use it in
+                   conjunction with other tools.
+    --last-commit  Checks the last checked-out commit. This is mostly useful
+                   when used as: git checkout <revid>; git lint --last-commit.
 """
 
 from __future__ import unicode_literals
@@ -159,6 +161,10 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
 
     json_output = arguments['--json']
 
+    commit = None
+    if arguments['--last-commit']:
+        commit = git.last_commit()
+
     repository_root = git.repository_root()
     if repository_root is None:
         stderr.write('fatal: Not a git repository' + os.linesep)
@@ -174,7 +180,8 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
             return 2
 
         changed_files = git.modified_files(repository_root,
-                                           tracked_only=arguments['--tracked'])
+                                           tracked_only=arguments['--tracked'],
+                                           commit=commit)
         modified_files = {}
         for filename in arguments['FILENAME']:
             normalized_filename = os.path.abspath(filename)
@@ -182,7 +189,8 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
                 normalized_filename)
     else:
         modified_files = git.modified_files(repository_root,
-                                            tracked_only=arguments['--tracked'])
+                                            tracked_only=arguments['--tracked'],
+                                            commit=commit)
 
     linter_not_found = False
     files_with_problems = 0
@@ -202,7 +210,8 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
             modified_lines = None
         else:
             modified_lines = git.modified_lines(filename,
-                                                modified_files[filename])
+                                                modified_files[filename],
+                                                commit=commit)
 
         result = linters.lint(
             filename, modified_lines, gitlint_config)
