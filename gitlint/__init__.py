@@ -232,8 +232,12 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
                 output += termcolor.colored('OK', 'green', attrs=('bold',))
         else:
             files_with_problems += 1
-            output += os.linesep.join(format_comment(data)
-                                      for data in result['comments'])
+            messages = []
+            for data in result['comments']:
+                formatted_message = format_comment(data)
+                messages.append(formatted_message)
+                data['formatted_message'] = formatted_message
+            output += os.linesep.join(messages)
 
         if json_output:
             json_result[filename] = result

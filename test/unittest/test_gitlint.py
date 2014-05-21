@@ -237,18 +237,44 @@ class GitLintTest(unittest.TestCase):
             self.filename: ' M',
             self.filename2: 'M ',
         }
-        lint_response = {
+        lint_responses = [
+            {
+                self.filename: {
+                    'skipped': ['skipped1', 'skipped2'],
+                    'error': ['error1', 'error2'],
+                    'comments': [
+                        {
+                            'line': 3,
+                            'message': 'message1'
+                        },
+                        {
+                            'line': 4,
+                            'message': 'message2'
+                        }
+                    ]
+                }
+            },
+            {
+                self.filename2: {
+                    'comments': []
+                },
+            }
+        ]
+        self.lint.side_effect = lint_responses
+        expected_response = {
             self.filename: {
                 'skipped': ['skipped1', 'skipped2'],
                 'error': ['error1', 'error2'],
                 'comments': [
                     {
                         'line': 3,
-                        'message': 'message1'
+                        'message': 'message1',
+                        'formatted_message': 'line 3: message1'
                     },
                     {
                         'line': 4,
-                        'message': 'message2'
+                        'message': 'message2',
+                        'formatted_message': 'line 4: message2'
                     }
                 ]
             },
@@ -256,13 +282,12 @@ class GitLintTest(unittest.TestCase):
                 'comments': []
             },
         }
-        self.lint.return_value = lint_response
 
         self.assertEqual(
             1,
             gitlint.main(['git-lint', '--json'],
                          stdout=self.stdout, stderr=None))
-        self.assertEqual(lint_response, json.loads(self.stdout.getvalue()))
+        self.assertEqual(expected_response, json.loads(self.stdout.getvalue()))
 
     def test_main_file_with_skipped_and_error(self):
         lint_response = {
