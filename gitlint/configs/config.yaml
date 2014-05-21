@@ -44,7 +44,7 @@ gjslint:
   extensions:
   - .js
   command: gjslint
-  filter: "^Line\\s+(?P<line>%(lines)s), (?P<severity>[^: ]+):((?P<column>\\d+):)? (?P<message>.+)"
+  filter: "^Line\\s+(?P<line>%(lines)s), (?P<severity>[^: ]+):((?P<message_id>\\d+):)? (?P<message>.+)"
   installation: "Run pip install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz, or visit https://developers.google.com/closure/utilities/docs/linter_howto for installation instructions."
 
 # Sample output:
