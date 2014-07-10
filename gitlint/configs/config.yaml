@@ -259,6 +259,11 @@ checkstyle:
 
 # Sample output:
 # /home/skreft/opensource/git-lint/test/e2etest/data/pmd/error.java:1:  All methods are static.
+# Disabled rulesets because of false positives
+# rulesets/java/coupling.xml: Demeter
+# rulesets/java/design.xml: Static class
+# rulesets/java/optimizations.xml: Parameter could be final
+# rulesets/java/junit.xml: maximum asserts, asserts should have message
 pmd:
   command: run.sh
   extensions:
@@ -270,7 +275,7 @@ pmd:
   - "-format"
   - "text"
   - "-rulesets"
-  - "rulesets/java/android.xml,rulesets/java/basic.xml,rulesets/java/braces.xml,rulesets/java/clone.xml,rulesets/java/codesize.xml,rulesets/java/coupling.xml,rulesets/java/design.xml,rulesets/java/empty.xml,rulesets/java/finalizers.xml,rulesets/java/imports.xml,rulesets/java/j2ee.xml,rulesets/java/junit.xml,rulesets/java/logging-jakarta-commons.xml,rulesets/java/optimizations.xml,rulesets/java/strictexception.xml,rulesets/java/strings.xml,rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml"
+  - "rulesets/java/android.xml,rulesets/java/basic.xml,rulesets/java/braces.xml,rulesets/java/clone.xml,rulesets/java/codesize.xml,rulesets/java/empty.xml,rulesets/java/finalizers.xml,rulesets/java/imports.xml,rulesets/java/j2ee.xml,rulesets/java/logging-jakarta-commons.xml,rulesets/java/strictexception.xml,rulesets/java/strings.xml,rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml"
   - "-d"
   filter: "%(filename)s:(?P<line>%(lines)s):\\s+(?P<message>.+)"
   installation: "Go to http://pmd.sourceforge.net/pmd-5.1.1/installing.html"

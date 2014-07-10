@@ -15,7 +15,7 @@
 
 # First part return the files being commited, excluding deleted files.
 git diff-index -z --cached HEAD --name-only --diff-filter="(A|C|M|R|T|U|X|B)" |
-xargs --null git lint;
+xargs --null --no-run-if-empty git lint;
 
 if [ "$?" != "0" ]; then
   echo "There are some problems with the modified files.";
