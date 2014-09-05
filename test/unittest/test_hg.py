@@ -96,7 +96,7 @@ class HgTest(unittest.TestCase):
                  '/home/user/repo/untracked.txt': '?'},
                 hg.modified_files('/home/user/repo', commit=commit))
             hg_call.assert_called_once_with(
-                ['hg', 'status', '--commit=%s' % commit])
+                ['hg', 'status', '--change=%s' % commit])
 
     def test_modified_files_non_absolute_root(self):
         with self.assertRaises(AssertionError):
@@ -164,4 +164,4 @@ class HgTest(unittest.TestCase):
                         return_value=b'0a' * 20 + b'\n') as hg_call:
             self.assertEqual('0a' * 20, hg.last_commit())
             hg_call.asser_called_once_with(
-                ['hg', 'parent', '--template="{node}"'])
+                ['hg', 'parent', '--template={node}'])
