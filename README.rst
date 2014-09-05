@@ -145,8 +145,8 @@ arguments:
 * %(REPO_HOME)s: the root of your repo.
 * %(DEFAULT_CONFIGS)s: the location of the default config files.
 
-Git Config
-----------
+Git Configuration
+-----------------
 
 git-lint comes with a pre-commit hook for git. To install it for your repo
 execute::
@@ -158,14 +158,27 @@ or if you want to install it globally execute instead::
   $ ln -s `which pre-commit.git-lint.sh` /usr/share/git-core/templates/hooks/pre-commit 
 
 
-Mercurial Config
-----------------
+Mercurial Configuration
+-----------------------
 
 To make available git-lint with a better name in mercurial you have to add the following
 to your .hgrc configuration::
 
   [alias]
   lint = !git-lint
+
+To add a pre-commit hook add the following::
+
+  [hooks]
+  pretxncommit.hglint = pre-commit.hg-lint.sh > /dev/pts/1
+
+
+The hook above has a hack to display the output of the command. You may need to adjust
+it to use the correct tty (you can find it with the command tty). Additionally,
+as mercurial does not provide (AFAIK) any way to skip a hook, if you want to force a commit
+with linter warnings execute the commit command as follow::
+
+  $ NO_VERIFY=1 hg commit ...
 
 Limitations
 -----------
