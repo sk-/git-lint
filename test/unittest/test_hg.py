@@ -165,3 +165,4 @@ class HgTest(unittest.TestCase):
             self.assertEqual('0a' * 20, hg.last_commit())
             hg_call.asser_called_once_with(
                 ['hg', 'parent', '--template={node}'])
+

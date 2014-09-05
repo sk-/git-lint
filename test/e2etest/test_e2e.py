@@ -23,14 +23,43 @@ import gitlint
 # pylint: disable=too-many-public-methods
 
 
-class E2ETest(unittest.TestCase):
+class TestGitE2E(unittest.TestCase):
+    @staticmethod
+    def init_repo():
+        """Initializes a git repo."""
+        subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
+
+    @staticmethod
+    def commit(message):
+        """Commit a changeset to the repo.
+
+        The option --no-verify is used as a pre-commit check could be globally
+        installed.
+        """
+        subprocess.check_output(
+            ['git', 'commit', '-m', message, '--no-verify'],
+            stderr=subprocess.STDOUT)
+
+    @staticmethod
+    def add(filename):
+        """Add a file to the repo."""
+        subprocess.check_output(['git', 'add', filename],
+                                stderr=subprocess.STDOUT)
+
+    @staticmethod
+    def lint():
+        """Returns the response and ouput of git-lint."""
+        out = io.StringIO()
+        response = gitlint.main([], stdout=out, stderr=out)
+
+        return response, out.getvalue()
+
     @classmethod
     def setUpClass(cls):
         cls.original_cwd = os.getcwd()
         cls.temp_directory = tempfile.mkdtemp(prefix='gitlint')
         os.chdir(cls.temp_directory)
-        subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
-        cls.gitlint_config = gitlint.get_config(cls.temp_directory)
+        cls.init_repo()
 
     @classmethod
     def tearDownClass(cls):
@@ -40,31 +69,31 @@ class E2ETest(unittest.TestCase):
     def setUp(self):
         self.out = io.StringIO()
 
-    def test_linters(self):
-        for extension, linter_list in self.gitlint_config.items():
-            for linter in linter_list:
-                self.assert_linter_works(linter.args[0], extension)
+    @classmethod
+    def add_linter_e2echeck(cls, linter_name, extension):
+        """Adds a test for the given linter and extension."""
+        def test_linter(self):
+            self.assert_linter_works(linter_name, extension)
+        test_linter.__name__ = 'test_linter_%s_with_%s' % (linter_name,
+                                                           extension[1:])
+        setattr(cls, test_linter.__name__, test_linter)
 
     def test_extension_not_defined(self):
-        extension = max(self.gitlint_config.keys()) + 'fake'
+        extension = '.areallyfakeextension'
         filename = os.path.join(self.temp_directory, 'filename' + extension)
         with open(filename, 'w') as f:
             f.write('Foo')
-        subprocess.check_output(['git', 'add', filename],
-                                stderr=subprocess.STDOUT)
-        try:
-            output = subprocess.check_output(['git', 'lint'],
-                                             stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as error:
-            self.fail(error.output)
+        self.add(filename)
+        response, output = self.lint()
+        if response != 0:
+            self.fail(output)
+
         # Python3 does not like mixing bytes and strings. So we need to convert
         # the first element to unicode first.
         self.assertIn(os.path.relpath(filename).encode('utf-8'), output)
         self.assertIn('SKIPPED'.encode('utf-8'), output)
         self.assertIn(extension.encode('utf-8'), output)
 
-    # TODO(skreft): improves assert so the message is clear in case there's an
-    # error. Include output and file that is being processed.
     # TODO(skreft): check that the first file has more than 1 error, check that
     # the second file has 1 new error, check also the lines that changed.
     def assert_linter_works(self, linter_name, extension):
@@ -99,39 +128,61 @@ class E2ETest(unittest.TestCase):
 
         # Add file 1 (original) to repo
         shutil.copy(filename_original, filename_repo)
-        subprocess.check_output(['git', 'add', filename_repo],
-                                stderr=subprocess.STDOUT)
-
-        # --no-verify is required as a pre-commit hook could be installed.
-        subprocess.check_output(
-            ['git', 'commit', '-m', 'Commit 1', '--no-verify'],
-            stderr=subprocess.STDOUT)
+        self.add(filename_repo)
+        self.commit('Commit 1')
 
         # Add file 2 (error) to repo
         shutil.copy(filename_error, filename_repo)
-        out = io.StringIO()
-        response = gitlint.main([], stdout=out, stderr=out)
+        response, output = self.lint()
         if response == 0:
             self.fail(('Git lint for file %s should have failed.\n' +
-                       'Output:\n%s') % (filename_error,
-                                         out.getvalue()))
-
-        subprocess.check_output(['git', 'add', filename_repo],
-                                stderr=subprocess.STDOUT)
-        # --no-verify is required as a pre-commit hook could be installed.
-        subprocess.check_output(
-            ['git', 'commit', '-m', 'Commit 2', '--no-verify'],
-            stderr=subprocess.STDOUT)
+                       'Output:\n%s') % (filename_error, output))
+        self.add(filename_repo)
+        self.commit('Commit 2')
 
         # Add file 3 (nonewerror) to repo
         shutil.copy(filename_nonewerror, filename_repo)
-        out = io.StringIO()
-        response = gitlint.main([], stdout=out, stderr=out)
+        response, output = self.lint()
         if response != 0:
             self.fail(('Git lint for file %s should have not failed. \n' +
-                       'Output:\n%s') % (filename_nonewerror,
-                                         out.getvalue()))
-        subprocess.check_output(['git', 'add', filename_repo],
-                                stderr=subprocess.STDOUT)
-        subprocess.check_output(['git', 'commit', '-m', 'Commit 3'],
+                       'Output:\n%s') % (filename_nonewerror, output))
+        self.add(filename_repo)
+        self.commit('Commit 3')
+
+
+def populate_linter_checks():
+    """Add a test for each defined linter and extension."""
+    for extension, linter_list in gitlint.get_config(None).items():
+        for linter in linter_list:
+            TestGitE2E.add_linter_e2echeck(linter.args[0], extension)
+
+
+populate_linter_checks()
+
+
+class TestHgE2E(TestGitE2E):
+    @staticmethod
+    def init_repo():
+        """Initializes a mercurial repo."""
+        subprocess.check_output(['hg', 'init'], stderr=subprocess.STDOUT)
+
+    @staticmethod
+    def commit(message):
+        """Commit a changeset to the repo.
+
+        The environment variable NO_VERIFY=1 is required as a git-lint could be
+        installed as pre-commit hook.
+        """
+        # NO_VERIFY=1 is required as a pre-commit hook could be installed.
+        environ = dict(os.environ)
+        environ['NO_VERIFY'] = '1'
+        subprocess.check_output(
+            ['hg', 'commit', '-m', message],
+            stderr=subprocess.STDOUT,
+            env=environ)
+
+    @staticmethod
+    def add(filename):
+        """Add a file to the repo."""
+        subprocess.check_output(['hg', 'add', filename],
                                 stderr=subprocess.STDOUT)
