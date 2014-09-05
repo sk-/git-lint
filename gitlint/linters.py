@@ -29,9 +29,9 @@ class Partial(functools.partial):
                 and self.keywords == other.keywords)
 
     def __repr__(self):
-        return 'Partial: func: %s, args: %s, kwargs: %s' % (self.func.__name__,
-                                                            self.args,
-                                                            self.keywords)
+        # This method should never be executed, only in failing tests.
+        return ('Partial: func: %s, args: %s, kwargs: %s' %
+            (self.func.__name__, self.args, self.keywords))  # pragma: no cover
 
 
 def missing_requirements_command(unused_name, missing_programs,

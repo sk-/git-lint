@@ -155,3 +155,9 @@ class UtilsTest(unittest.TestCase):
             self.assertEqual(
                 content, utils.get_output_from_cache('linter', 'filename'))
             mock_open.assert_called_once_with(cache_filename)
+
+    def test_which_absolute_path(self):
+        with mock.patch('os.path.isfile', return_value=True), \
+             mock.patch('os.access', return_value=True):
+            filename = '/foo/bar.sh'
+            self.assertEqual([filename], utils.which(filename))

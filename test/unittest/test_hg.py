@@ -166,3 +166,7 @@ class HgTest(unittest.TestCase):
             hg_call.asser_called_once_with(
                 ['hg', 'parent', '--template={node}'])
 
+    def test_last_commit_not_in_repo(self):
+        with mock.patch('subprocess.check_output',
+                        side_effect=subprocess.CalledProcessError(255, '', '')):
+            self.assertEqual(None, hg.last_commit())
