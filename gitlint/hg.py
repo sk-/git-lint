@@ -33,7 +33,7 @@ def repository_root():
 def last_commit():
     """Returns the SHA1 of the last commit."""
     try:
-        root = subprocess.check_output(['hg', 'parent', '--template="{node}"'],
+        root = subprocess.check_output(['hg', 'parent', '--template={node}'],
                                        stderr=subprocess.STDOUT).strip()
         # Convert to unicode first
         return root.decode('utf-8')
@@ -58,7 +58,7 @@ def modified_files(root, tracked_only=False, commit=None):
 
     command = ['hg', 'status']
     if commit:
-        command.append('--commit=%s' % commit)
+        command.append('--change=%s' % commit)
 
     # Convert to unicode and split
     status_lines = subprocess.check_output(
