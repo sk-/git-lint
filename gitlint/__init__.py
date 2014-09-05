@@ -50,6 +50,7 @@ import termcolor
 import yaml
 
 import gitlint.git as git
+import gitlint.hg as hg
 import gitlint.linters as linters
 
 
@@ -80,10 +81,9 @@ def find_invalid_filenames(filenames, repository_root):
     return errors
 
 
-def get_config():
+def get_config(repo_root):
     """Gets the configuration file either from the repository or the default."""
     config = os.path.join(os.path.dirname(__file__), 'configs', 'config.yaml')
-    repo_root = git.repository_root()
 
     if repo_root:
         repo_config = os.path.join(repo_root, '.gitlint.yaml')
@@ -144,6 +144,21 @@ def format_comment(comment_data):
     return ''.join(format_pieces).format(**comment_data)
 
 
+def get_vcs_root():
+    """Returns the vcs module and the root of the repo.
+
+    Returns:
+      A tuple containing the vcs module to use (git, hg) and the root of the
+      repository. If no repository exisits then (None, None) is returned.
+    """
+    for vcs in (git, hg):
+        repo_root = vcs.repository_root()
+        if repo_root:
+            return vcs, repo_root
+
+    return (None, None)
+
+
 def main(argv, stdout=sys.stdout, stderr=sys.stderr):
     """Main gitlint routine. To be called from scripts."""
     # Wrap sys stdout for python 2, so print can understand unicode.
@@ -161,14 +176,15 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
 
     json_output = arguments['--json']
 
-    commit = None
-    if arguments['--last-commit']:
-        commit = git.last_commit()
+    vcs, repository_root = get_vcs_root()
 
-    repository_root = git.repository_root()
-    if repository_root is None:
+    if vcs is None:
         stderr.write('fatal: Not a git repository' + os.linesep)
         return 128
+
+    commit = None
+    if arguments['--last-commit']:
+        commit = vcs.last_commit()
 
     if arguments['FILENAME']:
         invalid_filenames = find_invalid_filenames(arguments['FILENAME'],
@@ -179,7 +195,7 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
                 os.linesep.join(invalid[1] for invalid in invalid_filenames))
             return 2
 
-        changed_files = git.modified_files(repository_root,
+        changed_files = vcs.modified_files(repository_root,
                                            tracked_only=arguments['--tracked'],
                                            commit=commit)
         modified_files = {}
@@ -188,13 +204,13 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
             modified_files[normalized_filename] = changed_files.get(
                 normalized_filename)
     else:
-        modified_files = git.modified_files(repository_root,
+        modified_files = vcs.modified_files(repository_root,
                                             tracked_only=arguments['--tracked'],
                                             commit=commit)
 
     linter_not_found = False
     files_with_problems = 0
-    gitlint_config = get_config()
+    gitlint_config = get_config(repository_root)
     json_result = {}
 
     error = termcolor.colored('ERROR', 'red', attrs=('bold',))
@@ -209,7 +225,7 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
         if arguments['--force']:
             modified_lines = None
         else:
-            modified_lines = git.modified_lines(filename,
+            modified_lines = vcs.modified_lines(filename,
                                                 modified_files[filename],
                                                 commit=commit)
 
