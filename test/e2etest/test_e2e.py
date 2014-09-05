@@ -30,7 +30,7 @@ class E2ETest(unittest.TestCase):
         cls.temp_directory = tempfile.mkdtemp(prefix='gitlint')
         os.chdir(cls.temp_directory)
         subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
-        cls.gitlint_config = gitlint.get_config()
+        cls.gitlint_config = gitlint.get_config(cls.temp_directory)
 
     @classmethod
     def tearDownClass(cls):
