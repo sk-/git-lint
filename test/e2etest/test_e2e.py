@@ -66,18 +66,6 @@ class TestGitE2E(unittest.TestCase):
         shutil.rmtree(cls.temp_directory, True)
         os.chdir(cls.original_cwd)
 
-    def setUp(self):
-        self.out = io.StringIO()
-
-    @classmethod
-    def add_linter_e2echeck(cls, linter_name, extension):
-        """Adds a test for the given linter and extension."""
-        def test_linter(self):
-            self.assert_linter_works(linter_name, extension)
-        test_linter.__name__ = 'test_linter_%s_with_%s' % (linter_name,
-                                                           extension[1:])
-        setattr(cls, test_linter.__name__, test_linter)
-
     def test_extension_not_defined(self):
         extension = '.areallyfakeextension'
         filename = os.path.join(self.temp_directory, 'filename' + extension)
@@ -151,15 +139,24 @@ class TestGitE2E(unittest.TestCase):
         self.add(filename_repo)
         self.commit('Commit 3')
 
+    @classmethod
+    def add_linter_check(cls, linter_name, extension):
+        """Adds a test for the given linter and extension."""
+        def test_linter(self):
+            self.assert_linter_works(linter_name, extension)
+        test_linter.__name__ = 'test_linter_%s_with_%s' % (linter_name,
+                                                           extension[1:])
+        setattr(cls, test_linter.__name__, test_linter)
 
-def populate_linter_checks():
-    """Add a test for each defined linter and extension."""
-    for extension, linter_list in gitlint.get_config(None).items():
-        for linter in linter_list:
-            TestGitE2E.add_linter_e2echeck(linter.args[0], extension)
+    @classmethod
+    def add_linter_checks(cls):
+        """Add a test for each defined linter and extension."""
+        for extension, linter_list in gitlint.get_config(None).items():
+            for linter in linter_list:
+                cls.add_linter_check(linter.args[0], extension)
 
 
-populate_linter_checks()
+TestGitE2E.add_linter_checks()
 
 
 class TestHgE2E(TestGitE2E):
