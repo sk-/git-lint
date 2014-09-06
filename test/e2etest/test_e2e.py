@@ -85,8 +85,8 @@ class TestGitE2E(unittest.TestCase):
             f.write('Foo')
         self.add(filename)
         response, output = self.lint()
-        if response != 0:
-            self.fail(output)
+        self.assertEquals(
+            0, response, 'Response %s != 0.\nOutput:\n%s' % (response, output))
 
         # Python3 does not like mixing bytes and strings. So we need to convert
         # the first element to unicode first.
@@ -134,18 +134,20 @@ class TestGitE2E(unittest.TestCase):
         # Add file 2 (error) to repo
         shutil.copy(filename_error, filename_repo)
         response, output = self.lint()
-        if response == 0:
-            self.fail(('Git lint for file %s should have failed.\n' +
-                       'Output:\n%s') % (filename_error, output))
+        self.assertNotEquals(
+            0, response,
+            ('Git lint for file %s should have failed.\n Output:\n%s') %
+            (filename_error, output))
         self.add(filename_repo)
         self.commit('Commit 2')
 
         # Add file 3 (nonewerror) to repo
         shutil.copy(filename_nonewerror, filename_repo)
         response, output = self.lint()
-        if response != 0:
-            self.fail(('Git lint for file %s should have not failed. \n' +
-                       'Output:\n%s') % (filename_nonewerror, output))
+        self.assertEquals(
+            0, response,
+            ('Git lint for file %s should have not failed. \nOutput:\n%s') %
+            (filename_nonewerror, output))
         self.add(filename_repo)
         self.commit('Commit 3')
 
