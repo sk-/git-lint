@@ -1,4 +1,5 @@
-sudo apt-get install optipng pngcrush php5 php-codesniffer ruby checkstyle nodejs npm libjpeg-turbo-progs xsltproc
+sudo apt-getg remove rubygems
+sudo apt-get install optipng pngcrush php5 php-codesniffer ruby1.9.3 checkstyle nodejs npm libjpeg-turbo-progs xsltproc
 #sudo apt-get install nodejs-legacy in ubuntu 14
 sudo gem install rubocop
 sudo gem install ruby-lint
@@ -9,6 +10,9 @@ pip install pep8
 pip install pyYAML
 pip install docutils
 pip install html-linter
+
+# See https://github.com/n1k0/casperjs/issues/876
+sudo npm config set registry http://registry.npmjs.org/
 sudo npm install -g csslint
 sudo npm install -g jshint
 
