@@ -23,29 +23,7 @@ import gitlint
 # pylint: disable=too-many-public-methods
 
 
-class TestGitE2E(unittest.TestCase):
-    @staticmethod
-    def init_repo():
-        """Initializes a git repo."""
-        subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
-
-    @staticmethod
-    def commit(message):
-        """Commit a changeset to the repo.
-
-        The option --no-verify is used as a pre-commit check could be globally
-        installed.
-        """
-        subprocess.check_output(
-            ['git', 'commit', '-m', message, '--no-verify'],
-            stderr=subprocess.STDOUT)
-
-    @staticmethod
-    def add(filename):
-        """Add a file to the repo."""
-        subprocess.check_output(['git', 'add', filename],
-                                stderr=subprocess.STDOUT)
-
+class E2EBase(object):
     @staticmethod
     def lint():
         """Returns the response and ouput of git-lint."""
@@ -156,10 +134,34 @@ class TestGitE2E(unittest.TestCase):
                 cls.add_linter_check(linter.args[0], extension)
 
 
-TestGitE2E.add_linter_checks()
+E2EBase.add_linter_checks()
 
 
-class TestHgE2E(TestGitE2E):
+class TestGitE2E(E2EBase, unittest.TestCase):
+    @staticmethod
+    def init_repo():
+        """Initializes a git repo."""
+        subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
+
+    @staticmethod
+    def commit(message):
+        """Commit a changeset to the repo.
+
+        The option --no-verify is used as a pre-commit check could be globally
+        installed.
+        """
+        subprocess.check_output(
+            ['git', 'commit', '-m', message, '--no-verify'],
+            stderr=subprocess.STDOUT)
+
+    @staticmethod
+    def add(filename):
+        """Add a file to the repo."""
+        subprocess.check_output(['git', 'add', filename],
+                                stderr=subprocess.STDOUT)
+
+
+class TestHgE2E(E2EBase, unittest.TestCase):
     @staticmethod
     def init_repo():
         """Initializes a mercurial repo."""
