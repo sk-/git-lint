@@ -145,6 +145,56 @@ arguments:
 * %(REPO_HOME)s: the root of your repo.
 * %(DEFAULT_CONFIGS)s: the location of the default config files.
 
+Git Configuration
+-----------------
+
+git-lint comes with a pre-commit hook for git. To install it for your repo
+execute::
+
+  $ ln -s `which pre-commit.git-lint.sh` $PATH_TO_YOUR_REPO/.git/hooks/pre-commit
+
+or if you want to install it globally execute instead::
+
+  $ ln -s `which pre-commit.git-lint.sh` /usr/share/git-core/templates/hooks/pre-commit 
+
+
+Mercurial Configuration
+-----------------------
+
+To make available git-lint with a better name in mercurial you have to add the following
+to your .hgrc configuration::
+
+  [alias]
+  lint = !git-lint
+
+To add a pre-commit hook add the following::
+
+  [hooks]
+  pretxncommit.hglint = pre-commit.hg-lint.sh > /dev/pts/1
+
+
+The hook above has a hack to display the output of the command. You may need to adjust
+it to use the correct tty (you can find it with the command tty). Additionally,
+as mercurial does not provide (AFAIK) any way to skip a hook, if you want to force a commit
+with linter warnings execute the commit command as follow::
+
+  $ NO_VERIFY=1 hg commit ...
+
+Limitations
+-----------
+
+In some cases a change will trigger a warning in another line. Those cases are
+unfortunately not handled by git-lint, as it only reports those lines taht were
+modified. Fully supporting this use case would require to run the linters twice
+and report only the new lines. The most common case in which this occurs is with
+unused imports or variables. Let's say we have the following piece of code::
+
+  import foo
+  foo.bar()
+
+If you remove the second line, git-lint will not complain as the warning is for line
+1, which was not modified.
+
 Python Versions
 ---------------
 
@@ -187,13 +237,18 @@ TODOS and Possible Features
   as returned by the command file.
 * Provide better options for colorizing the output, and maybe a way to disable
   it. Also detect if colors are supported or if it is a tty.
-* Add support for other version control systems like mercurial. This should be
+* Add support for more version control systems (svn, perforce). This should be
   easy, it's just a matter of implementing the functions defined in
-  gitlint/git.py.
+  gitlint/git.py or gitlint/hg.py.
 * Support windows.
 
 Changelog
 =========
+
+v0.0.6 (2014-09-07)
+-------------------
+
+* Added mercurial support
 
 v0.0.5 (2014-05-09)
 -------------------

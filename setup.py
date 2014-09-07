@@ -29,6 +29,7 @@ setup(
     scripts=[
         'scripts/git-lint',
         'scripts/pre-commit.git-lint.sh',
+        'scripts/pre-commit.hg-lint.sh',
         'scripts/custom_linters/ini_linter.py',
         'scripts/custom_linters/yaml_linter.py',
         'scripts/custom_linters/jpegtran-linter.sh',

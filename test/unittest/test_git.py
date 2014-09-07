@@ -179,3 +179,8 @@ class GitTest(unittest.TestCase):
             self.assertEqual('0a' * 20, git.last_commit())
             git_call.asser_called_once_with(
                 ['git', 'rev-parse', 'HEAD'])
+
+    def test_last_commit_not_in_repo(self):
+        with mock.patch('subprocess.check_output',
+                        side_effect=subprocess.CalledProcessError(255, '', '')):
+            self.assertEqual(None, git.last_commit())
