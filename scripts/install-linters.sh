@@ -1,4 +1,5 @@
-sudo apt-get install optipng pngcrush jpegtran php5 php-codesniffer ruby checkstyle nodejs nodejs-legacy npm libjpeg-turbo-progs xsltproc
+sudo apt-get install optipng pngcrush php5 php-codesniffer ruby checkstyle nodejs npm libjpeg-turbo-progs xsltproc
+#sudo apt-get install nodejs-legacy in ubuntu 14
 sudo gem install rubocop
 sudo gem install ruby-lint
 sudo gem install scss-lint

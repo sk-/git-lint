@@ -15,7 +15,7 @@ before_script:
   - export PATH=$PATH:$PWD/pmd-bin/bin
   - git config --global user.email "john@example.com"
   - git config --global user.name "John Doe"
-  - "echo -e '[ui]\nusername = John Doe <john@example.com>'"
+  - "echo -e '[ui]\nusername = John Doe <john@example.com>' >> ~/.hgrc"
 script: "python -R setup.py nosetests"
 after_success:
   coveralls
