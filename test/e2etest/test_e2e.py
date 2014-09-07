@@ -149,11 +149,21 @@ class E2EBase(object):
 E2EBase.add_linter_checks()
 
 
+def execute(*args, **kwargs):
+    """Executes a command and prints the output in case of error."""
+    kwargs['stderr'] = subprocess.STDOUT
+    try:
+        subprocess.check_output(*args, **kwargs)
+    except subprocess.CalledProcessError as error:
+        print error.output
+        raise
+
+
 class TestGitE2E(E2EBase, unittest.TestCase):
     @staticmethod
     def init_repo():
         """Initializes a git repo."""
-        subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
+        execute(['git', 'init'])
 
     @staticmethod
     def commit(message):
@@ -162,22 +172,19 @@ class TestGitE2E(E2EBase, unittest.TestCase):
         The option --no-verify is used as a pre-commit check could be globally
         installed.
         """
-        subprocess.check_output(
-            ['git', 'commit', '-m', message, '--no-verify'],
-            stderr=subprocess.STDOUT)
+        execute(['git', 'commit', '-m', message, '--no-verify'])
 
     @staticmethod
     def add(filename):
         """Add a file to the repo."""
-        subprocess.check_output(['git', 'add', filename],
-                                stderr=subprocess.STDOUT)
+        execute(['git', 'add', filename])
 
 
 class TestHgE2E(E2EBase, unittest.TestCase):
     @staticmethod
     def init_repo():
         """Initializes a mercurial repo."""
-        subprocess.check_output(['hg', 'init'], stderr=subprocess.STDOUT)
+        execute(['hg', 'init'])
 
     @staticmethod
     def commit(message):
@@ -189,13 +196,9 @@ class TestHgE2E(E2EBase, unittest.TestCase):
         # NO_VERIFY=1 is required as a pre-commit hook could be installed.
         environ = dict(os.environ)
         environ['NO_VERIFY'] = '1'
-        subprocess.check_output(
-            ['hg', 'commit', '-m', message],
-            stderr=subprocess.STDOUT,
-            env=environ)
+        execute(['hg', 'commit', '-m', message], env=environ)
 
     @staticmethod
     def add(filename):
         """Add a file to the repo."""
-        subprocess.check_output(['hg', 'add', filename],
-                                stderr=subprocess.STDOUT)
+        execute(['hg', 'add', filename])
