@@ -39,10 +39,22 @@ class E2EBase(object):
         os.chdir(cls.temp_directory)
         cls.init_repo()
 
+    def setUp(self):
+        self.filename_repo = None
+
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree(cls.temp_directory, True)
         os.chdir(cls.original_cwd)
+
+    def tearDown(self):
+        if self.filename_repo is None:
+            return
+
+        with open(self.filename_repo, 'w') as f:
+            pass
+        self.add(self.filename_repo)
+        self.commit('Commit teardown')
 
     def test_extension_not_defined(self):
         extension = '.areallyfakeextension'
@@ -73,7 +85,7 @@ class E2EBase(object):
         """
         data_dirname = os.path.join(
             os.path.dirname(os.path.realpath(__file__)), 'data')
-        filename_repo = os.path.join(
+        self.filename_repo = filename_repo = os.path.join(
             self.temp_directory, '%s%s' % (linter_name, extension))
         filename_original = os.path.join(
             data_dirname, linter_name, 'original%s' % extension)
