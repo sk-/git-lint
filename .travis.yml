@@ -4,11 +4,13 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
+  - "pypy"
 # command to install dependencies
 install:
   - "pip install ."
   - "pip install coveralls"
+  - "bash scripts/install-linters.sh"
 # command to run tests
-script: python -R setup.py nosetests --exclude e2e
+script: "PATH=$PATH:pmd-bin/bin python -R setup.py nosetests"
 after_success:
   coveralls
