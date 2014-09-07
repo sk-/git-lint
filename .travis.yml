@@ -11,6 +11,8 @@ install:
   - "pip install coveralls"
   - "bash scripts/install-linters.sh"
 # command to run tests
+before_script:
+  - export PATH=$PATH:$PWD/pmd-bin/bin
 script: "PATH=$PATH:pmd-bin/bin python -R setup.py nosetests"
 after_success:
   coveralls
