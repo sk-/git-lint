@@ -21,4 +21,4 @@ cd -
 # PMD
 wget "http://downloads.sourceforge.net/project/pmd/pmd/5.1.3/pmd-bin-5.1.3.zip?r=&ts=`date +%s`&use_mirror=ufpr"
 unzip pmd-bin-*
-mv pmd-bin-* pmd-bin
+mv pmd-bin-5.1.3 pmd-bin
