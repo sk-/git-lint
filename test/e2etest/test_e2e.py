@@ -74,7 +74,7 @@ class E2EBase(object):
 
     def get_linter_output(self, linter_name, file_path):
         cache_path = os.path.expanduser('~/.git-lint/cache')
-        filename = os.path.join(cache_path, linter_name, file_path)
+        filename = os.path.join(cache_path, linter_name, file_path[1:])
         with open(filename) as f:
             output = f.read()
         return output
