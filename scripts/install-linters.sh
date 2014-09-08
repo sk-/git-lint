@@ -12,16 +12,16 @@ source $HOME/.rvm/scripts/rvm
 #./configure
 #sudo make install
 #cd -
+# Install npm
+#curl -L https://npmjs.org/install.sh | sh
 curl -sL https://deb.nodesource.com/setup | sudo bash -
 sudo apt-get install nodejs
 
-# Install npm
-curl -L https://npmjs.org/install.sh | sh
+gem install rubocop
+rubocop --help
+gem install ruby-lint
+gem install scss-lint
 
-sudo gem install rubocop
-rubcop --help
-sudo gem install ruby-lint
-sudo gem install scss-lint
 pip install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz
 pip install pylint
 pip install pep8
