@@ -72,6 +72,13 @@ class E2EBase(object):
         self.assertIn('SKIPPED'.encode('utf-8'), output)
         self.assertIn(extension.encode('utf-8'), output)
 
+    def get_linter_output(self, linter_name, file_path):
+        cache_path = os.path.expanduser('~/.git-lint/cache')
+        filename = os.path.join(cache_path, linter_name, file_path)
+        with open(filename) as f:
+            output = f.read()
+        return output
+
     # TODO(skreft): check that the first file has more than 1 error, check that
     # the second file has 1 new error, check also the lines that changed.
     def assert_linter_works(self, linter_name, extension):
@@ -114,8 +121,9 @@ class E2EBase(object):
         response, output = self.lint()
         self.assertNotEquals(
             0, response,
-            ('Git lint for file %s should have failed.\n Output:\n%s') %
-            (filename_error, output))
+            ('Git lint for file %s should have failed.\n Linter Output:\n%s') %
+            (filename_error,
+             self.get_linter_output(linter_name, filename_repo)))
         self.add(filename_repo)
         self.commit('Commit 2')
 
@@ -155,7 +163,7 @@ def execute(*args, **kwargs):
     try:
         subprocess.check_output(*args, **kwargs)
     except subprocess.CalledProcessError as error:
-        print error.output
+        print(error.output)
         raise
 
 

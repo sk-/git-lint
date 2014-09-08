@@ -1,6 +1,17 @@
 sudo apt-getg remove rubygems
-sudo apt-get install optipng pngcrush php5 php-codesniffer ruby1.9.3 checkstyle nodejs npm libjpeg-turbo-progs xsltproc
+sudo apt-get install curl build-essential optipng pngcrush php5 php-codesniffer ruby1.9.3 checkstyle libjpeg-turbo-progs xsltproc
 #sudo apt-get install nodejs-legacy in ubuntu 14
+
+# Install latest node
+curl http://nodejs.org/dist/node-latest.tar.gz | tar xz
+cd node-v*
+./configure
+sudo make install
+cd -
+
+# Install npm
+curl -L https://npmjs.org/install.sh | sh
+
 sudo gem install rubocop
 sudo gem install ruby-lint
 sudo gem install scss-lint
