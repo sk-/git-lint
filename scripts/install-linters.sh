@@ -1,5 +1,5 @@
 sudo apt-get remove rubygems
-sudo apt-get install curl build-essential optipng pngcrush php5 ruby1.9.3 checkstyle libjpeg-turbo-progs xsltproc
+sudo apt-get install curl build-essential php-pear optipng pngcrush php5 ruby1.9.3 checkstyle libjpeg-turbo-progs xsltproc
 #sudo apt-get install nodejs-legacy in ubuntu 14
 
 # Install latest node
@@ -28,8 +28,6 @@ sudo npm install -g csslint
 sudo npm install -g jshint
 
 # PHP CodeSniffer
-wget http://pear.php.net/go-pear.phar
-sudo php go-pear.phar
 sudo pear install PHP_CodeSniffer
 
 # Tidy
