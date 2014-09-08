@@ -66,11 +66,16 @@ class E2EBase(object):
         self.assertEquals(
             0, response, 'Response %s != 0.\nOutput:\n%s' % (response, output))
 
-        # Python3 does not like mixing bytes and strings. So we need to convert
-        # the first element to unicode first.
-        self.assertIn(os.path.relpath(filename).encode('utf-8'), output)
-        self.assertIn('SKIPPED'.encode('utf-8'), output)
-        self.assertIn(extension.encode('utf-8'), output)
+        self.assertIn(os.path.relpath(filename), output)
+        self.assertIn('SKIPPED', output)
+        self.assertIn(extension, output)
+
+    def get_linter_output(self, linter_name, file_path):
+        cache_path = os.path.expanduser('~/.git-lint/cache')
+        filename = os.path.join(cache_path, linter_name, file_path[1:])
+        with open(filename) as f:
+            output = f.read()
+        return output
 
     # TODO(skreft): check that the first file has more than 1 error, check that
     # the second file has 1 new error, check also the lines that changed.
@@ -114,8 +119,9 @@ class E2EBase(object):
         response, output = self.lint()
         self.assertNotEquals(
             0, response,
-            ('Git lint for file %s should have failed.\n Output:\n%s') %
-            (filename_error, output))
+            ('Git lint for file %s should have failed.\n Linter Output:\n%s') %
+            (filename_error,
+             self.get_linter_output(linter_name, filename_repo)))
         self.add(filename_repo)
         self.commit('Commit 2')
 
@@ -149,11 +155,21 @@ class E2EBase(object):
 E2EBase.add_linter_checks()
 
 
+def execute(*args, **kwargs):
+    """Executes a command and prints the output in case of error."""
+    kwargs['stderr'] = subprocess.STDOUT
+    try:
+        subprocess.check_output(*args, **kwargs)
+    except subprocess.CalledProcessError as error:
+        print(error.output)
+        raise
+
+
 class TestGitE2E(E2EBase, unittest.TestCase):
     @staticmethod
     def init_repo():
         """Initializes a git repo."""
-        subprocess.check_output(['git', 'init'], stderr=subprocess.STDOUT)
+        execute(['git', 'init'])
 
     @staticmethod
     def commit(message):
@@ -162,22 +178,19 @@ class TestGitE2E(E2EBase, unittest.TestCase):
         The option --no-verify is used as a pre-commit check could be globally
         installed.
         """
-        subprocess.check_output(
-            ['git', 'commit', '-m', message, '--no-verify'],
-            stderr=subprocess.STDOUT)
+        execute(['git', 'commit', '-m', message, '--no-verify'])
 
     @staticmethod
     def add(filename):
         """Add a file to the repo."""
-        subprocess.check_output(['git', 'add', filename],
-                                stderr=subprocess.STDOUT)
+        execute(['git', 'add', filename])
 
 
 class TestHgE2E(E2EBase, unittest.TestCase):
     @staticmethod
     def init_repo():
         """Initializes a mercurial repo."""
-        subprocess.check_output(['hg', 'init'], stderr=subprocess.STDOUT)
+        execute(['hg', 'init'])
 
     @staticmethod
     def commit(message):
@@ -189,13 +202,9 @@ class TestHgE2E(E2EBase, unittest.TestCase):
         # NO_VERIFY=1 is required as a pre-commit hook could be installed.
         environ = dict(os.environ)
         environ['NO_VERIFY'] = '1'
-        subprocess.check_output(
-            ['hg', 'commit', '-m', message],
-            stderr=subprocess.STDOUT,
-            env=environ)
+        execute(['hg', 'commit', '-m', message], env=environ)
 
     @staticmethod
     def add(filename):
         """Add a file to the repo."""
-        subprocess.check_output(['hg', 'add', filename],
-                                stderr=subprocess.STDOUT)
+        execute(['hg', 'add', filename])
