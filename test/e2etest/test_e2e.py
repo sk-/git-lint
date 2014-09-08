@@ -66,11 +66,9 @@ class E2EBase(object):
         self.assertEquals(
             0, response, 'Response %s != 0.\nOutput:\n%s' % (response, output))
 
-        # Python3 does not like mixing bytes and strings. So we need to convert
-        # the first element to unicode first.
-        self.assertIn(os.path.relpath(filename).encode('utf-8'), output)
-        self.assertIn('SKIPPED'.encode('utf-8'), output)
-        self.assertIn(extension.encode('utf-8'), output)
+        self.assertIn(os.path.relpath(filename), output)
+        self.assertIn('SKIPPED', output)
+        self.assertIn(extension, output)
 
     def get_linter_output(self, linter_name, file_path):
         cache_path = os.path.expanduser('~/.git-lint/cache')
