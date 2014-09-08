@@ -1,4 +1,4 @@
-sudo apt-get remove rubygems
+sudo apt-get remove rubygems ruby
 sudo apt-get install curl build-essential php-pear optipng pngcrush php5 ruby1.9.3 checkstyle libjpeg-turbo-progs xsltproc
 #sudo apt-get install nodejs-legacy in ubuntu 14
 
@@ -13,6 +13,7 @@ cd -
 curl -L https://npmjs.org/install.sh | sh
 
 sudo gem install rubocop
+rubcop --help
 sudo gem install ruby-lint
 sudo gem install scss-lint
 pip install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz
