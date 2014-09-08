@@ -223,7 +223,6 @@ explanatory. (Note to myself: don't be so lazy and write a proper doc for this.)
 TODOS and Possible Features
 ---------------------------
 
-* Add travis-ci configuration for e2e tests.
 * Support directories as arguments
 * Provide a man page so 'git help lint' and 'git lint --help' work. I already
   have a script for converting the Usage to a man page, but I still need to
@@ -245,10 +244,11 @@ TODOS and Possible Features
 Changelog
 =========
 
-v0.0.6 (2014-09-07)
+v0.0.6 (2014-09-08)
 -------------------
 
 * Added mercurial support
+* Run e2e tests on Travis
 
 v0.0.5 (2014-05-09)
 -------------------
