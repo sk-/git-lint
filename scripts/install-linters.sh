@@ -1,5 +1,5 @@
-sudo apt-getg remove rubygems
-sudo apt-get install curl build-essential optipng pngcrush php5 php-codesniffer ruby1.9.3 checkstyle libjpeg-turbo-progs xsltproc
+sudo apt-get remove rubygems
+sudo apt-get install curl build-essential optipng pngcrush php5 ruby1.9.3 checkstyle libjpeg-turbo-progs xsltproc
 #sudo apt-get install nodejs-legacy in ubuntu 14
 
 # Install latest node
@@ -26,6 +26,11 @@ pip install html-linter
 sudo npm config set registry http://registry.npmjs.org/
 sudo npm install -g csslint
 sudo npm install -g jshint
+
+# PHP CodeSniffer
+wget http://pear.php.net/go-pear.phar
+sudo php go-pear.phar
+sudo pear install PHP_CodeSniffer
 
 # Tidy
 git clone https://github.com/w3c/tidy-html5.git
