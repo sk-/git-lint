@@ -1,3 +1,4 @@
+sudo apt-get update
 sudo apt-get remove rubygems ruby
 sudo apt-get install curl build-essential php-pear optipng pngcrush php5 checkstyle libjpeg-turbo-progs xsltproc
 #sudo apt-get install nodejs-legacy in ubuntu 14
