@@ -73,6 +73,9 @@ class E2EBase(object):
     def get_linter_output(self, linter_name, file_path):
         cache_path = os.path.expanduser('~/.git-lint/cache')
         filename = os.path.join(cache_path, linter_name, file_path[1:])
+        if not os.path.exists(filename):
+            return 'No git-lint cache found for %s' % filename
+
         with open(filename) as f:
             output = f.read()
         return output
@@ -119,8 +122,10 @@ class E2EBase(object):
         response, output = self.lint()
         self.assertNotEquals(
             0, response,
-            ('Git lint for file %s should have failed.\n Linter Output:\n%s') %
+            ('Git lint for file %s should have failed.\n git-lint output: %s' +
+             '\nLinter Output:\n%s') %
             (filename_error,
+             output,
              self.get_linter_output(linter_name, filename_repo)))
         self.add(filename_repo)
         self.commit('Commit 2')
