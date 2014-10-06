@@ -31,7 +31,7 @@ class LintersTest(unittest.TestCase):
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
             check_output.return_value = os.linesep.join([
                 'Line 1:1: 1',
-                'Line 5:2: 5',
+                u'Line 5:2: 5 \xb7',
                 'Line 7:3: 7',
                 'Line 9:4: 9']).encode('utf-8')
             command = functools.partial(
@@ -48,7 +48,7 @@ class LintersTest(unittest.TestCase):
                             {
                                 'line': 5,
                                 'column': 2,
-                                'message': '5'
+                                'message': u'5 \xb7'
                             },
                             {
                                 'line': 7,
@@ -71,7 +71,7 @@ class LintersTest(unittest.TestCase):
                             {
                                 'line': 5,
                                 'column': 2,
-                                'message': '5'
+                                'message': u'5 \xb7'
                             },
                             {
                                 'line': 7,
