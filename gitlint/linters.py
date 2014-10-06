@@ -186,7 +186,7 @@ def lint(filename, lines, config):
     else:
         return {
             filename: {
-                'skipped': ['SKIPPED: no linter is defined or enabled for files'
+                'skipped': ['no linter is defined or enabled for files'
                             ' with extension "%s"' % ext]
             }
         }
