@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2013-2014 Sebastian Kreft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import unicode_literals
+
 import functools
 import os
 import subprocess
@@ -31,7 +34,7 @@ class LintersTest(unittest.TestCase):
                 mock.patch('os.path.getmtime', side_effect=[1, 0, 1, 0]):
             check_output.return_value = os.linesep.join([
                 'Line 1:1: 1',
-                u'Line 5:2: 5 \xb7',
+                'Line 5:2: 5 ·',
                 'Line 7:3: 7',
                 'Line 9:4: 9']).encode('utf-8')
             command = functools.partial(
@@ -48,7 +51,7 @@ class LintersTest(unittest.TestCase):
                             {
                                 'line': 5,
                                 'column': 2,
-                                'message': u'5 \xb7'
+                                'message': '5 ·'
                             },
                             {
                                 'line': 7,
@@ -71,7 +74,7 @@ class LintersTest(unittest.TestCase):
                             {
                                 'line': 5,
                                 'column': 2,
-                                'message': u'5 \xb7'
+                                'message': '5 ·'
                             },
                             {
                                 'line': 7,

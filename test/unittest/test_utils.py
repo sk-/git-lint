@@ -71,7 +71,7 @@ class UtilsTest(unittest.TestCase):
 
     def test_open_for_write_file_exists(self):
         filename = 'foo/bar/new_file'
-        with mock.patch('gitlint.utils.open',
+        with mock.patch('io.open',
                         mock.mock_open(),
                         create=True) as mock_open, \
              mock.patch('os.path.exists', return_value=True):
@@ -81,7 +81,7 @@ class UtilsTest(unittest.TestCase):
 
     def test_open_for_write_file_does_not_exist(self):
         filename = 'foo/bar/new_file'
-        with mock.patch('gitlint.utils.open',
+        with mock.patch('io.open',
                         mock.mock_open(),
                         create=True) as mock_open, \
              mock.patch('os.path.exists', return_value=False), \
@@ -149,7 +149,7 @@ class UtilsTest(unittest.TestCase):
                         return_value=cache_filename), \
              mock.patch('os.path.exists', return_value=True), \
              mock.patch('os.path.getmtime', side_effect=[1, 2]), \
-             mock.patch('gitlint.utils.open',
+             mock.patch('io.open',
                         mock.mock_open(read_data=content),
                         create=True) as mock_open:
             self.assertEqual(

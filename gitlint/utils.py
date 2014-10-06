@@ -13,6 +13,7 @@
 # limitations under the License.
 """Common function used across modules."""
 
+import io
 import os
 import re
 
@@ -66,7 +67,7 @@ def _open_for_write(filename):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    return open(filename, 'w')
+    return io.open(filename, 'w')
 
 
 def _get_cache_filename(name, filename):
@@ -94,7 +95,7 @@ def get_output_from_cache(name, filename):
     cache_filename = _get_cache_filename(name, filename)
     if (os.path.exists(cache_filename) and
             os.path.getmtime(filename) < os.path.getmtime(cache_filename)):
-        with open(cache_filename) as f:
+        with io.open(cache_filename) as f:
             return f.read()
 
     return None
