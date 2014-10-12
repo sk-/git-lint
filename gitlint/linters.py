@@ -17,6 +17,7 @@ import collections
 import functools
 import os
 import os.path
+import string
 import subprocess
 
 import gitlint.utils as utils
@@ -100,8 +101,8 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
 
     groups = ('line', 'column', 'message', 'severity', 'message_id')
     filtered_lines = utils.filter_lines(output_lines,
-                                        filter_regex % {'lines': lines_regex,
-                                                        'filename': filename},
+                                        filter_regex.format(lines=lines_regex,
+                                                            filename=filename),
                                         groups=groups)
 
     result = []
@@ -122,6 +123,12 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
     }
 
 
+def _replace_variables(data, variables):
+    """Replace the format variables in all items of data."""
+    formatter = string.Formatter()
+    return [formatter.vformat(item, [], variables) for item in data]
+
+
 # TODO(skreft): validate data['filter'], ie check that only has valid fields.
 def parse_yaml_config(yaml_config, repo_home):
     """Converts a dictionary (parsed Yaml) to the internal representation."""
@@ -134,9 +141,10 @@ def parse_yaml_config(yaml_config, repo_home):
     }
 
     for name, data in yaml_config.items():
-        command = data['command'] % variables
-        requirements = [req % variables for req in data.get('requirements', [])]
-        arguments = [arg % variables for arg in data.get('arguments', [])]
+        command = _replace_variables([data['command']], variables)[0]
+        requirements = _replace_variables(data.get('requirements', []),
+                                          variables)
+        arguments = _replace_variables(data.get('arguments', []), variables)
 
         not_found_programs = utils.programs_not_in_path(
             [command] + requirements)

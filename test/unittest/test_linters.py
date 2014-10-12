@@ -42,7 +42,7 @@ class LintersTest(unittest.TestCase):
                 'l',
                 'linter',
                 ['-f', '--compact'],
-                r'^Line (?P<line>%(lines)s):(?P<column>\d+): (?P<message>.*)$')
+                r'^Line (?P<line>{lines}):(?P<column>\d+): (?P<message>.*)$')
             filename = 'foo.txt'
             self.assertEqual(
                 {
@@ -107,7 +107,7 @@ class LintersTest(unittest.TestCase):
                 'l',
                 'linter',
                 ['-f', '--compact'],
-                r'^(?P<severity>.*): line (?P<line>%(lines)s)(, col ' +
+                r'^(?P<severity>.*): line (?P<line>{lines})(, col ' +
                 r'(?P<column>\d+)): \((?P<message_id>.*)\) (?P<message>.*)$')
             filename = 'foo.txt'
             self.assertEqual(
@@ -141,7 +141,7 @@ class LintersTest(unittest.TestCase):
                 'l',
                 'linter',
                 ['-f', '--compact'],
-                '^Line (?P<line>%(lines)s): (?P<message>.*)$')
+                '^Line (?P<line>{lines}): (?P<message>.*)$')
             filename = 'foo.txt'
             self.assertEqual(
                 {
@@ -198,7 +198,7 @@ class LintersTest(unittest.TestCase):
                                         'l',
                                         'linter',
                                         ['-f', '--compact'],
-                                        '^Line (%(lines)s):')
+                                        '^Line ({lines}):')
             filename = 'foo.txt'
             output = command(filename, lines=[3, 5, 7])
             self.assertEqual(1, len(output[filename]['error']))
@@ -220,12 +220,12 @@ class LintersTest(unittest.TestCase):
             linters.lint_command,
             'l1',
             'linter1', ['-f'],
-            '^Line (?P<line>%(lines)s): (?P<message>.*)$')
+            '^Line (?P<line>{lines}): (?P<message>.*)$')
         linter2 = functools.partial(
             linters.lint_command,
             'l2',
             'linter2', [],
-            '^ line (?P<line>%(lines)s): (?P<message>.*)$')
+            '^ line (?P<line>{lines}): (?P<message>.*)$')
         config = {
             '.txt': [linter1, linter2]
         }
@@ -263,13 +263,13 @@ class LintersTest(unittest.TestCase):
             'l1',
             'linter1',
             ['-f'],
-            '^Line (?P<line>%(lines)s): (?P<message>.*)$')
+            '^Line (?P<line>{lines}): (?P<message>.*)$')
         linter2 = functools.partial(
             linters.lint_command,
             'l2',
             'linter2',
             [],
-            '^ line (?P<line>%(lines)s): (?P<message>.*)$')
+            '^ line (?P<line>{lines}): (?P<message>.*)$')
         config = {
             '.txt': [linter1, linter2]
         }
@@ -299,9 +299,9 @@ class LintersTest(unittest.TestCase):
 
     def test_lint_all_empty_lint(self):
         linter1 = functools.partial(
-            linters.lint_command, 'l1', 'linter1', ['-f'], '^Line %(lines)s:')
+            linters.lint_command, 'l1', 'linter1', ['-f'], '^Line {lines}:')
         linter2 = functools.partial(
-            linters.lint_command, 'l2', 'linter2', [], '^ line %(lines)s:')
+            linters.lint_command, 'l2', 'linter2', [], '^ line {lines}:')
         config = {
             '.txt': [linter1, linter2]
         }
@@ -426,11 +426,11 @@ class LintersTest(unittest.TestCase):
             'linter': {
                 'arguments': [
                     '--config',
-                    '%(DEFAULT_CONFIGS)s/foo.config'
+                    '{DEFAULT_CONFIGS}/foo.config'
                 ],
-                'command': '%(REPO_HOME)s/bin/linter',
+                'command': '{REPO_HOME}/bin/linter',
                 'requirements': [
-                    '%(REPO_HOME)s/bin/dep1',
+                    '{REPO_HOME}/bin/dep1',
                 ],
                 'extensions': ['.foo'],
                 'filter': '.*',
@@ -446,11 +446,11 @@ class LintersTest(unittest.TestCase):
             'linter': {
                 'arguments': [
                     '--config',
-                    '%(DEFAULT_CONFIGS)s/foo.config' % variables
+                    '{DEFAULT_CONFIGS}/foo.config'.format(**variables),
                 ],
-                'command': '%(REPO_HOME)s/bin/linter' % variables,
+                'command': '{REPO_HOME}/bin/linter'.format(**variables),
                 'requirements': [
-                    '%(REPO_HOME)s/bin/dep1' % variables,
+                    '{REPO_HOME}/bin/dep1'.format(**variables),
                 ],
                 'extensions': ['.foo'],
                 'filter': '.*',
