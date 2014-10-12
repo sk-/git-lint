@@ -188,6 +188,11 @@ def lint(filename, lines, config):
             for category, values in linter_output[filename].items():
                 output[category].extend(values)
 
+        if 'comments' in output:
+            output['comments'] = sorted(
+                output['comments'],
+                key=lambda x: (x.get('line', -1), x.get('column', -1)))
+
         return {
             filename: dict(output)
         }
