@@ -240,12 +240,12 @@ class LintersTest(unittest.TestCase):
                     filename: {
                         'comments': [
                             {
-                                'line': 5,
-                                'message': '5'
-                            },
-                            {
                                 'line': 4,
                                 'message': '4'
+                            },
+                            {
+                                'line': 5,
+                                'message': '5'
                             },
                         ],
                     },
@@ -256,6 +256,73 @@ class LintersTest(unittest.TestCase):
                           stderr=subprocess.STDOUT),
                 mock.call(['linter2', 'foo.txt'], stderr=subprocess.STDOUT)]
             self.assertEqual(expected_calls, check_output.call_args_list)
+
+    def test_lint_output_is_sorted(self):
+        linter1 = functools.partial(
+            linters.lint_command,
+            'l1',
+            'linter1', ['-f'],
+            '^Line (?P<line>{lines}): (?P<message>.*)$')
+        linter2 = functools.partial(
+            linters.lint_command,
+            'l2',
+            'linter2', [],
+            '^ line (?P<line>{lines}): (?P<message>.*)$')
+        linter3 = functools.partial(
+            linters.lint_command,
+            'l3',
+            'linter3', [],
+            '^(?P<message>.*)$')
+        linter4 = functools.partial(
+            linters.lint_command,
+            'l4',
+            'linter4', [],
+            r'^(?P<line>{lines}):(?P<column>\d+): (?P<message>.*)$')
+        config = {
+            '.txt': [linter1, linter2, linter3, linter4]
+        }
+        outputs = [
+            os.linesep.join(['Line 5: 5', 'Line 1: 1']).encode('utf-8'),
+            os.linesep.join([' line 4: 4']).encode('utf-8'),
+            os.linesep.join(['message']).encode('utf-8'),
+            os.linesep.join(['4:10: 4.a', '4:1: 4.b']).encode('utf-8'),
+        ]
+        with mock.patch('subprocess.check_output', side_effect=outputs), \
+                mock.patch('os.path.getmtime', side_effect=[1, 0] * 4):
+            filename = 'foo.txt'
+            self.assertEqual(
+                {
+                    filename: {
+                        'comments': [
+                            {
+                                'message': 'message',
+                            },
+                            {
+                                'line': 1,
+                                'message': '1',
+                            },
+                            {
+                                'line': 4,
+                                'message': '4',
+                            },
+                            {
+                                'line': 4,
+                                'column': 1,
+                                'message': '4.b',
+                            },
+                            {
+                                'line': 4,
+                                'column': 10,
+                                'message': '4.a',
+                            },
+                            {
+                                'line': 5,
+                                'message': '5',
+                            },
+                        ],
+                    },
+                },
+                linters.lint(filename, lines=None, config=config))
 
     def test_lint_one_empty_lint(self):
         linter1 = functools.partial(
