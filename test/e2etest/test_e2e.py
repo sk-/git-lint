@@ -207,7 +207,7 @@ class TestHgE2E(E2EBase, unittest.TestCase):
         # NO_VERIFY=1 is required as a pre-commit hook could be installed.
         environ = dict(os.environ)
         environ['NO_VERIFY'] = '1'
-        execute(['hg', 'commit', '-m', message], env=environ)
+        execute(['hg', 'commit', '-u', 'onone', '-m', message], env=environ)
 
     @staticmethod
     def add(filename):

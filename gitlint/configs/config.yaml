@@ -13,6 +13,9 @@
 # limitations under the License.
 
 # Regular expression matchers like \d, \w, must be escaped as in \\d, \\w.
+# If you need to include a string like '{}' or '{foo}', you need to double the
+# braces, as in '{{}}' or '{{foo}}'. See the pylint configuration for an
+# example.
 
 # CSS
 # Sample output:
@@ -24,7 +27,7 @@ csslint:
   arguments:
   - "--ignore=ids,box-model,adjoining-classes,qualified-headings,unique-headings,zero-units"
   - "--format=compact"
-  filter: "^%(filename)s: line (?P<line>%(lines)s), col (?P<column>\\d+)?, (?P<severity>\\S+) - (?P<message>.+)"
+  filter: "^{filename}: line (?P<line>{lines}), col (?P<column>\\d+)?, (?P<severity>\\S+) - (?P<message>.+)"
   installation: "Go to https://github.com/stubbornella/csslint/wiki/Command-line-interface for installation instructions."
 
 # SCSS
@@ -34,7 +37,7 @@ scss:
   extensions:
   - .scss
   command: scss-lint
-  filter: "^%(filename)s:(?P<line>%(lines)s) \\[(?P<severity>.+)\\] (?P<message>.+)"
+  filter: "^{filename}:(?P<line>{lines}) \\[(?P<severity>.+)\\] (?P<message>.+)"
   installation: "gem install scss-lint or go to https://github.com/causes/scss-lint"
 
 # Javascript
@@ -44,7 +47,7 @@ gjslint:
   extensions:
   - .js
   command: gjslint
-  filter: "^Line\\s+(?P<line>%(lines)s), (?P<severity>[^: ]+):((?P<message_id>\\d+):)? (?P<message>.+)"
+  filter: "^Line\\s+(?P<line>{lines}), (?P<severity>[^: ]+):((?P<message_id>\\d+):)? (?P<message>.+)"
   installation: "Run pip install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz, or visit https://developers.google.com/closure/utilities/docs/linter_howto for installation instructions."
 
 # Sample output:
@@ -55,8 +58,8 @@ jshint:
   command: jshint
   arguments:
   - "--config"
-  - "%(DEFAULT_CONFIGS)s/jshint.json"
-  filter: "^%(filename)s: line (?P<line>%(lines)s), col (?P<column>\\d+), (?P<message>.+)"
+  - "{DEFAULT_CONFIGS}/jshint.json"
+  filter: "^{filename}: line (?P<line>{lines}), col (?P<column>\\d+), (?P<message>.+)"
   installation: "Visit http://www.jshint.com/install/ for installation instructions."
 
 # PHP
@@ -68,7 +71,7 @@ php:
   command: php
   arguments:
   - "-l"
-  filter: "^(?P<message>.*) in %(filename)s on line (?P<line>\\d+)"
+  filter: "^(?P<message>.*) in {filename} on line (?P<line>\\d+)"
   installation: "You first need to install PHP."
 
 # Sample output:
@@ -80,7 +83,7 @@ phpcs:
   arguments:
   - "--report-width=1000"
   - "--standard=PSR2"
-  filter: "^\\s*(?P<line>%(lines)s)\\s+[|]\\s+(?P<severity>\\S+)\\s+[|]\\s+(?P<message>.+)"
+  filter: "^\\s*(?P<line>{lines})\\s+[|]\\s+(?P<severity>\\S+)\\s+[|]\\s+(?P<message>.+)"
   installation: "Visit https://github.com/squizlabs/PHP_CodeSniffer for installation instructions"
 
 # Python
@@ -89,11 +92,11 @@ pylint:
   - .py
   command: pylint
   arguments:
-  - "--rcfile=%(DEFAULT_CONFIGS)s/pylintrc"
+  - "--rcfile={DEFAULT_CONFIGS}/pylintrc"
   - "--output-format=text"
-  - "--msg-template='{abspath}:{line}:{column}: [{category}:{symbol}] {obj}: {msg}'"
+  - "--msg-template='{{abspath}}:{{line}}:{{column}}: [{{category}}:{{symbol}}] {{obj}}: {{msg}}'"
   - "--reports=n"
-  filter: "^%(filename)s:(?P<line>%(lines)s):((?P<column>\\d+):)? \\[(?P<severity>.+):(?P<message_id>\\S+)\\]\\s+(: )?(?P<message>.+)$"
+  filter: "^{filename}:(?P<line>{lines}):((?P<column>\\d+):)? \\[(?P<severity>.+):(?P<message_id>\\S+)\\]\\s+(: )?(?P<message>.+)$"
   installation: "Run pip install pylint."
 
 # Sample output: gitlint/__init__.py:68:80: E501 line too long (80 > 79 characters)
@@ -103,7 +106,7 @@ pep8:
   command: pep8
   arguments:
   - "--max-line-length=80"
-  filter: "^%(filename)s:(?P<line>%(lines)s):((?P<column>\\d+):)? (?P<message_id>\\S+) (?P<message>.+)$"
+  filter: "^{filename}:(?P<line>{lines}):((?P<column>\\d+):)? (?P<message_id>\\S+) (?P<message>.+)$"
   installation: "Run pip install pep8."
 
 # JSON
@@ -127,7 +130,7 @@ rst:
   extensions:
   - .rst
   command: rst2html.py
-  filter: "^%(filename)s:(?P<line>%(lines)s): [(](?P<severity>.+)[)] (?P<message>.+)"
+  filter: "^{filename}:(?P<line>{lines}): [(](?P<severity>.+)[)] (?P<message>.+)"
   installation: "Run pip install docutils."
 
 # PNG
@@ -169,7 +172,7 @@ bash:
   command: bash
   arguments:
   - "-n"
-  filter: "%(filename)s: line (?P<line>%(lines)s): (?P<message>.+)"
+  filter: "{filename}: line (?P<line>{lines}): (?P<message>.+)"
   installation: "Please install bash in your system."
 
 # YAML
@@ -205,7 +208,7 @@ tidy:
   - "--drop-empty-elements"
   - "false"
   installation: "Visit https://w3c.github.io/tidy-html5/"
-  filter: "^line (?P<line>%(lines)s) column (?P<column>\\d+) - (?P<severity>[^:]+): (?P<message>.+)"
+  filter: "^line (?P<line>{lines}) column (?P<column>\\d+) - (?P<severity>[^:]+): (?P<message>.+)"
 
 # Sample output:
 # 1:10: Error: Javascript ...
@@ -217,7 +220,7 @@ html_lint:
   - "--disable"
   - "optional_tag"
   installation: "pip install html-linter."
-  filter: "^(?P<line>%(lines)s):(?P<column>\\d+): (?P<severity>\\S+): (?P<message>.+)"
+  filter: "^(?P<line>{lines}):(?P<column>\\d+): (?P<severity>\\S+): (?P<message>.+)"
 
 # Ruby
 # Sample output:
@@ -227,7 +230,7 @@ rubylint:
   extensions:
   - '.rb'
   # The first component is the basename, but it's not supported yet.
-  filter: ".*: (?P<severity>.+): line (?P<line>%(lines)s), column (?P<column>\\d+): (?P<message>.+)"
+  filter: ".*: (?P<severity>.+): line (?P<line>{lines}), column (?P<column>\\d+): (?P<message>.+)"
   installation: "sudo gem install ruby-lint (requires ruby 1.9) or visit https://github.com/yorickpeterse/ruby-lint"
 
 
@@ -238,7 +241,7 @@ rubocop:
   extensions:
   - '.rb'
   # The first component is the relpath, but it's not supported yet.
-  filter: ".*:(?P<line>%(lines)s):((?P<column>\\d+):)? (?P<severity>.+): (?P<message>.+)"
+  filter: ".*:(?P<line>{lines}):((?P<column>\\d+):)? (?P<severity>.+): (?P<message>.+)"
   installation: "sudo gem install rubocop or visit https://github.com/bbatsov/rubocop"
 
 #Java
@@ -253,8 +256,8 @@ checkstyle:
   - java
   arguments:
   - "-c"
-  - "%(DEFAULT_CONFIGS)s/checkstyle.xml"
-  filter: "%(filename)s:(?P<line>%(lines)s):((?P<column>\\d+):)? (?P<message>.+)"
+  - "{DEFAULT_CONFIGS}/checkstyle.xml"
+  filter: "{filename}:(?P<line>{lines}):((?P<column>\\d+):)? (?P<message>.+)"
   installation: "sudo apt-get install checkstyle or go to http://checkstyle.sourceforge.net/cmdline.html"
 
 # Sample output:
@@ -277,5 +280,5 @@ pmd:
   - "-rulesets"
   - "rulesets/java/android.xml,rulesets/java/basic.xml,rulesets/java/braces.xml,rulesets/java/clone.xml,rulesets/java/codesize.xml,rulesets/java/empty.xml,rulesets/java/finalizers.xml,rulesets/java/imports.xml,rulesets/java/j2ee.xml,rulesets/java/logging-jakarta-commons.xml,rulesets/java/strictexception.xml,rulesets/java/strings.xml,rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml"
   - "-d"
-  filter: "%(filename)s:(?P<line>%(lines)s):\\s+(?P<message>.+)"
+  filter: "{filename}:(?P<line>{lines}):\\s+(?P<message>.+)"
   installation: "Go to http://pmd.sourceforge.net/pmd-5.1.1/installing.html"

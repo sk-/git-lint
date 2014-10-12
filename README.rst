@@ -142,8 +142,11 @@ share that with us, so we can integrate those changes.
 The configuration support two variables for the command, requirements and
 arguments:
 
-* %(REPO_HOME)s: the root of your repo.
-* %(DEFAULT_CONFIGS)s: the location of the default config files.
+* {REPO_HOME}: the root of your repo.
+* {DEFAULT_CONFIGS}: the location of the default config files.
+
+If you need to include strings like `{}` or `{foo}` in your command, you need to
+double the braces as in `{{}}` or `{{foo}}`.
 
 Git Configuration
 -----------------
