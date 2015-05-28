@@ -20,7 +20,6 @@ curl -sL https://deb.nodesource.com/setup | sudo bash -
 sudo apt-get install nodejs
 
 gem install rubocop
-rubocop --help
 gem install ruby-lint
 gem install scss-lint
 
