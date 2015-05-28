@@ -200,7 +200,7 @@ tidy:
   - .html
   command: tidy-wrapper.sh
   requirements:
-  - tidy
+  - tidy5
   - remove_template.py
   - grep
   arguments:
