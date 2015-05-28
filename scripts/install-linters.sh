@@ -1,6 +1,6 @@
 sudo apt-get update
 sudo apt-get remove rubygems ruby
-sudo apt-get install curl build-essential php-pear optipng pngcrush php5 checkstyle libjpeg-turbo-progs xsltproc
+sudo apt-get install curl build-essential php-pear optipng pngcrush php5 checkstyle libjpeg-turbo-progs xsltproc cmake
 #sudo apt-get install nodejs-legacy in ubuntu 14
 
 # Install ruby
@@ -39,13 +39,14 @@ sudo npm install -g jshint
 sudo pear install PHP_CodeSniffer
 
 # Tidy
-git clone https://github.com/w3c/tidy-html5.git
-cd tidy-html5
-make -C build/gmake/
-sudo make install -C build/gmake/
+git clone https://github.com/htacg/tidy-html5.git
+cd build/cmake
+cmake ../..
+make
+sudo make install
 cd -
 
 # PMD
 wget "http://downloads.sourceforge.net/project/pmd/pmd/5.1.3/pmd-bin-5.1.3.zip?r=&ts=`date +%s`&use_mirror=ufpr"
-unzip pmd-bin-*
+unzip -q pmd-bin-*
 mv pmd-bin-5.1.3 pmd-bin
