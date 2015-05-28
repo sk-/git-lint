@@ -1,7 +1,8 @@
 language: python
 python:
   - "2.7"
-  - "3.2"
+  # Pep8 and Pylint are not working correctly with 3.2
+  #- "3.2"
   - "3.3"
   - "3.4"
   # The JSON e2e test fails because, the output and exceptions are different
@@ -13,10 +14,10 @@ install:
   - "bash scripts/install-linters.sh"
 # command to run tests
 before_script:
-  - export PATH=$PATH:$PWD/pmd-bin/bin
+  - export PATH=$PATH:$PWD/pmd-bin/bin:/usr/local/bin
   - git config --global user.email "john@example.com"
   - git config --global user.name "John Doe"
-  - "echo -e '[ui]\nusername = John Doe <john@example.com>' >> ~/.hgrc"
+  #- "echo -e '[ui]\nusername = John Doe <john@example.com>' >> ~/.hgrc"
 script: "python -R setup.py nosetests"
 after_success:
   coveralls
