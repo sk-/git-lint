@@ -234,14 +234,18 @@ rubylint:
   installation: "sudo gem install ruby-lint (requires ruby 1.9) or visit https://github.com/yorickpeterse/ruby-lint"
 
 
-# Sample output:
-# test/e2etest/data/rubocop/error.rb:1:4: C: Surrounding space missing for operator '='.
+# Sample output with the --format emacs option:
+# /home/skreft/opensource/git-lint/test/e2etest/data/rubocop/error.rb:1:4: C: Surrounding space missing for operator '='.
 rubocop:
   command: rubocop
+  arguments:
+  - '--format'
+  - 'emacs'
+  - '--rails'
   extensions:
   - '.rb'
   # The first component is the relpath, but it's not supported yet.
-  filter: ".*:(?P<line>{lines}):((?P<column>\\d+):)? (?P<severity>.+): (?P<message>.+)"
+  filter: "{filename}:(?P<line>{lines}):(?P<column>\\d+): (?P<severity>.+): (?P<message>.+)"
   installation: "sudo gem install rubocop or visit https://github.com/bbatsov/rubocop"
 
 #Java
