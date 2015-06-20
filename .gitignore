@@ -6,3 +6,5 @@ gitlint/man.py
 build/
 dist/
 experimental/
+.eggs/
+.DS_Store

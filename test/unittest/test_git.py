@@ -40,14 +40,18 @@ class GitTest(unittest.TestCase):
                                   'M  data/file2.json',
                                   'D  file3.py',
                                   '?? file4.js',
-                                  'AM file5.txt']).encode('utf-8')
+                                  'AM file5.txt',
+                                  'MM file6.txt']).encode('utf-8')
         with mock.patch('subprocess.check_output',
                         return_value=output) as git_call:
             self.assertEqual(
-                {'/home/user/repo/docs/file1.txt': 'A ',
-                 '/home/user/repo/data/file2.json': 'M ',
-                 '/home/user/repo/file4.js': '??',
-                 '/home/user/repo/file5.txt': 'AM'},
+                {
+                    '/home/user/repo/docs/file1.txt': 'A ',
+                    '/home/user/repo/data/file2.json': 'M ',
+                    '/home/user/repo/file4.js': '??',
+                    '/home/user/repo/file5.txt': 'AM',
+                    '/home/user/repo/file6.txt': 'MM',
+                },
                 git.modified_files('/home/user/repo'))
             git_call.assert_called_once_with(
                 ['git', 'status', '--porcelain', '--untracked-files=all'])
