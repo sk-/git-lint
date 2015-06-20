@@ -227,6 +227,9 @@ html_lint:
 # error.rb: warning: line 1, column 1: unused constant FOO
 rubylint:
   command: ruby-lint
+  arguments:
+  - "--analysis"
+  - "argument_amount,loop_keywords,pedantics,shadowing_variables,unused_variables,useless_equality_checks"
   extensions:
   - '.rb'
   # The first component is the basename, but it's not supported yet.
