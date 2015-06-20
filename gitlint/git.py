@@ -72,7 +72,7 @@ def modified_files(root, tracked_only=False, commit=None):
         ['git', 'status', '--porcelain',
          '--untracked-files=all']).decode('utf-8').split(os.linesep)
 
-    modes = ['M ', ' M', 'A ', 'AM']
+    modes = ['M ', ' M', 'A ', 'AM', 'MM']
     if not tracked_only:
         modes.append(r'\?\?')
     modes_str = '|'.join(modes)
