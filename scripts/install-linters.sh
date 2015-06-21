@@ -34,6 +34,7 @@ pip install html-linter
 sudo npm config set registry http://registry.npmjs.org/
 sudo npm install -g csslint
 sudo npm install -g jshint
+sudo npm install -g coffeelint
 
 # PHP CodeSniffer
 sudo pear install PHP_CodeSniffer

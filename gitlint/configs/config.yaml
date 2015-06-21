@@ -251,7 +251,7 @@ rubocop:
   filter: "{filename}:(?P<line>{lines}):(?P<column>\\d+): (?P<severity>.+): (?P<message>.+)"
   installation: "sudo gem install rubocop or visit https://github.com/bbatsov/rubocop"
 
-#Java
+# Java
 # Sample output:
 # /home/skreft/opensource/git-lint/test/e2etest/data/checkstyle/error.java:0: Missing package-info.java file.
 # /home/skreft/opensource/git-lint/test/e2etest/data/checkstyle/error.java:1:7: warning: Name 'foo' must match pattern '^[A-Z][a-zA-Z0-9]*$'.
@@ -289,3 +289,17 @@ pmd:
   - "-d"
   filter: "{filename}:(?P<line>{lines}):\\s+(?P<message>.+)"
   installation: "Go to http://pmd.sourceforge.net/pmd-5.1.1/installing.html"
+
+# Coffeescript
+# Sample output:
+# /home/skreft/opensource/git-lint/test/e2etest/data/coffeelint/error.coffee,4,,error,Operators must be spaced properly =.
+# /home/skreft/opensource/git-lint/test/e2etest/data/coffeelint/error.coffee,5,,error,[stdin]:5:1: error: reserved word 'yes' can't be assigned
+coffeelint:
+  command: coffeelint
+  extensions:
+  - .coffee
+  arguments:
+  - "--reporter=csv"
+  - "--file={DEFAULT_CONFIGS}/coffeelint.json"
+  filter: "{filename},(?P<line>{lines}),.*,(?P<severity>.+),(?:\\[stdin\\]:\\d+:(?P<column>\\d+): .*: )?(?P<message>.+)"
+  installation: "npm install -g coffeelint"
