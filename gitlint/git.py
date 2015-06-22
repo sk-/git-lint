@@ -120,7 +120,7 @@ def modified_lines(filename, extra_data, commit=None):
     """
     if extra_data is None:
         return []
-    if extra_data not in ('M ', ' M'):
+    if extra_data not in ('M ', ' M', 'MM'):
         return None
 
     if commit is None:

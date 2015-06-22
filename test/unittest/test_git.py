@@ -131,9 +131,12 @@ class GitTest(unittest.TestCase):
             self.assertEqual(
                 [2, 5],
                 list(git.modified_lines('/home/user/repo/foo/bar.txt', 'M ')))
+            self.assertEqual(
+                [2, 5],
+                list(git.modified_lines('/home/user/repo/foo/bar.txt', 'MM')))
             expected_calls = [mock.call(
                 ['git', 'blame', '--porcelain',
-                 '/home/user/repo/foo/bar.txt'])] * 2
+                 '/home/user/repo/foo/bar.txt'])] * 3
             self.assertEqual(expected_calls, check_output.call_args_list)
 
     def test_modified_lines_with_commit(self):
@@ -157,9 +160,15 @@ class GitTest(unittest.TestCase):
                     '/home/user/repo/foo/bar.txt',
                     'M ',
                     commit='0123456789abcdef31410123456789abcdef3141')))
+            self.assertEqual(
+                [2, 5],
+                list(git.modified_lines(
+                    '/home/user/repo/foo/bar.txt',
+                    'MM',
+                    commit='0123456789abcdef31410123456789abcdef3141')))
             expected_calls = [mock.call(
                 ['git', 'blame', '--porcelain',
-                 '/home/user/repo/foo/bar.txt'])] * 2
+                 '/home/user/repo/foo/bar.txt'])] * 3
             self.assertEqual(expected_calls, check_output.call_args_list)
 
     def test_modified_lines_new_addition(self):
