@@ -68,9 +68,9 @@ def modified_files(root, tracked_only=False, commit=None):
         return _modified_files_with_commit(root, commit)
 
     # Convert to unicode and split
-    status_lines = subprocess.check_output(
-        ['git', 'status', '--porcelain',
-         '--untracked-files=all']).decode('utf-8').split(os.linesep)
+    status_lines = subprocess.check_output([
+        'git', 'status', '--porcelain', '--untracked-files=all',
+        '--ignore-submodules=all']).decode('utf-8').split(os.linesep)
 
     modes = ['M ', ' M', 'A ', 'AM', 'MM']
     if not tracked_only:
