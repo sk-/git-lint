@@ -171,10 +171,15 @@ def execute(*args, **kwargs):
 
 
 class TestGitE2E(E2EBase, unittest.TestCase):
-    @staticmethod
-    def init_repo():
+    @classmethod
+    def init_repo(cls):
         """Initializes a git repo."""
         execute(['git', 'init'])
+        # We need to create a file, otherwise there's no defined branch.
+        with open('README', 'w'):
+            pass
+        cls.add('README')
+        cls.commit('Initial commit')
 
     @staticmethod
     def commit(message):
@@ -189,6 +194,39 @@ class TestGitE2E(E2EBase, unittest.TestCase):
     def add(filename):
         """Add a file to the repo."""
         execute(['git', 'add', filename])
+
+    def test_submodules(self):
+        """Check that repositories with submodules can be handled.
+
+        Checks Issue #62:
+          modifying files in a submodule produces an error as it is not possible
+          to run git blame on a submodule.
+        """
+        try:
+            original_cwd = os.getcwd()
+
+            submodule_dir = tempfile.mkdtemp(prefix='gitlint')
+            os.chdir(submodule_dir)
+            self.init_repo()
+
+            repo_dir = tempfile.mkdtemp(prefix='gitlint')
+            os.chdir(repo_dir)
+            self.init_repo()
+
+            execute(['git', 'submodule', 'add', submodule_dir])
+            self.commit('Added submodule')
+
+            submodule_name = os.path.basename(submodule_dir)
+            with open(os.path.join(submodule_name, 'LICENSE'), 'w'):
+                pass
+
+            self.lint()
+        finally:
+            os.chdir(original_cwd)
+            if submodule_dir:
+                shutil.rmtree(submodule_dir)
+            if repo_dir:
+                shutil.rmtree(repo_dir)
 
 
 class TestHgE2E(E2EBase, unittest.TestCase):
