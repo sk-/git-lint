@@ -94,6 +94,10 @@ Current linters:
   * `PMD <http://pmd.sourceforge.net/>`_ (it requires to put the script run.sh in your PATH)
   * `Checkstyle <http://checkstyle.sourceforge.net/>`
 
+- Coffeescript
+
+  * `coffeelint <http://www.coffeelint.org/>`_
+
 Example use
 -----------
 
@@ -249,6 +253,16 @@ TODOS and Possible Features
 
 Changelog
 =========
+
+v0.0.7 (2015-06-28)
+-------------------
+
+* Better support in python 3
+* Removed support for Python 3.2
+* Output is sorted by line and column number
+* Bugfixes: issues #49, #50, #54, #62
+* Added coffelint support
+* Improved defaults
 
 v0.0.6 (2014-09-08)
 -------------------
