@@ -1,13 +1,13 @@
 Git-Lint
 ========
 
-.. image:: https://badge.fury.io/py/git-lint.png
+.. image:: https://badge.fury.io/py/git-lint.svg
     :target: http://badge.fury.io/py/git-lint
 
-.. image:: https://travis-ci.org/sk-/git-lint.png?branch=master
+.. image:: https://travis-ci.org/sk-/git-lint.svg?branch=master
     :target: https://travis-ci.org/sk-/git-lint
 
-.. image:: https://coveralls.io/repos/sk-/git-lint/badge.png?branch=master
+.. image:: https://coveralls.io/repos/sk-/git-lint/badge.svg?branch=master
     :target: https://coveralls.io/r/sk-/git-lint?branch=master
 
 Git-lint is a tool for improving source code one step at a time.
