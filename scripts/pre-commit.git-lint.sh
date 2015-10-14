@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # First part return the files being commited, excluding deleted files.
-git diff-index -z --cached HEAD --name-only --diff-filter="(A|C|M|R|T|U|X|B)" |
+git diff-index -z --cached HEAD --name-only --diff-filter=ACMRTUXB |
 xargs --null --no-run-if-empty git lint;
 
 if [ "$?" != "0" ]; then
