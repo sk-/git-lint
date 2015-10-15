@@ -12,16 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+function get_size {
+    LS_OUTPUT=($(ls -n $1));
+    echo ${LS_OUTPUT[4]};
+}
+
 FILENAME=$1;
 OUTFILE='/tmp/git-lint/optipng.png';
-origsize=`stat -c%s $FILENAME`;
+origsize=$(get_size $FILENAME);
 rm $OUTFILE 2> /dev/null;
-optipng -out $OUTFILE -o9 $FILENAME > /dev/null;
-newsize=`stat -c%s $OUTFILE`;
+optipng -out $OUTFILE -o9 $FILENAME > /dev/null 2> /dev/null;
+newsize=$(get_size $OUTFILE);
 
 if [ $newsize -gt 0 ] && [ $newsize -lt $origsize ]; then
     reduction=`bc <<< "scale = 2; (100*($origsize - $newsize) / $origsize)"`;
-    echo "The file size can be losslessly reduced from $origsize to $newsize bytes. ($reduction % filesize reduction)";
+    echo "The file size can be losslessly reduced from $origsize to $newsize bytes. ($reduction% filesize reduction)";
     echo "Use: optipng -o9 $FILENAME";
     exit 1;
 fi
