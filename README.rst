@@ -251,8 +251,20 @@ TODOS and Possible Features
   gitlint/git.py or gitlint/hg.py.
 * Support windows.
 
+Contributors
+============
+
+* `Rovanion Luckey <https://github.com/Rovanion>`_
+* `Radek Simko <https://github.com/radeksimko>`_
+
+
 Changelog
 =========
+
+v0.0.8 (master)
+---------------
+
+* Fixed git pre commit hook (thanks to Rovanion Luckey)
 
 v0.0.7 (2015-06-28)
 -------------------
