@@ -56,6 +56,10 @@ import gitlint.linters as linters
 
 __VERSION__ = '0.0.6.1'
 
+ERROR = termcolor.colored('ERROR', 'red', attrs=('bold',))
+SKIPPED = termcolor.colored('SKIPPED', 'yellow', attrs=('bold',))
+OK = termcolor.colored('OK', 'green', attrs=('bold',))
+
 
 def find_invalid_filenames(filenames, repository_root):
     """Find files that does not exist, are not in the repo or are directories.
@@ -179,7 +183,7 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
     vcs, repository_root = get_vcs_root()
 
     if vcs is None:
-        stderr.write('fatal: Not a git repository' + os.linesep)
+        stderr.write('fatal: Not a git repository' + linesep)
         return 128
 
     commit = None
@@ -192,7 +196,7 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
         if invalid_filenames:
             invalid_filenames.append(('', ''))
             stderr.write(
-                os.linesep.join(invalid[1] for invalid in invalid_filenames))
+                linesep.join(invalid[1] for invalid in invalid_filenames))
             return 2
 
         changed_files = vcs.modified_files(repository_root,
@@ -213,9 +217,6 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
     gitlint_config = get_config(repository_root)
     json_result = {}
 
-    error = termcolor.colored('ERROR', 'red', attrs=('bold',))
-    skipped = termcolor.colored('SKIPPED', 'yellow', attrs=('bold',))
-
     for filename in sorted(modified_files.keys()):
         rel_filename = os.path.relpath(filename)
         if not json_output:
@@ -233,31 +234,30 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
             filename, modified_lines, gitlint_config)
         result = result[filename]
 
-        output = ''
+        output_lines = []
         if result.get('error'):
-            output += os.linesep.join(
-                '%s: %s' % (error, reason) for reason in result.get('error')
+            output_lines.extend(
+                '%s: %s' % (ERROR, reason) for reason in result.get('error')
             )
             linter_not_found = True
         if result.get('skipped'):
-            output += os.linesep.join(
-                '%s: %s' % (skipped, reason) for reason in result.get('skipped')
+            output_lines.extend(
+                '%s: %s' % (SKIPPED, reason) for reason in result.get('skipped')
             )
         if result.get('comments', []) == []:
-            if not output:
-                output += termcolor.colored('OK', 'green', attrs=('bold',))
+            if not output_lines:
+                output_lines.append(OK)
         else:
             files_with_problems += 1
-            messages = []
             for data in result['comments']:
                 formatted_message = format_comment(data)
-                messages.append(formatted_message)
+                output_lines.append(formatted_message)
                 data['formatted_message'] = formatted_message
-            output += os.linesep.join(messages)
 
         if json_output:
             json_result[filename] = result
         else:
+            output = linesep.join(output_lines)
             stdout.write(output)
             stdout.write(linesep + linesep)
 

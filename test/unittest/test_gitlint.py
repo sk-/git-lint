@@ -449,6 +449,34 @@ class GitLintTest(unittest.TestCase):
                           self.git_lint_config)]
             self.assertEqual(expected_calls, self.lint.call_args_list)
 
+    def test_main_errors_skipped_comments(self):
+        lint_response = {
+            self.filename: {
+                'error': ['error1', 'error2'],
+                'skipped': ['skipped1', 'skipped2'],
+                'comments': [{'message': 'msg1'}, {'message': 'msg2'}],
+            },
+            self.filename2: {
+                'comments': [],
+            }
+        }
+        self.lint.return_value = lint_response
+
+        with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
+                mock.patch('os.getcwd', return_value=self.root):
+            self.assertEqual(
+                1, gitlint.main(['git-lint', self.filename, self.filename2],
+                                stdout=self.stdout, stderr=None))
+            expected_output = os.linesep.join([
+                '\x1b[1m\x1b[31mERROR\x1b[0m: error1',
+                '\x1b[1m\x1b[31mERROR\x1b[0m: error2',
+                '\x1b[1m\x1b[33mSKIPPED\x1b[0m: skipped1',
+                '\x1b[1m\x1b[33mSKIPPED\x1b[0m: skipped2',
+                'msg1',
+                'msg2',
+            ])
+            self.assertIn(expected_output, self.stdout.getvalue())
+
     def test_get_config(self):
         git_config = os.path.join(self.root, '.gitlint.yaml')
         config = """python:
