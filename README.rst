@@ -261,8 +261,8 @@ Contributors
 Changelog
 =========
 
-v0.0.8 (master)
----------------
+v0.0.8 (2015-10-14)
+-------------------
 
 * Fixed git pre commit hook (thanks to Rovanion Luckey)
 * Fixed issues #64, #67
