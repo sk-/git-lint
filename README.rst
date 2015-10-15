@@ -265,6 +265,7 @@ v0.0.8 (master)
 ---------------
 
 * Fixed git pre commit hook (thanks to Rovanion Luckey)
+* Fixed issues #64, #67
 
 v0.0.7 (2015-06-28)
 -------------------
