@@ -180,9 +180,19 @@ yaml:
   extensions:
   - .yaml
   - .yml
-  command: yaml_linter.py
-  filter: "(?P<message>.+)$"
-  installation: "Run pip install PyYAML."
+  command: yamllint
+  arguments:
+  - "--format"
+  - "parsable"
+  - "--config-data"
+  - "relaxed"
+  # Matches either:
+  # - syntax error, on any line
+  # - other error, on a modified line only
+  filter: "^{filename}:(?P<line>{lines}|\\d+\
+           (?=:\\d+: \\[error\\] syntax error:)):(?P<column>\\d+): \
+           \\[(?P<severity>\\S+)\\] (?P<message>.+)$"
+  installation: "Run pip install yamllint."
 
 # INI
 ini:
