@@ -92,7 +92,7 @@ Current linters:
 - Java
 
   * `PMD <http://pmd.sourceforge.net/>`_ (it requires to put the script run.sh in your PATH)
-  * `Checkstyle <http://checkstyle.sourceforge.net/>`
+  * `Checkstyle <http://checkstyle.sourceforge.net/>`_
 
 - Coffeescript
 
