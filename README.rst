@@ -73,7 +73,7 @@ Current linters:
 
 - YAML
 
-  * Custom via `PyYAML <http://pyyaml.org/>`_
+  * `yamllint <https://github.com/adrienverge/yamllint>`_
 
 - INI
 
@@ -256,6 +256,7 @@ Contributors
 
 * `Rovanion Luckey <https://github.com/Rovanion>`_
 * `Radek Simko <https://github.com/radeksimko>`_
+* `Adrien Vergé <https://github.com/adrienverge>`_
 
 
 Changelog

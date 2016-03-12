@@ -26,7 +26,7 @@ gem install scss-lint
 pip install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz
 pip install pylint
 pip install pep8
-pip install pyYAML
+pip install yamllint
 pip install docutils
 pip install html-linter
 

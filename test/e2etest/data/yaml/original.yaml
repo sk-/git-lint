@@ -1,1 +1,5 @@
+already-present error:
+  duplicated-key: number 1
+  duplicated-key: number 2
+
 "foo"
