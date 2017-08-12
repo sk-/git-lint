@@ -313,3 +313,21 @@ coffeelint:
   - "--file={DEFAULT_CONFIGS}/coffeelint.json"
   filter: "{filename},(?P<line>{lines}),.*,(?P<severity>.+),(?:\\[stdin\\]:\\d+:(?P<column>\\d+): .*: )?(?P<message>.+)"
   installation: "npm install -g coffeelint"
+
+# C++
+# Sample output:
+# main.cpp:0:  No copyright message found.  You should have a line: "Copyright [year] <Copyright Owner>"  [legal/copyright] [5]
+cpplint:
+  extensions:
+  - .c
+  - .cc
+  - .cpp
+  - .c++
+  - .h
+  - .hpp
+  - .h++
+  command: cpplint
+  requirements:
+  - cpplint
+  filter: "^{filename}:(?P<line>{lines}): (?P<message>.+) \\[(?P<message_id>.+)\\] \\[(?P<severity>\\d+)\\]"
+  installation: "Run pip install cpplint."
