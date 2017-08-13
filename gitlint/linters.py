@@ -17,9 +17,9 @@ import collections
 import functools
 import os
 import os.path
+import re
 import string
 import subprocess
-import re
 
 import gitlint.utils as utils
 
