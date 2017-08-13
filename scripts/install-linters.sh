@@ -1,29 +1,43 @@
-sudo add-apt-repository --yes ppa:kalakris/cmake
-sudo apt-get update -qq
-sudo apt-get remove rubygems ruby
-sudo apt-get install curl build-essential php-pear optipng pngcrush php5 checkstyle libjpeg-turbo-progs xsltproc cmake
-#sudo apt-get install nodejs-legacy in ubuntu 14
+set -x
+set -e
 
-# Install ruby
-curl -sSL https://get.rvm.io | bash -s stable --ruby=1.9.3
-source $HOME/.rvm/scripts/rvm
+root="$(git rev-parse --show-toplevel)"
+${root}/scripts/clean-linters.sh
+
+sudo apt-get update -qq
+sudo apt-get remove rubygems ruby --yes
+sudo apt-get install curl build-essential php-pear optipng pngcrush checkstyle libjpeg-turbo-progs xsltproc cmake --yes
+
+# Ubuntu 14
+if lsb_release -c | grep -q trusty
+then
+    # Install ruby
+    sudo apt-get install ruby2.0 --yes
+    sudo ln -sf /usr/bin/ruby2.0 /usr/bin/ruby
+    sudo ln -sf /usr/bin/gem2.0 /usr/bin/gem
+    sudo apt-get install nodejs-legacy php5 --yes
+fi
+
+# Ubuntu 16
+if lsb_release -c | grep -q xenial
+then
+    # Install ruby
+    sudo apt-get install ruby2.3 --yes
+    sudo ln -sf /usr/bin/ruby2.3 /usr/bin/ruby
+    sudo ln -sf /usr/bin/gem2.3 /usr/bin/gem
+fi
+
+sudo gem install rake
+sudo gem install rubocop
+sudo gem install ruby-lint
+sudo gem install scss_lint
 
 # Install latest node
-#curl http://nodejs.org/dist/node-latest.tar.gz | tar xz
-#cd node-v*
-#./configure
-#sudo make install
-#cd -
-# Install npm
-#curl -L https://npmjs.org/install.sh | sh
-curl -sL https://deb.nodesource.com/setup | sudo bash -
-sudo apt-get install nodejs
+curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
+sudo apt-get install nodejs --yes
 
-gem install rubocop
-gem install ruby-lint
-gem install scss-lint
-
-pip install http://closure-linter.googlecode.com/files/closure_linter-latest.tar.gz
+# Install python packages
+pip install closure-linter
 pip install pylint
 pip install pep8
 pip install yamllint
@@ -37,7 +51,7 @@ sudo npm install -g jshint
 sudo npm install -g coffeelint
 
 # PHP CodeSniffer
-sudo pear install PHP_CodeSniffer
+sudo pear install --force PHP_CodeSniffer 
 
 # Tidy
 git clone https://github.com/htacg/tidy-html5.git
