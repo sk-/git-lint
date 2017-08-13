@@ -1,5 +1,6 @@
 set -x
 set -e
 
-rm -rf pmd-bin*
-rm -rf tidy-html5*
+rm -f pmd-bin-*
+rm -rf pmd-bin/
+rm -rf tidy-html5/
