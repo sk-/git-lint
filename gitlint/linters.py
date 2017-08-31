@@ -17,6 +17,7 @@ import collections
 import functools
 import os
 import os.path
+import re
 import string
 import subprocess
 
@@ -102,7 +103,7 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
     groups = ('line', 'column', 'message', 'severity', 'message_id')
     filtered_lines = utils.filter_lines(output_lines,
                                         filter_regex.format(lines=lines_regex,
-                                                            filename=filename),
+                                                            filename=re.escape(filename)),
                                         groups=groups)
 
     result = []

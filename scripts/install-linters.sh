@@ -43,6 +43,7 @@ pip install pep8
 pip install yamllint
 pip install docutils
 pip install html-linter
+pip install cpplint
 
 # See https://github.com/n1k0/casperjs/issues/876
 sudo npm config set registry http://registry.npmjs.org/
