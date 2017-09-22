@@ -98,6 +98,10 @@ Current linters:
 
   * `coffeelint <http://www.coffeelint.org/>`_
 
+- C++
+
+  * `cpplint <https://github.com/google/styleguide/tree/gh-pages/cpplint>`_
+
 Example use
 -----------
 
