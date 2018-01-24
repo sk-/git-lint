@@ -12,10 +12,29 @@ sudo apt-get install curl build-essential php-pear optipng pngcrush checkstyle l
 if lsb_release -c | grep -q trusty
 then
     # Install ruby
-    sudo apt-get install ruby2.0 --yes
-    sudo ln -sf /usr/bin/ruby2.0 /usr/bin/ruby
-    sudo ln -sf /usr/bin/gem2.0 /usr/bin/gem
+    sudo apt-add-repository --yes ppa:brightbox/ruby-ng
+    sudo apt-get update
+    sudo apt-get install ruby2.2 ruby2.2-dev --yes
+    sudo ln -sf /usr/bin/ruby2.2 /usr/bin/ruby
+    sudo ln -sf /usr/bin/gem2.2 /usr/bin/gem
     sudo apt-get install nodejs-legacy php5 --yes
+
+    sudo update-alternatives --remove ruby /usr/bin/ruby2.2
+    sudo update-alternatives --remove irb /usr/bin/irb2.2
+    sudo update-alternatives --remove gem /usr/bin/gem2.2
+
+    sudo update-alternatives \
+        --install /usr/bin/ruby ruby /usr/bin/ruby2.2 50 \
+        --slave /usr/bin/irb irb /usr/bin/irb2.2 \
+        --slave /usr/bin/rake rake /usr/bin/rake2.2 \
+        --slave /usr/bin/gem gem /usr/bin/gem2.2 \
+        --slave /usr/bin/rdoc rdoc /usr/bin/rdoc2.2 \
+        --slave /usr/bin/testrb testrb /usr/bin/testrb2.2 \
+        --slave /usr/bin/erb erb /usr/bin/erb2.2 \
+        --slave /usr/bin/ri ri /usr/bin/ri2.2
+
+    update-alternatives --config ruby
+    update-alternatives --display ruby
 fi
 
 # Ubuntu 16

@@ -261,10 +261,17 @@ Contributors
 * `Rovanion Luckey <https://github.com/Rovanion>`_
 * `Radek Simko <https://github.com/radeksimko>`_
 * `Adrien Vergé <https://github.com/adrienverge>`_
+* `Rob Rodrigues <https://github.com/irialad>`_
 
 
 Changelog
 =========
+
+v0.0.9 (2018-01-22)
+-------------------
+
+* Fixed versioning to match in both pip install and package
+* Added multithreading support
 
 v0.0.8 (2015-10-14)
 -------------------

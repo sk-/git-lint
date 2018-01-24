@@ -3,10 +3,9 @@ dist: trusty
 language: python
 python:
   - "2.7"
-  # Pep8 and Pylint are not working correctly with 3.2
-  #- "3.2"
-  - "3.3"
   - "3.4"
+  - "3.5"
+  - "3.6"
   # The JSON e2e test fails because, the output and exceptions are different
   #- "pypy"
 # command to install dependencies

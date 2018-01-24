@@ -13,12 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 from setuptools import setup, find_packages
 
+version_file = open(os.path.join('gitlint', 'version.py'))
+
+version = version_file.read()
+version = eval(version.split('=')[1].strip())
 
 setup(
     name='git-lint',
-    version='0.0.8',
+    version=version,
     description='Git Lint',
     long_description=open('README.rst').read(),
     author='Sebastian Kreft',
@@ -37,6 +42,7 @@ setup(
         'scripts/custom_linters/tidy-wrapper.sh',
     ],
     install_requires=[
+        'futures; python_version == "2.7"',
         'pyyaml',
         'termcolor',
         'docopt',
@@ -56,8 +62,9 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Software Development :: Version Control',
     ],
 )
