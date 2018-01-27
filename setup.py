@@ -13,13 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ast
 import os
 from setuptools import setup, find_packages
 
 version_file = open(os.path.join('gitlint', 'version.py'))
 
 version = version_file.read()
-version = eval(version.split('=')[1].strip())
+version = ast.literal_eval(version.rsplit('=', 1)[1].strip())
 
 setup(
     name='git-lint',
@@ -42,7 +43,7 @@ setup(
         'scripts/custom_linters/tidy-wrapper.sh',
     ],
     install_requires=[
-        'futures; python_version == "2.7"',
+        'futures',
         'pyyaml',
         'termcolor',
         'docopt',
@@ -53,6 +54,9 @@ setup(
         'docutils',
     ],
     tests_require=['nose>=1.3', 'mock'],
+    extras_require={
+        ':python_version == "2.7"': ['futures']
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
