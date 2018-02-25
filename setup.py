@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import ast
+import io
 import os
 from setuptools import setup, find_packages
 
@@ -26,7 +27,7 @@ setup(
     name='git-lint',
     version=version,
     description='Git Lint',
-    long_description=open('README.rst').read(),
+    long_description=io.open('README.rst', encoding='utf-8').read(),
     author='Sebastian Kreft',
     url='http://github.com/sk-/git-lint',
     packages=find_packages(exclude=['test']),
