@@ -267,6 +267,12 @@ Contributors
 Changelog
 =========
 
+v0.1.0 (2018-02-26)
+-------------------
+
+* Fixed setup in some systems due to default encodings.
+* Changed version to use semantic versioning. If the version would have been semantic, this release would have been just a patch.
+
 v0.0.9 (2018-01-22)
 -------------------
 
