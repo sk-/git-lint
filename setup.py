@@ -44,7 +44,6 @@ setup(
         'scripts/custom_linters/tidy-wrapper.sh',
     ],
     install_requires=[
-        'futures',
         'pyyaml',
         'termcolor',
         'docopt',
