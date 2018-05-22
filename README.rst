@@ -43,7 +43,7 @@ Current linters:
 - Python
 
   * `Pylint <http://www.pylint.org/>`_
-  * `PEP8 <https://pypi.python.org/pypi/pep8/1.4.6>`_
+  * `pycodestyle <https://github.com/PyCQA/pycodestyle>`_
 
 - PHP
 
