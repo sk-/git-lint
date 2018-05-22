@@ -58,7 +58,7 @@ sudo apt-get install nodejs --yes
 # Install python packages
 pip install closure-linter
 pip install pylint
-pip install pep8
+pip install pycodestyle
 pip install yamllint
 pip install docutils
 pip install html-linter

@@ -100,14 +100,14 @@ pylint:
   installation: "Run pip install pylint."
 
 # Sample output: gitlint/__init__.py:68:80: E501 line too long (80 > 79 characters)
-pep8:
+pycodestyle:
   extensions:
   - .py
-  command: pep8
+  command: pycodestyle
   arguments:
   - "--max-line-length=80"
   filter: "^{filename}:(?P<line>{lines}):((?P<column>\\d+):)? (?P<message_id>\\S+) (?P<message>.+)$"
-  installation: "Run pip install pep8."
+  installation: "Run pip install pycodestyle."
 
 # JSON
 # Sample output:
