@@ -52,6 +52,7 @@ setup(
         'html-linter',
         'template-remover',
         'docutils',
+        'pathlib2',
     ],
     tests_require=['nose>=1.3', 'mock'],
     extras_require={
