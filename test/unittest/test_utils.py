@@ -69,26 +69,20 @@ class UtilsTest(unittest.TestCase):
                                     r'(?P<line>\d+): .*',
                                     groups=('line', 'debug'))))
 
-    def test_open_for_write_file_exists(self):
+    def test_open_for_write(self):
         filename = 'foo/bar/new_file'
         with mock.patch('io.open',
                         mock.mock_open(),
                         create=True) as mock_open, \
-             mock.patch('os.path.exists', return_value=True):
+             mock.patch.object(
+                utils.pathlib.Path,
+                'mkdir',
+                return_value=True) as mock_create:
             utils._open_for_write(filename)
 
-            mock_open.assert_called_once_with(filename, 'w')
-
-    def test_open_for_write_file_does_not_exist(self):
-        filename = 'foo/bar/new_file'
-        with mock.patch('io.open',
-                        mock.mock_open(),
-                        create=True) as mock_open, \
-             mock.patch('os.path.exists', return_value=False), \
-             mock.patch('os.makedirs') as mock_makedirs:
-            utils._open_for_write(filename)
-
-            mock_makedirs.assert_called_once_with(os.path.dirname(filename))
+            mock_create.assert_called_once_with(
+                parents=True,
+                exist_ok=True)
             mock_open.assert_called_once_with(filename, 'w')
 
     def test_get_cache_filename(self):

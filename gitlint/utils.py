@@ -17,6 +17,9 @@ import io
 import os
 import re
 
+# This can be just pathlib when 2.7 and 3.4 support is dropped.
+import pathlib2 as pathlib
+
 
 def filter_lines(lines, filter_regex, groups=None):
     """Filters out the lines not matching the pattern.
@@ -64,8 +67,7 @@ def programs_not_in_path(programs):
 def _open_for_write(filename):
     """Opens filename for writing, creating the directories if needed."""
     dirname = os.path.dirname(filename)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
+    pathlib.Path(dirname).mkdir(parents=True, exist_ok=True)
 
     return io.open(filename, 'w')
 
