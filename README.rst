@@ -262,10 +262,20 @@ Contributors
 * `Radek Simko <https://github.com/radeksimko>`_
 * `Adrien Vergé <https://github.com/adrienverge>`_
 * `Rob Rodrigues <https://github.com/irialad>`_
-
+* `Alex LordThorsen <https://github.com/rawrgulmuffins>`_
 
 Changelog
 =========
+
+v0.1.2 (2018-05-24)
+-------------------
+
+* Fixed race condition when creating cache directories.
+
+v0.1.1 (2018-05-15)
+-------------------
+
+* Fixed futures dependency not working corectly in Python 3.
 
 v0.1.0 (2018-02-26)
 -------------------
