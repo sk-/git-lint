@@ -11,14 +11,15 @@ python:
 # command to install dependencies
 install:
   - "pip install ."
-  - "pip install coveralls"
+  - "pip install coveralls yapf"
   - "bash scripts/install-linters.sh"
 # command to run tests
 before_script:
   - export PATH=$PATH:$PWD/pmd-bin/bin:/usr/local/bin
   - git config --global user.email "john@example.com"
   - git config --global user.name "John Doe"
-  #- "echo -e '[ui]\nusername = John Doe <john@example.com>' >> ~/.hgrc"
-script: "python -R setup.py nosetests"
+script:
+  - python -R setup.py nosetests
+  - yapf --parallel --recursive --diff . || ( ! echo "Run yapf before committing (yapf -pri .)" )
 after_success:
   coveralls

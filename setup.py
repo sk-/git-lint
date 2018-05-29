@@ -32,7 +32,10 @@ setup(
     url='http://github.com/sk-/git-lint',
     packages=find_packages(exclude=['test']),
     package_dir={'gitlint': 'gitlint'},
-    package_data={'gitlint': ['configs/*'], '': ['README.rst', 'LICENSE']},
+    package_data={
+        'gitlint': ['configs/*'],
+        '': ['README.rst', 'LICENSE']
+    },
     scripts=[
         'scripts/git-lint',
         'scripts/pre-commit.git-lint.sh',
@@ -55,9 +58,7 @@ setup(
         'pathlib2',
     ],
     tests_require=['nose>=1.3', 'mock'],
-    extras_require={
-        ':python_version == "2.7"': ['futures']
-    },
+    extras_require={':python_version == "2.7"': ['futures']},
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

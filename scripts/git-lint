@@ -18,6 +18,6 @@ import sys
 import gitlint
 
 try:
-	sys.exit(gitlint.main(sys.argv))
+    sys.exit(gitlint.main(sys.argv))
 except KeyboardInterrupt:
-	sys.exit(128)
+    sys.exit(128)

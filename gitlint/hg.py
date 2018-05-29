@@ -22,8 +22,8 @@ import gitlint.utils as utils
 def repository_root():
     """Returns the root of the repository as an absolute path."""
     try:
-        root = subprocess.check_output(['hg', 'root'],
-                                       stderr=subprocess.STDOUT).strip()
+        root = subprocess.check_output(
+            ['hg', 'root'], stderr=subprocess.STDOUT).strip()
         # Convert to unicode first
         return root.decode('utf-8')
     except subprocess.CalledProcessError:
@@ -33,8 +33,9 @@ def repository_root():
 def last_commit():
     """Returns the SHA1 of the last commit."""
     try:
-        root = subprocess.check_output(['hg', 'parent', '--template={node}'],
-                                       stderr=subprocess.STDOUT).strip()
+        root = subprocess.check_output(
+            ['hg', 'parent', '--template={node}'],
+            stderr=subprocess.STDOUT).strip()
         # Convert to unicode first
         return root.decode('utf-8')
     except subprocess.CalledProcessError:
@@ -61,8 +62,8 @@ def modified_files(root, tracked_only=False, commit=None):
         command.append('--change=%s' % commit)
 
     # Convert to unicode and split
-    status_lines = subprocess.check_output(
-        command).decode('utf-8').split(os.linesep)
+    status_lines = subprocess.check_output(command).decode('utf-8').split(
+        os.linesep)
 
     modes = ['M', 'A']
     if not tracked_only:

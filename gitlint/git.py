@@ -22,8 +22,9 @@ import gitlint.utils as utils
 def repository_root():
     """Returns the root of the repository as an absolute path."""
     try:
-        root = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
-                                       stderr=subprocess.STDOUT).strip()
+        root = subprocess.check_output(
+            ['git', 'rev-parse', '--show-toplevel'],
+            stderr=subprocess.STDOUT).strip()
         # Convert to unicode first
         return root.decode('utf-8')
     except subprocess.CalledProcessError:
@@ -33,8 +34,8 @@ def repository_root():
 def last_commit():
     """Returns the SHA1 of the last commit."""
     try:
-        root = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
-                                       stderr=subprocess.STDOUT).strip()
+        root = subprocess.check_output(
+            ['git', 'rev-parse', 'HEAD'], stderr=subprocess.STDOUT).strip()
         # Convert to unicode first
         return root.decode('utf-8')
     except subprocess.CalledProcessError:
@@ -70,7 +71,8 @@ def modified_files(root, tracked_only=False, commit=None):
     # Convert to unicode and split
     status_lines = subprocess.check_output([
         'git', 'status', '--porcelain', '--untracked-files=all',
-        '--ignore-submodules=all']).decode('utf-8').split(os.linesep)
+        '--ignore-submodules=all'
+    ]).decode('utf-8').split(os.linesep)
 
     modes = ['M ', ' M', 'A ', 'AM', 'MM']
     if not tracked_only:
@@ -88,9 +90,10 @@ def modified_files(root, tracked_only=False, commit=None):
 
 def _modified_files_with_commit(root, commit):
     # Convert to unicode and split
-    status_lines = subprocess.check_output(
-        ['git', 'diff-tree', '-r', '--root', '--no-commit-id', '--name-status',
-         commit]).decode('utf-8').split(os.linesep)
+    status_lines = subprocess.check_output([
+        'git', 'diff-tree', '-r', '--root', '--no-commit-id', '--name-status',
+        commit
+    ]).decode('utf-8').split(os.linesep)
 
     modified_file_status = utils.filter_lines(
         status_lines,
@@ -132,8 +135,6 @@ def modified_lines(filename, extra_data, commit=None):
         ['git', 'blame', '--porcelain', filename]).split(
             os.linesep.encode('utf-8'))
     modified_line_numbers = utils.filter_lines(
-        blame_lines,
-        commit + br' (?P<line>\d+) (\d+)',
-        groups=('line',))
+        blame_lines, commit + br' (?P<line>\d+) (\d+)', groups=('line', ))
 
     return list(map(int, modified_line_numbers))

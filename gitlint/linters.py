@@ -26,13 +26,15 @@ import gitlint.utils as utils
 
 class Partial(functools.partial):
     """Wrapper around functools partial to support equality comparisons."""
+
     def __eq__(self, other):
         return (isinstance(other, self.__class__) and self.args == other.args
                 and self.keywords == other.keywords)
 
     def __repr__(self):
         # This method should never be executed, only in failing tests.
-        return ('Partial: func: %s, args: %s, kwargs: %s' %
+        return (
+            'Partial: func: %s, args: %s, kwargs: %s' %
             (self.func.__name__, self.args, self.keywords))  # pragma: no cover
 
 
@@ -45,8 +47,7 @@ def missing_requirements_command(unused_name, missing_programs,
     return {
         filename: {
             'skipped': [
-                '%s %s not installed. %s' % (', '.join(missing_programs),
-                                             verb,
+                '%s %s not installed. %s' % (', '.join(missing_programs), verb,
                                              installation_string)
             ]
         }
@@ -77,8 +78,8 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
     if output is None:
         call_arguments = [program] + arguments + [filename]
         try:
-            output = subprocess.check_output(call_arguments,
-                                             stderr=subprocess.STDOUT)
+            output = subprocess.check_output(
+                call_arguments, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as error:
             output = error.output
         except OSError:
@@ -101,10 +102,10 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
     lines_regex = '(%s)' % lines_regex
 
     groups = ('line', 'column', 'message', 'severity', 'message_id')
-    filtered_lines = utils.filter_lines(output_lines,
-                                        filter_regex.format(lines=lines_regex,
-                                                            filename=re.escape(filename)),
-                                        groups=groups)
+    filtered_lines = utils.filter_lines(
+        output_lines,
+        filter_regex.format(lines=lines_regex, filename=re.escape(filename)),
+        groups=groups)
 
     result = []
     for data in filtered_lines:
@@ -117,11 +118,7 @@ def lint_command(name, program, arguments, filter_regex, filename, lines):
             comment['severity'] = comment['severity'].title()
         result.append(comment)
 
-    return {
-        filename: {
-            'comments': result
-        }
-    }
+    return {filename: {'comments': result}}
 
 
 def _replace_variables(data, variables):
@@ -136,29 +133,23 @@ def parse_yaml_config(yaml_config, repo_home):
     config = collections.defaultdict(list)
 
     variables = {
-        'DEFAULT_CONFIGS': os.path.join(os.path.dirname(__file__),
-                                        'configs'),
+        'DEFAULT_CONFIGS': os.path.join(os.path.dirname(__file__), 'configs'),
         'REPO_HOME': repo_home,
     }
 
     for name, data in yaml_config.items():
         command = _replace_variables([data['command']], variables)[0]
-        requirements = _replace_variables(data.get('requirements', []),
-                                          variables)
+        requirements = _replace_variables(
+            data.get('requirements', []), variables)
         arguments = _replace_variables(data.get('arguments', []), variables)
 
-        not_found_programs = utils.programs_not_in_path(
-            [command] + requirements)
+        not_found_programs = utils.programs_not_in_path([command] +
+                                                        requirements)
         if not_found_programs:
-            linter_command = Partial(missing_requirements_command,
-                                     name,
-                                     not_found_programs,
-                                     data['installation'])
+            linter_command = Partial(missing_requirements_command, name,
+                                     not_found_programs, data['installation'])
         else:
-            linter_command = Partial(lint_command,
-                                     name,
-                                     command,
-                                     arguments,
+            linter_command = Partial(lint_command, name, command, arguments,
                                      data['filter'])
         for extension in data['extensions']:
             config[extension].append(linter_command)
@@ -194,13 +185,13 @@ def lint(filename, lines, config):
                 output['comments'],
                 key=lambda x: (x.get('line', -1), x.get('column', -1)))
 
-        return {
-            filename: dict(output)
-        }
+        return {filename: dict(output)}
     else:
         return {
             filename: {
-                'skipped': ['no linter is defined or enabled for files'
-                            ' with extension "%s"' % ext]
+                'skipped': [
+                    'no linter is defined or enabled for files'
+                    ' with extension "%s"' % ext
+                ]
             }
         }

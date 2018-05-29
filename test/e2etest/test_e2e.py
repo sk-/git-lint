@@ -95,12 +95,12 @@ class E2EBase(object):
             os.path.dirname(os.path.realpath(__file__)), 'data')
         self.filename_repo = filename_repo = os.path.join(
             self.temp_directory, '%s%s' % (linter_name, extension))
-        filename_original = os.path.join(
-            data_dirname, linter_name, 'original%s' % extension)
-        filename_error = os.path.join(
-            data_dirname, linter_name, 'error%s' % extension)
-        filename_nonewerror = os.path.join(
-            data_dirname, linter_name, 'nonewerror%s' % extension)
+        filename_original = os.path.join(data_dirname, linter_name,
+                                         'original%s' % extension)
+        filename_error = os.path.join(data_dirname, linter_name,
+                                      'error%s' % extension)
+        filename_nonewerror = os.path.join(data_dirname, linter_name,
+                                           'nonewerror%s' % extension)
 
         self.assertTrue(
             os.path.exists(filename_original),
@@ -108,8 +108,8 @@ class E2EBase(object):
         self.assertTrue(
             os.path.exists(filename_error),
             'You must define file "%s"' % filename_error)
-        self.assertTrue(os.path.exists(
-            filename_nonewerror),
+        self.assertTrue(
+            os.path.exists(filename_nonewerror),
             'You must define file "%s"' % filename_nonewerror)
 
         # Add file 1 (original) to repo
@@ -123,10 +123,9 @@ class E2EBase(object):
         self.assertNotEquals(
             0, response,
             ('Git lint for file %s should have failed.\n git-lint output: %s' +
-             '\nLinter Output:\n%s') %
-            (filename_error,
-             output,
-             self.get_linter_output(linter_name, filename_repo)))
+             '\nLinter Output:\n%s') % (filename_error, output,
+                                        self.get_linter_output(
+                                            linter_name, filename_repo)))
         self.add(filename_repo)
         self.commit('Commit 2')
 
@@ -143,8 +142,10 @@ class E2EBase(object):
     @classmethod
     def add_linter_check(cls, linter_name, extension):
         """Adds a test for the given linter and extension."""
+
         def test_linter(self):
             self.assert_linter_works(linter_name, extension)
+
         test_linter.__name__ = 'test_linter_%s_with_%s' % (linter_name,
                                                            extension[1:])
         setattr(cls, test_linter.__name__, test_linter)

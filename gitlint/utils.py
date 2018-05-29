@@ -46,8 +46,8 @@ def filter_lines(lines, filter_regex, groups=None):
 # TODO(skreft): add test
 def which(program):
     """Returns a list of paths where the program is found."""
-    if (os.path.isabs(program) and os.path.isfile(program) and
-            os.access(program, os.X_OK)):
+    if (os.path.isabs(program) and os.path.isfile(program)
+            and os.access(program, os.X_OK)):
         return [program]
 
     candidates = []
@@ -95,8 +95,8 @@ def get_output_from_cache(name, filename):
     Returns: a string with the output, if it is still valid, or None otherwise.
     """
     cache_filename = _get_cache_filename(name, filename)
-    if (os.path.exists(cache_filename) and
-            os.path.getmtime(filename) < os.path.getmtime(cache_filename)):
+    if (os.path.exists(cache_filename)
+            and os.path.getmtime(filename) < os.path.getmtime(cache_filename)):
         with io.open(cache_filename) as f:
             return f.read()
 

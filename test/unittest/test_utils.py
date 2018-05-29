@@ -33,41 +33,45 @@ class UtilsTest(unittest.TestCase):
 
     def test_filter_lines_one_group(self):
         lines = ['1: foo', '12: bar', '', 'Debug: info']
-        self.assertEqual(
-            ['1', '12'],
-            list(utils.filter_lines(lines,
-                                    r'(?P<line>\d+): .*',
-                                    groups=('line',))))
+        self.assertEqual(['1', '12'],
+                         list(
+                             utils.filter_lines(
+                                 lines,
+                                 r'(?P<line>\d+): .*',
+                                 groups=('line', ))))
 
     def test_filter_lines_many_groups(self):
         lines = ['1: foo', '12: bar', '', 'Debug: info']
-        self.assertEqual(
-            [('1', 'foo'), ('12', 'bar')],
-            list(utils.filter_lines(lines,
-                                    r'(?P<line>\d+): (?P<info>.*)',
-                                    groups=('line', 'info'))))
-        self.assertEqual(
-            [('1', 'foo', ':'), ('12', 'bar', ':')],
-            list(utils.filter_lines(
-                lines,
-                r'(?P<line>\d+)(?P<separator>:) (?P<info>.*)',
-                groups=('line', 'info', 'separator'))))
+        self.assertEqual([('1', 'foo'), ('12', 'bar')],
+                         list(
+                             utils.filter_lines(
+                                 lines,
+                                 r'(?P<line>\d+): (?P<info>.*)',
+                                 groups=('line', 'info'))))
+        self.assertEqual([('1', 'foo', ':'), ('12', 'bar', ':')],
+                         list(
+                             utils.filter_lines(
+                                 lines,
+                                 r'(?P<line>\d+)(?P<separator>:) (?P<info>.*)',
+                                 groups=('line', 'info', 'separator'))))
 
     def test_filter_lines_group_not_always_defined(self):
         lines = ['1: foo', '12: bar', '', 'Debug: info']
-        self.assertEqual(
-            [('1', None), ('12', None), (None, 'info')],
-            list(utils.filter_lines(lines,
-                                    r'(?P<line>\d+): .*|Debug: (?P<debug>.*)',
-                                    groups=('line', 'debug'))))
+        self.assertEqual([('1', None), ('12', None), (None, 'info')],
+                         list(
+                             utils.filter_lines(
+                                 lines,
+                                 r'(?P<line>\d+): .*|Debug: (?P<debug>.*)',
+                                 groups=('line', 'debug'))))
 
     def test_filter_lines_group_not_defined(self):
         lines = ['1: foo', '12: bar', '', 'Debug: info']
-        self.assertEqual(
-            [('1', None), ('12', None)],
-            list(utils.filter_lines(lines,
-                                    r'(?P<line>\d+): .*',
-                                    groups=('line', 'debug'))))
+        self.assertEqual([('1', None), ('12', None)],
+                         list(
+                             utils.filter_lines(
+                                 lines,
+                                 r'(?P<line>\d+): .*',
+                                 groups=('line', 'debug'))))
 
     def test_open_for_write(self):
         filename = 'foo/bar/new_file'
@@ -80,9 +84,7 @@ class UtilsTest(unittest.TestCase):
                 return_value=True) as mock_create:
             utils._open_for_write(filename)
 
-            mock_create.assert_called_once_with(
-                parents=True,
-                exist_ok=True)
+            mock_create.assert_called_once_with(parents=True, exist_ok=True)
             mock_open.assert_called_once_with(filename, 'w')
 
     def test_get_cache_filename(self):
@@ -99,9 +101,8 @@ class UtilsTest(unittest.TestCase):
                 '/home/user/.git-lint/cache/linter1/foo/bar/file.txt',
                 utils._get_cache_filename('linter1', 'bar/file.txt'))
 
-            self.assertEqual(
-                '/home/user/.git-lint/cache/linter2/foo/file.txt',
-                utils._get_cache_filename('linter2', 'file.txt'))
+            self.assertEqual('/home/user/.git-lint/cache/linter2/foo/file.txt',
+                             utils._get_cache_filename('linter2', 'file.txt'))
 
             self.assertEqual(
                 '/home/user/.git-lint/cache/linter3/bar/file.txt',
@@ -146,8 +147,8 @@ class UtilsTest(unittest.TestCase):
              mock.patch('io.open',
                         mock.mock_open(read_data=content),
                         create=True) as mock_open:
-            self.assertEqual(
-                content, utils.get_output_from_cache('linter', 'filename'))
+            self.assertEqual(content,
+                             utils.get_output_from_cache('linter', 'filename'))
             mock_open.assert_called_once_with(cache_filename)
 
     def test_which_absolute_path(self):
