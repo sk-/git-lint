@@ -57,7 +57,8 @@ setup(
         'docutils',
         'pathlib2',
     ],
-    tests_require=['nose>=1.3', 'mock'],
+    tests_require=['nose>=1.3', 'mock', 'coverage'],
+    setup_requires=['nose>=1.3'],
     extras_require={':python_version == "2.7"': ['futures']},
     classifiers=[
         'Development Status :: 3 - Alpha',
