@@ -476,13 +476,13 @@ class GitLintTest(unittest.TestCase):
     def test_get_config_from_default(self):
         with mock.patch('os.path.exists', return_value=False):
             parsed_config = gitlint.get_config(self.root)
-            self.assertEquals(self.git_lint_config, parsed_config)
+            self.assertEqual(self.git_lint_config, parsed_config)
 
     def test_get_config_not_in_a_repo(self):
         # When not in a repo should return the default config.
         self.git_repository_root.return_value = None
         parsed_config = gitlint.get_config(None)
-        self.assertEquals(self.git_lint_config, parsed_config)
+        self.assertEqual(self.git_lint_config, parsed_config)
 
     def test_get_config_empty(self):
         # When config file is empty return an empty dictionary.
@@ -543,14 +543,14 @@ class GitLintTest(unittest.TestCase):
 
     def test_get_vcs_git(self):
         self.git_repository_root.return_value = self.root
-        self.assertEquals((gitlint.git, self.root), gitlint.get_vcs_root())
+        self.assertEqual((gitlint.git, self.root), gitlint.get_vcs_root())
 
     def test_get_vcs_hg(self):
         self.git_repository_root.return_value = None
         self.hg_repository_root.return_value = self.root
-        self.assertEquals((gitlint.hg, self.root), gitlint.get_vcs_root())
+        self.assertEqual((gitlint.hg, self.root), gitlint.get_vcs_root())
 
     def test_get_vcs_none(self):
         self.git_repository_root.return_value = None
         self.hg_repository_root.return_value = None
-        self.assertEquals((None, None), gitlint.get_vcs_root())
+        self.assertEqual((None, None), gitlint.get_vcs_root())

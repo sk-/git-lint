@@ -63,8 +63,8 @@ class E2EBase(object):
             f.write('Foo')
         self.add(filename)
         response, output = self.lint()
-        self.assertEquals(
-            0, response, 'Response %s != 0.\nOutput:\n%s' % (response, output))
+        self.assertEqual(0, response,
+                         'Response %s != 0.\nOutput:\n%s' % (response, output))
 
         self.assertIn(os.path.relpath(filename), output)
         self.assertIn('SKIPPED', output)
@@ -132,7 +132,7 @@ class E2EBase(object):
         # Add file 3 (nonewerror) to repo
         shutil.copy(filename_nonewerror, filename_repo)
         response, output = self.lint()
-        self.assertEquals(
+        self.assertEqual(
             0, response,
             ('Git lint for file %s should have not failed. \nOutput:\n%s') %
             (filename_nonewerror, output))
