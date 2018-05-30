@@ -23,7 +23,18 @@ import gitlint
 # pylint: disable=too-many-public-methods
 
 
-class E2EBase(object):
+class E2EMixin(object):
+    """Mixin holding the actual end to end tests.
+
+    To define a concrete VCS e2e test, one needs to define a class extending
+    from E2EMixin and unittest.TestCase.
+
+    This class needs to implement to following methods:
+    - init_repo(cls)
+    - commit(message)
+    - add(filename)
+    """
+
     @staticmethod
     def lint():
         """Returns the response and ouput of git-lint."""
@@ -158,7 +169,7 @@ class E2EBase(object):
                 cls.add_linter_check(linter.args[0], extension)
 
 
-E2EBase.add_linter_checks()
+E2EMixin.add_linter_checks()
 
 
 def execute(*args, **kwargs):
@@ -171,7 +182,7 @@ def execute(*args, **kwargs):
         raise
 
 
-class TestGitE2E(E2EBase, unittest.TestCase):
+class TestGitE2E(E2EMixin, unittest.TestCase):
     @classmethod
     def init_repo(cls):
         """Initializes a git repo."""
@@ -230,7 +241,7 @@ class TestGitE2E(E2EBase, unittest.TestCase):
                 shutil.rmtree(repo_dir)
 
 
-class TestHgE2E(E2EBase, unittest.TestCase):
+class TestHgE2E(E2EMixin, unittest.TestCase):
     @staticmethod
     def init_repo():
         """Initializes a mercurial repo."""

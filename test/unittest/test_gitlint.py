@@ -16,29 +16,34 @@ import io
 import json
 import os
 import sys
-import unittest
 
 import mock
+from pyfakefs import fake_filesystem_unittest
 
 import gitlint
-import gitlint.linters as linters
 
 # pylint: disable=too-many-public-methods
 
 
-class GitLintTest(unittest.TestCase):
+class GitLintTest(fake_filesystem_unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._stderr = sys.stderr
         sys.stderr = sys.stdout
-        cls.git_lint_config = gitlint.get_config(None)
 
     @classmethod
     def tearDownClass(cls):
         sys.stderr = cls._stderr
 
     def setUp(self):
+        self.original_config_file = os.path.join(
+            os.path.dirname(gitlint.__file__), 'configs', 'config.yaml')
+        self.setUpPyfakefs()
+        self.fs.add_real_file(self.original_config_file)
+
         self.root = '/home/user/repo'
+        self.fs.create_dir(self.root)
+        os.chdir(self.root)
         self.filename = os.path.join(self.root, 'changed.py')
         self.filename2 = os.path.join(self.root, 'foo.txt')
 
@@ -90,33 +95,28 @@ class GitLintTest(unittest.TestCase):
             self.root, tracked_only=tracked_only, commit=commit)
         self.git_modified_lines.assert_called_once_with(
             self.filename, ' M', commit=commit)
-        self.lint.assert_called_once_with(self.filename, [3, 14],
-                                          self.git_lint_config)
+        self.lint.assert_called_once_with(self.filename, [3, 14], mock.ANY)
 
     def test_find_invalid_filenames(self):
+        file_outside_repo = '/tmp/outside_repo'
+        inexistent_file = os.path.join(self.root, 'inexistent_file')
+        directory_in_repo = os.path.join(self.root, 'directory_in_repo')
+        valid_file = os.path.join(self.root, 'valid')
         filenames = [
-            '/tmp/outside_repo',
-            '%s/inexistent_file' % self.root,
-            '%s/directory_in_repo/' % self.root,
-            '%s/valid' % self.root
+            file_outside_repo, inexistent_file, directory_in_repo, valid_file
         ]
         expected = {
-            '/tmp/outside_repo':
-            'does not belong to repository',
-            '%s/inexistent_file' % self.root:
-            'does not exist',
-            '%s/directory_in_repo/' % self.root:
-            ('Directories are not yet ' + 'supported'),
+            file_outside_repo: 'does not belong to repository',
+            inexistent_file: 'does not exist',
+            directory_in_repo: 'Directories are not yet supported',
         }
 
-        with mock.patch(
-                'os.path.exists',
-                side_effect=lambda filename: 'inexistent' not in filename), \
-             mock.patch(
-                'os.path.isdir',
-                side_effect=lambda filename: 'directory' in filename):
-            invalid_filenames = dict(
-                gitlint.find_invalid_filenames(filenames, self.root))
+        self.fs.create_file(file_outside_repo)
+        self.fs.create_dir(directory_in_repo)
+        self.fs.create_file(valid_file)
+
+        invalid_filenames = dict(
+            gitlint.find_invalid_filenames(filenames, self.root))
 
         self.assertEqual(expected.keys(), invalid_filenames.keys())
         for filename in invalid_filenames:
@@ -316,8 +316,7 @@ class GitLintTest(unittest.TestCase):
 
         self.git_modified_files.assert_called_once_with(
             self.root, tracked_only=False, commit=None)
-        self.lint.assert_called_once_with(self.filename, None,
-                                          self.git_lint_config)
+        self.lint.assert_called_once_with(self.filename, None, mock.ANY)
 
         self.reset_mock_calls()
         self.stdout = io.StringIO()
@@ -329,8 +328,7 @@ class GitLintTest(unittest.TestCase):
 
         self.git_modified_files.assert_called_once_with(
             self.root, tracked_only=False, commit=None)
-        self.lint.assert_called_once_with(self.filename, None,
-                                          self.git_lint_config)
+        self.lint.assert_called_once_with(self.filename, None, mock.ANY)
 
     def test_main_with_invalid_files(self):
         with mock.patch(
@@ -353,8 +351,7 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
-                mock.patch('os.getcwd', return_value=self.root):
+        with mock.patch('gitlint.find_invalid_filenames', return_value=[]):
             self.assertEqual(
                 0,
                 gitlint.main(
@@ -376,8 +373,8 @@ class GitLintTest(unittest.TestCase):
             self.assertEqual(expected_calls,
                              self.git_modified_lines.call_args_list)
             expected_calls = [
-                mock.call(self.filename, [3, 14], self.git_lint_config),
-                mock.call(self.filename2, [3, 14], self.git_lint_config)
+                mock.call(self.filename, [3, 14], mock.ANY),
+                mock.call(self.filename2, [3, 14], mock.ANY)
             ]
             self.assertEqual(expected_calls, self.lint.call_args_list)
 
@@ -392,8 +389,7 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
-                mock.patch('os.getcwd', return_value=self.root):
+        with mock.patch('gitlint.find_invalid_filenames', return_value=[]):
             self.assertEqual(
                 0,
                 gitlint.main(
@@ -412,8 +408,8 @@ class GitLintTest(unittest.TestCase):
             self.assertEqual(expected_calls,
                              self.git_modified_lines.call_args_list)
             expected_calls = [
-                mock.call(self.filename, [3, 14], self.git_lint_config),
-                mock.call(self.filename2, [3, 14], self.git_lint_config)
+                mock.call(self.filename, [3, 14], mock.ANY),
+                mock.call(self.filename2, [3, 14], mock.ANY)
             ]
             self.assertEqual(expected_calls, self.lint.call_args_list)
 
@@ -434,8 +430,7 @@ class GitLintTest(unittest.TestCase):
         }
         self.lint.return_value = lint_response
 
-        with mock.patch('gitlint.find_invalid_filenames', return_value=[]), \
-                mock.patch('os.getcwd', return_value=self.root):
+        with mock.patch('gitlint.find_invalid_filenames', return_value=[]):
             self.assertEqual(
                 1,
                 gitlint.main(
@@ -453,7 +448,6 @@ class GitLintTest(unittest.TestCase):
             self.assertIn(expected_output, self.stdout.getvalue())
 
     def test_get_config(self):
-        git_config = os.path.join(self.root, '.gitlint.yaml')
         config = """python:
   extensions:
   - .py
@@ -464,34 +458,27 @@ class GitLintTest(unittest.TestCase):
   filter: ".*"
   installation: "Really?"
 """
-        with mock.patch('os.path.exists', return_value=True), \
-            mock.patch('gitlint.open',
-                       mock.mock_open(read_data=config),
-                       create=True) as mock_open:
-            parsed_config = gitlint.get_config(self.root)
-            mock_open.assert_called_once_with(git_config)
-            self.assertEqual(['.py'], list(parsed_config.keys()))
-            self.assertEqual(1, len(parsed_config['.py']))
+        self.fs.create_file(
+            os.path.join(self.root, '.gitlint.yaml'), contents=config)
+        parsed_config = gitlint.get_config(self.root)
+        self.assertEqual(['.py'], list(parsed_config.keys()))
+        self.assertEqual(1, len(parsed_config['.py']))
 
     def test_get_config_from_default(self):
-        with mock.patch('os.path.exists', return_value=False):
-            parsed_config = gitlint.get_config(self.root)
-            self.assertEqual(self.git_lint_config, parsed_config)
+        parsed_config = gitlint.get_config(self.root)
+        self.assertEqual(gitlint.get_config(None), parsed_config)
 
     def test_get_config_not_in_a_repo(self):
         # When not in a repo should return the default config.
         self.git_repository_root.return_value = None
-        parsed_config = gitlint.get_config(None)
-        self.assertEqual(self.git_lint_config, parsed_config)
+        parsed_config = gitlint.get_config(self.root)
+        self.assertEqual(gitlint.get_config(None), parsed_config)
 
     def test_get_config_empty(self):
+        self.fs.create_file(os.path.join(self.root, '.gitlint.yaml'))
         # When config file is empty return an empty dictionary.
-        with mock.patch('os.path.exists', return_value=True), \
-            mock.patch('gitlint.open',
-                       mock.mock_open(read_data=''),
-                       create=True) as mock_open:
-            parsed_config = gitlint.get_config(self.root)
-            self.assertEqual({}, parsed_config)
+        parsed_config = gitlint.get_config(self.root)
+        self.assertEqual({}, parsed_config)
 
     def test_format_comment(self):
         self.assertEqual('', gitlint.format_comment({}))

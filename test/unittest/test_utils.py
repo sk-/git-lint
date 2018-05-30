@@ -13,15 +13,20 @@
 # limitations under the License.
 import os.path
 import unittest
+import sys
 
 import mock
+from pyfakefs import fake_filesystem_unittest
 
 import gitlint.utils as utils
 
-# pylint: disable=too-many-public-methods
+# pylint: disable=protected-access
 
 
-class UtilsTest(unittest.TestCase):
+class UtilsTest(fake_filesystem_unittest.TestCase):
+    def setUp(self):
+        self.setUpPyfakefs()
+
     def test_filter_lines_no_groups(self):
         lines = ['a', 'b', 'c', 'ad']
         self.assertEqual(lines, list(utils.filter_lines(lines, '.')))
@@ -73,86 +78,77 @@ class UtilsTest(unittest.TestCase):
                                  r'(?P<line>\d+): .*',
                                  groups=('line', 'debug'))))
 
+    @unittest.skipUnless(sys.version_info >= (3, 5),
+                         'pyfakefs does not support pathlib2. See'
+                         'https://github.com/jmcgeheeiv/pyfakefs/issues/408')
     def test_open_for_write(self):
         filename = 'foo/bar/new_file'
-        with mock.patch('io.open',
-                        mock.mock_open(),
-                        create=True) as mock_open, \
-             mock.patch.object(
-                utils.pathlib.Path,
-                'mkdir',
-                return_value=True) as mock_create:
-            utils._open_for_write(filename)
-
-            mock_create.assert_called_once_with(parents=True, exist_ok=True)
-            mock_open.assert_called_once_with(filename, 'w')
+        with utils._open_for_write(filename) as f:
+            f.write('foo')
+        with open(filename) as f:
+            self.assertEqual('foo', f.read())
 
     def test_get_cache_filename(self):
-        def mock_abspath(filename):
-            if os.path.isabs(filename):
-                return filename
-            return '/foo/%s' % filename
-
-        with mock.patch('os.path.abspath',
-                        side_effect=mock_abspath), \
-             mock.patch('os.path.expanduser',
-                        side_effect=lambda a: '/home/user'):
+        self.fs.create_dir('/abspath')
+        os.chdir('/abspath')
+        with mock.patch('os.path.expanduser', return_value='/home/user'):
             self.assertEqual(
-                '/home/user/.git-lint/cache/linter1/foo/bar/file.txt',
+                '/home/user/.git-lint/cache/linter1/abspath/bar/file.txt',
                 utils._get_cache_filename('linter1', 'bar/file.txt'))
 
-            self.assertEqual('/home/user/.git-lint/cache/linter2/foo/file.txt',
-                             utils._get_cache_filename('linter2', 'file.txt'))
+            self.assertEqual(
+                '/home/user/.git-lint/cache/linter2/abspath/file.txt',
+                utils._get_cache_filename('linter2', 'file.txt'))
 
             self.assertEqual(
                 '/home/user/.git-lint/cache/linter3/bar/file.txt',
                 utils._get_cache_filename('linter3', '/bar/file.txt'))
 
+    @unittest.skipUnless(sys.version_info >= (3, 5),
+                         'pyfakefs does not support pathlib2. See'
+                         'https://github.com/jmcgeheeiv/pyfakefs/issues/408')
     def test_save_output_in_cache(self):
         output = 'Some content'
-        cache_filename = '/cache/filename.txt'
-        mock_file = mock.MagicMock()
-        with mock.patch('gitlint.utils._get_cache_filename',
-                        return_value=cache_filename), \
-             mock.patch('gitlint.utils._open_for_write',
-                        mock.mock_open(mock_file)) as mock_open:
+        with mock.patch(
+                'gitlint.utils._get_cache_filename',
+                return_value='/cache/filename.txt'):
             utils.save_output_in_cache('linter', 'filename', output)
-            mock_open.assert_called_once_with(cache_filename)
-            mock_file().write.assert_called_once_with(output)
+
+            with open(utils._get_cache_filename('linter', 'filename')) as f:
+                self.assertEqual(output, f.read())
 
     def test_get_output_from_cache_no_cache(self):
         cache_filename = '/cache/filename.txt'
-        with mock.patch('gitlint.utils._get_cache_filename',
-                        return_value=cache_filename), \
-             mock.patch('os.path.exists', return_value=False):
+        with mock.patch(
+                'gitlint.utils._get_cache_filename',
+                return_value=cache_filename):
             self.assertIsNone(
                 utils.get_output_from_cache('linter', 'filename'))
 
     def test_get_output_from_cache_cache_is_expired(self):
         cache_filename = '/cache/filename.txt'
-        with mock.patch('gitlint.utils._get_cache_filename',
-                        return_value=cache_filename), \
-             mock.patch('os.path.exists', return_value=True), \
-             mock.patch('os.path.getmtime', side_effect=[2, 1]):
+        self.fs.create_file(cache_filename)
+        self.fs.create_file('filename')
+        with mock.patch(
+                'gitlint.utils._get_cache_filename',
+                return_value=cache_filename):
             self.assertIsNone(
                 utils.get_output_from_cache('linter', 'filename'))
 
     def test_get_output_from_cache_cache_is_valid(self):
         cache_filename = '/cache/filename.txt'
         content = 'some_content'
-        with mock.patch('gitlint.utils._get_cache_filename',
-                        return_value=cache_filename), \
-             mock.patch('os.path.exists', return_value=True), \
-             mock.patch('os.path.getmtime', side_effect=[1, 2]), \
-             mock.patch('io.open',
-                        mock.mock_open(read_data=content),
-                        create=True) as mock_open:
+        self.fs.create_file('filename')
+        self.fs.create_file(cache_filename, contents=content)
+        with mock.patch(
+                'gitlint.utils._get_cache_filename',
+                return_value=cache_filename):
             self.assertEqual(content,
                              utils.get_output_from_cache('linter', 'filename'))
-            mock_open.assert_called_once_with(cache_filename)
 
     def test_which_absolute_path(self):
-        with mock.patch('os.path.isfile', return_value=True), \
-            mock.patch('os.access', return_value=True):
-            filename = '/foo/bar.sh'
-            self.assertEqual([filename], utils.which(filename))
+        filename = '/foo/bar.sh'
+        self.fs.create_file(filename)
+        os.chmod(filename, 0o755)
+
+        self.assertEqual([filename], utils.which(filename))

@@ -47,17 +47,16 @@ setup(
         'scripts/custom_linters/tidy-wrapper.sh',
     ],
     install_requires=[
-        'pyyaml',
-        'termcolor',
         'docopt',
+        'pyyaml',
+        'pathlib2',
+        'termcolor',
         # Packages specific to linters. They are optional, but to ease the use
         # we prefer to put them here.
-        'html-linter',
-        'template-remover',
         'docutils',
-        'pathlib2',
+        'html-linter',
     ],
-    tests_require=['nose>=1.3', 'mock', 'coverage'],
+    tests_require=['nose>=1.3', 'mock', 'coverage', 'pyfakefs'],
     setup_requires=['nose>=1.3'],
     extras_require={':python_version == "2.7"': ['futures']},
     classifiers=[
