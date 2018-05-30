@@ -198,6 +198,7 @@ yaml:
 ini:
   extensions:
   - .ini
+  - .cfg
   command: ini_linter.py
   filter: "(?P<message>.+)$"
   installation: ""
