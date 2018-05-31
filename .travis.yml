@@ -11,8 +11,7 @@ python:
 cache: pip
 # command to install dependencies
 install:
-  - pip install .
-  - pip install coveralls yapf
+  - pip install .[dev,test] coveralls
   - bash scripts/install-linters.sh
 # command to run tests
 before_script:
@@ -21,7 +20,7 @@ before_script:
   - git config --global user.name "John Doe"
 script:
   - env | grep TRAVIS
-  - python -R setup.py nosetests
+  - nosetests
   - >
     yapf --parallel --recursive --diff . ||
     ( ! echo "Run yapf before committing (yapf -pri .)" )

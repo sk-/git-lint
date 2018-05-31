@@ -18,16 +18,19 @@ import io
 import os
 from setuptools import setup, find_packages
 
-version_file = open(os.path.join('gitlint', 'version.py'))
+with io.open(os.path.join('gitlint', 'version.py')) as f:
+    VERSION = ast.literal_eval(f.read().rsplit('=', 1)[1].strip())
 
-version = version_file.read()
-version = ast.literal_eval(version.rsplit('=', 1)[1].strip())
+with io.open('README.rst', encoding='utf-8') as f:
+    LONG_DESCRIPTION = f.read()
+
+TEST_REQUIRES = ['nose>=1.3', 'mock', 'coverage', 'pyfakefs']
 
 setup(
     name='git-lint',
-    version=version,
+    version=VERSION,
     description='Git Lint',
-    long_description=io.open('README.rst', encoding='utf-8').read(),
+    long_description=LONG_DESCRIPTION,
     author='Sebastian Kreft',
     url='http://github.com/sk-/git-lint',
     packages=find_packages(exclude=['test']),
@@ -56,9 +59,13 @@ setup(
         'docutils',
         'html-linter',
     ],
-    tests_require=['nose>=1.3', 'mock', 'coverage', 'pyfakefs'],
+    tests_require=TEST_REQUIRES,
     setup_requires=['nose>=1.3'],
-    extras_require={':python_version == "2.7"': ['futures']},
+    extras_require={
+        ':python_version == "2.7"': ['futures'],
+        'test': TEST_REQUIRES,
+        'dev': ['pycodestyle', 'pylint', 'yapf'],
+    },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

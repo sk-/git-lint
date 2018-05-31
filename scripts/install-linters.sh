@@ -46,29 +46,16 @@ then
     sudo ln -sf /usr/bin/gem2.3 /usr/bin/gem
 fi
 
-sudo gem install rake
-sudo gem install rubocop
-sudo gem install ruby-lint
-sudo gem install scss_lint
+sudo gem install rake rubocop ruby-lint scss_lint
 
 # Install latest node
-curl -sL https://deb.nodesource.com/setup_4.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
 sudo apt-get install nodejs --yes
 
 # Install python packages
-pip install closure-linter
-pip install pylint
-pip install pycodestyle
-pip install yamllint
-pip install docutils
-pip install html-linter
-pip install cpplint
+pip install closure-linter cpplint docutils html-linter pycodestyle pylint yamllint
 
-# See https://github.com/n1k0/casperjs/issues/876
-sudo npm config set registry http://registry.npmjs.org/
-sudo npm install -g csslint
-sudo npm install -g jshint
-sudo npm install -g coffeelint
+sudo npm install -g coffeelint csslint jshint
 
 # PHP CodeSniffer
 sudo pear install --force PHP_CodeSniffer 
@@ -76,14 +63,15 @@ sudo pear install --force PHP_CodeSniffer
 cd /tmp
 
 # Tidy
-git clone https://github.com/htacg/tidy-html5.git
+git clone https://github.com/htacg/tidy-html5.git --depth=1
+
 cd tidy-html5/build/cmake
 cmake ../..
-make
+make -j 4
 sudo make install
 cd -
 
 # PMD
-wget --no-check-certificate "http://downloads.sourceforge.net/project/pmd/pmd/5.1.3/pmd-bin-5.1.3.zip?r=&ts=`date +%s`&use_mirror=ufpr"
-unzip -q pmd-bin-*
-mv pmd-bin-5.1.3 pmd-bin
+wget --no-check-certificate "https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.4.0/pmd-bin-6.4.0.zip"
+unzip -q pmd-bin-6.4.0.zip
+mv pmd-bin-6.4.0 pmd-bin
