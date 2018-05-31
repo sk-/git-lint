@@ -23,6 +23,17 @@ import gitlint
 # pylint: disable=too-many-public-methods
 
 
+def get_linter_output(linter_name, file_path):
+    cache_path = os.path.expanduser('~/.git-lint/cache')
+    filename = os.path.join(cache_path, linter_name, file_path[1:])
+    if not os.path.exists(filename):
+        return 'No git-lint cache found for %s' % filename
+
+    with open(filename) as f:
+        output = f.read()
+    return output
+
+
 class E2EMixin(object):
     """Mixin holding the actual end to end tests.
 
@@ -62,7 +73,7 @@ class E2EMixin(object):
         if self.filename_repo is None:
             return
 
-        with open(self.filename_repo, 'w') as f:
+        with open(self.filename_repo, 'w'):
             pass
         self.add(self.filename_repo)
         self.commit('Commit teardown')
@@ -80,16 +91,6 @@ class E2EMixin(object):
         self.assertIn(os.path.relpath(filename), output)
         self.assertIn('SKIPPED', output)
         self.assertIn(extension, output)
-
-    def get_linter_output(self, linter_name, file_path):
-        cache_path = os.path.expanduser('~/.git-lint/cache')
-        filename = os.path.join(cache_path, linter_name, file_path[1:])
-        if not os.path.exists(filename):
-            return 'No git-lint cache found for %s' % filename
-
-        with open(filename) as f:
-            output = f.read()
-        return output
 
     # TODO(skreft): check that the first file has more than 1 error, check that
     # the second file has 1 new error, check also the lines that changed.
@@ -135,7 +136,7 @@ class E2EMixin(object):
             0, response,
             ('Git lint for file %s should have failed.\n git-lint output: %s' +
              '\nLinter Output:\n%s') % (filename_error, output,
-                                        self.get_linter_output(
+                                        get_linter_output(
                                             linter_name, filename_repo)))
         self.add(filename_repo)
         self.commit('Commit 2')

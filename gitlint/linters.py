@@ -38,8 +38,8 @@ class Partial(functools.partial):
             (self.func.__name__, self.args, self.keywords))  # pragma: no cover
 
 
-def missing_requirements_command(unused_name, missing_programs,
-                                 installation_string, filename, unused_lines):
+def missing_requirements_command(missing_programs, installation_string,
+                                 filename, unused_lines):
     """Pseudo-command to be used when requirements are missing."""
     verb = 'is'
     if len(missing_programs) > 1:
@@ -146,7 +146,7 @@ def parse_yaml_config(yaml_config, repo_home):
         not_found_programs = utils.programs_not_in_path([command] +
                                                         requirements)
         if not_found_programs:
-            linter_command = Partial(missing_requirements_command, name,
+            linter_command = Partial(missing_requirements_command,
                                      not_found_programs, data['installation'])
         else:
             linter_command = Partial(lint_command, name, command, arguments,

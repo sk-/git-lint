@@ -12,7 +12,7 @@ profile=no
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS,.git
+ignore=CVS,.git,.hg,.eggs
 
 # Pickle collected data for later comparisons.
 persistent=no
@@ -244,7 +244,7 @@ max-args=8
 
 # Argument names that match this expression will be ignored. Default to name
 # with leading underscore
-ignored-argument-names=_.*
+ignored-argument-names=(unused)?_[a-z_][a-z0-9_]+
 
 # Maximum number of locals for function / method body
 max-locals=15

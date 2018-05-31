@@ -193,7 +193,7 @@ def main(argv, stdout=sys.stdout, stderr=sys.stderr):
             stdout = codecs.getwriter("utf-8")(stdout)
         if stderr == sys.stderr:
             stderr = codecs.getwriter("utf-8")(stderr)
-        linesep = unicode(os.linesep)
+        linesep = unicode(os.linesep)  # pylint: disable=undefined-variable
 
     arguments = docopt.docopt(
         __doc__, argv=argv[1:], version='git-lint v%s' % __VERSION__)
