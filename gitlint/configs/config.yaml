@@ -17,16 +17,20 @@
 # braces, as in '{{}}' or '{{foo}}'. See the pylint configuration for an
 # example.
 
----
+# NOTE: filter are regular expressions, and for readability they are broken up
+# using '>-' line folding from YAML. This means that between each line a space
+# will be added.
+
 # CSS
 # Sample output:
-# /home/skreft/opensource/git-lint/test/e2etest/data/csslint/error.css: line 3, col 2, Warning - Duplicate property 'width' found.
+# /path_to/error.css: line 3, col 2, Warning - Duplicate property 'width' found.
 csslint:
   extensions:
     - .css
   command: csslint
   arguments:
-    - --ignore=ids,box-model,adjoining-classes,qualified-headings,unique-headings,zero-units
+    - "--ignore=ids,box-model,adjoining-classes,qualified-headings,\
+       unique-headings,zero-units"
     - --format=compact
   filter: >-
     ^{filename}: line (?P<line>{lines}), col (?P<column>\d+)?,
@@ -37,7 +41,7 @@ csslint:
 
 # SCSS
 # Sample output:
-# /home/skreft/opensource/git-lint/test/e2etest/data/scss/error.scss:2 [W] `0px` should be written without units as `0`
+# /path_to/error.scss:2 [W] `0px` should be written without units as `0`
 scss:
   extensions:
     - .scss
@@ -66,7 +70,7 @@ gjslint:
     for installation instructions.
 
 # Sample output:
-# /home/skreft/opensource/git-lint/test/e2etest/data/jshint/error.js: line 1, col 3, Use '===' to compare with ''.
+# /path_to/error.js: line 1, col 3, Use '===' to compare with ''.
 jshint:
   extensions:
     - .js
@@ -76,12 +80,12 @@ jshint:
     - "{DEFAULT_CONFIGS}/jshint.json"
   filter: >-
     ^{filename}: line (?P<line>{lines}), col (?P<column>\d+), (?P<message>.+)
-  installation: >
+  installation: >-
     Visit http://www.jshint.com/install/ for installation instructions.
 
 # PHP
 # Sample output:
-# PHP Parse error:  syntax error, unexpected 'bar' (T_STRING) in /home/skreft/opensource/git-lint/test/e2etest/data/php/error.php on line 3
+# PHP Parse error:  syntax error, unexpected 'bar' (T_STRING) in /path_to/error.php on line 3
 php:
   extensions:
     - .php
@@ -100,7 +104,8 @@ phpcs:
   arguments:
     - --report-width=1000
     - --standard=PSR2
-  filter: ^\s*(?P<line>{lines})\s+[|]\s+(?P<severity>\S+)\s+[|]\s+(?P<message>.+)
+  filter: >-
+    ^\s*(?P<line>{lines})\s+[|]\s+(?P<severity>\S+)\s+[|]\s+(?P<message>.+)
   installation: >-
     Visit https://github.com/squizlabs/PHP_CodeSniffer for installation
     instructions
@@ -114,7 +119,7 @@ pylint:
     - --rcfile={DEFAULT_CONFIGS}/pylintrc
     - --output-format=text
     - >-
-      --msg-template='{{abspath}}:{{line}}:{{column}}:
+      --msg-template={{abspath}}:{{line}}:{{column}}:
       [{{category}}:{{symbol}}] {{obj}}: {{msg}}
     - --reports=n
   filter: >-
@@ -123,14 +128,17 @@ pylint:
     )?(?P<message>.+)$
   installation: "Run pip install pylint."
 
-# Sample output: gitlint/__init__.py:68:80: E501 line too long (80 > 79 characters)
+# Sample output:
+# package/module.py:68:80: E501 line too long (80 > 79 characters)
 pycodestyle:
   extensions:
-  - .py
+    - .py
   command: pycodestyle
   arguments:
-  - "--max-line-length=80"
-  filter: "^{filename}:(?P<line>{lines}):((?P<column>\\d+):)? (?P<message_id>\\S+) (?P<message>.+)$"
+    - "--max-line-length=80"
+  filter: >-
+    ^{filename}:(?P<line>{lines}):((?P<column>\d+):)?
+    (?P<message_id>\S+) (?P<message>.+)$
   installation: "Run pip install pycodestyle."
 
 # JSON
@@ -152,7 +160,7 @@ json:
 
 # RST
 # Sample output:
-# /home/skreft/opensource/git-lint/test/e2etest/data/rst/error.rst:3: (WARNING/2) Inline interpreted text or phrase reference start-string without end-string.
+# /path_to/error.rst:3: (WARNING/2) Inline interpreted text or phrase reference start-string without end-string.
 rst:
   extensions:
     - .rst
@@ -193,7 +201,7 @@ jpegtran:
 
 # SHELL scripts
 # Sample output
-# /home/skreft/opensource/git-lint/test/e2etest/data/bash/error.sh: line 3: syntax error: unexpected end of file
+# /path_to/error.sh: line 3: syntax error: unexpected end of file
 bash:
   extensions:
     - .sh
@@ -214,7 +222,7 @@ yaml:
     - --format
     - parsable
     - --config-data
-    - relaxed
+    - "{{extends: default, rules: {{document-start: disable}}}}"
   # Matches either:
   # - syntax error, on any line
   # - other error, on a modified line only
@@ -228,8 +236,8 @@ yaml:
 # INI
 ini:
   extensions:
-  - .ini
-  - .cfg
+    - .ini
+    - .cfg
   command: ini_linter.py
   filter: (?P<message>.+)$
   installation: ""
@@ -274,7 +282,8 @@ rubylint:
   command: ruby-lint
   arguments:
     - --analysis
-    - argument_amount,loop_keywords,pedantics,shadowing_variables,unused_variables,useless_equality_checks
+    - "argument_amount,loop_keywords,pedantics,shadowing_variables,\
+       unused_variables,useless_equality_checks"
   extensions:
     - .rb
   # The first component is the basename, but it's not supported yet.
@@ -287,7 +296,7 @@ rubylint:
 
 
 # Sample output with the --format emacs option:
-# /home/skreft/opensource/git-lint/test/e2etest/data/rubocop/error.rb:1:4: C: Surrounding space missing for operator '='.
+# /path_to/error.rb:1:4: C: Surrounding space missing for operator '='.
 rubocop:
   command: rubocop
   arguments:
@@ -300,13 +309,13 @@ rubocop:
   filter: >-
     {filename}:(?P<line>{lines}):(?P<column>\d+):
     (?P<severity>.+): (?P<message>.+)
-  installation: >
+  installation: >-
     sudo gem install rubocop or visit https://github.com/bbatsov/rubocop
 
 # Java
 # Sample output:
-# /home/skreft/opensource/git-lint/test/e2etest/data/checkstyle/error.java:0: Missing package-info.java file.
-# /home/skreft/opensource/git-lint/test/e2etest/data/checkstyle/error.java:1:7: warning: Name 'foo' must match pattern '^[A-Z][a-zA-Z0-9]*$'.
+# /path_to/error.java:0: Missing package-info.java file.
+# /path_to/error.java:1:7: warning: Name 'foo' must match pattern '^[A-Z][a-zA-Z0-9]*$'.
 checkstyle:
   command: checkstyle
   extensions:
@@ -322,7 +331,7 @@ checkstyle:
     http://checkstyle.sourceforge.net/cmdline.html
 
 # Sample output:
-# /home/skreft/opensource/git-lint/test/e2etest/data/pmd/error.java:1:  All methods are static.
+# /path_to/error.java:1:  All methods are static.
 # Disabled rulesets because of false positives
 # rulesets/java/coupling.xml: Demeter
 # rulesets/java/design.xml: Static class
@@ -339,15 +348,22 @@ pmd:
     - -format
     - text
     - -rulesets
-    - rulesets/java/android.xml,rulesets/java/basic.xml,rulesets/java/braces.xml,rulesets/java/clone.xml,rulesets/java/codesize.xml,rulesets/java/empty.xml,rulesets/java/finalizers.xml,rulesets/java/imports.xml,rulesets/java/j2ee.xml,rulesets/java/logging-jakarta-commons.xml,rulesets/java/strictexception.xml,rulesets/java/strings.xml,rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml
+    - "rulesets/java/android.xml,rulesets/java/basic.xml,\
+       rulesets/java/braces.xml,rulesets/java/clone.xml,\
+       rulesets/java/codesize.xml,rulesets/java/empty.xml,\
+       rulesets/java/finalizers.xml,rulesets/java/imports.xml,\
+       rulesets/java/j2ee.xml,rulesets/java/logging-jakarta-commons.xml,\
+       rulesets/java/strictexception.xml,rulesets/java/strings.xml,\
+       rulesets/java/sunsecure.xml,rulesets/java/typeresolution.xml,\
+       rulesets/java/unnecessary.xml,rulesets/java/unusedcode.xml"
     - -d
   filter: "{filename}:(?P<line>{lines}):\\s+(?P<message>.+)"
   installation: Go to http://pmd.sourceforge.net/pmd-5.1.1/installing.html
 
 # Coffeescript
 # Sample output:
-# /home/skreft/opensource/git-lint/test/e2etest/data/coffeelint/error.coffee,4,,error,Operators must be spaced properly =.
-# /home/skreft/opensource/git-lint/test/e2etest/data/coffeelint/error.coffee,5,,error,[stdin]:5:1: error: reserved word 'yes' can't be assigned
+# /path_to/error.coffee,4,,error,Operators must be spaced properly =.
+# /path_to/error.coffee,5,,error,[stdin]:5:1: error: reserved word 'yes' can't be assigned
 coffeelint:
   command: coffeelint
   extensions:
@@ -356,8 +372,7 @@ coffeelint:
     - --reporter=csv
     - --file={DEFAULT_CONFIGS}/coffeelint.json
   filter: >-
-    {filename},(?P<line>{lines}),.*,(?P<severity>.+),(?:\[stdin\]:\d+:(?P<column>\d+):
-    .*: )?(?P<message>.+)
+    {filename},(?P<line>{lines}),.*,(?P<severity>.+),(?:\[stdin\]:\d+:(?P<column>\d+): .*: )?(?P<message>.+)
   installation: npm install -g coffeelint
 
 # C++
@@ -374,6 +389,8 @@ cpplint:
     - .h++
   command: cpplint
   requirements:
-  - cpplint
-  filter: "^{filename}:(?P<line>{lines}): (?P<message>.+) \\[(?P<message_id>.+)\\] \\[(?P<severity>\\d+)\\]"
+    - cpplint
+  filter: >-
+    ^{filename}:(?P<line>{lines}): (?P<message>.+) \[(?P<message_id>.+)\]
+    \[(?P<severity>\d+)\]
   installation: "Run pip install cpplint."
