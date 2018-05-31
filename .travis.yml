@@ -2,24 +2,33 @@ sudo: required
 dist: trusty
 language: python
 python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
   # The JSON e2e test fails because, the output and exceptions are different
   #- "pypy"
+cache: pip
 # command to install dependencies
 install:
-  - "pip install ."
-  - "pip install coveralls yapf"
-  - "bash scripts/install-linters.sh"
+  - pip install .
+  - pip install coveralls yapf
+  - bash scripts/install-linters.sh
 # command to run tests
 before_script:
-  - export PATH=$PATH:$PWD/pmd-bin/bin:/usr/local/bin
+  - export PATH=$PATH:/tmp/pmd-bin/bin:/usr/local/bin
   - git config --global user.email "john@example.com"
   - git config --global user.name "John Doe"
 script:
+  - env | grep TRAVIS
   - python -R setup.py nosetests
-  - yapf --parallel --recursive --diff . || ( ! echo "Run yapf before committing (yapf -pri .)" )
+  - >
+    yapf --parallel --recursive --diff . ||
+    ( ! echo "Run yapf before committing (yapf -pri .)" )
+  - >
+    git reset --soft ${TRAVIS_COMMIT_RANGE%...*} &&
+    git status &&
+    git log | head -n 1 &&
+    git lint
 after_success:
   coveralls

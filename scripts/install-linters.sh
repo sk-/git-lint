@@ -73,6 +73,8 @@ sudo npm install -g coffeelint
 # PHP CodeSniffer
 sudo pear install --force PHP_CodeSniffer 
 
+cd /tmp
+
 # Tidy
 git clone https://github.com/htacg/tidy-html5.git
 cd tidy-html5/build/cmake

@@ -194,6 +194,13 @@ Note though that mercurial heavily uses commit to leverage all of their commands
 I've found that setting any sort of precommit hook will get on your way when using common
 actions as ``rebase`` or ``shelve``.
 
+Travis Configuration
+--------------------
+
+To run git lint on Travis, you can add the following step::
+
+  git reset --soft ${TRAVIS_COMMIT_RANGE%...*} && git lint
+
 Limitations
 -----------
 
