@@ -7,7 +7,7 @@ python:
   - 3.5
   - 3.6
   # The JSON e2e test fails because, the output and exceptions are different
-  #- "pypy"
+  # - "pypy"
 cache: pip
 # command to install dependencies
 install:
