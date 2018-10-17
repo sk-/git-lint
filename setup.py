@@ -64,7 +64,7 @@ setup(
     extras_require={
         ':python_version == "2.7"': ['futures'],
         'test': TEST_REQUIRES,
-        'dev': ['pycodestyle', 'pylint', 'yapf'],
+        'dev': ['pycodestyle', 'pylint', 'yapf==0.23.0'],
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
