@@ -219,8 +219,7 @@ If you remove the second line, git-lint will not complain as the warning is for 
 Python Versions
 ---------------
 
-Python 2.7 is supported, and it should also work for Python 3.2, 3.3 and 3.4.
-Python 2.6 is not supported because of the lack of subprocess.check_output.
+Python 2.7 and Python 3.5 and higher are supported.
 
 Development
 -----------
