@@ -1,3 +1,13 @@
+DEPRECATED
+==========
+
+Unfortunately I've decided to deprecate this package.
+
+* `git-lint` would be more valuable to large companies with large legacy codebases. But for smaller ones, it's quite possible (I've done it in many) to progressively make the linter config stricter. 
+* Users of this project wanted to have a complete out of the box experience, while my original vision was that companies/users would define their own configuration, tailoring to whatever settings and linters they wanted.
+* There was not really much feedback on the RFC issue https://github.com/sk-/git-lint/issues/152
+* There are some promising tools, like https://pre-commit.com/ which has an ever growing adoption rate. It's not a full replacement of `git-lint`, but at least would lint only modified files. 
+
 Git-Lint
 ========
 
